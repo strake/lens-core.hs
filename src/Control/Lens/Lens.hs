@@ -135,10 +135,12 @@ module Control.Lens.Lens
 -}
   ) where
 
-import Control.Applicative
+import Prelude ()
+
 import Control.Arrow
 import Control.Comonad
 import Control.Lens.Internal.Context
+import Control.Lens.Internal.Prelude
 import Control.Lens.Internal.Getter
 --import Control.Lens.Internal.Indexed
 import Control.Lens.Type
@@ -146,7 +148,6 @@ import Control.Monad.State as State (MonadState (..), State, execState)
 --import Data.Functor.Apply
 import Data.Functor.Reverse
 --import Data.Functor.Yoneda
-import Data.Monoid
 import Data.Profunctor
 --import Data.Profunctor.Rep
 --import Data.Profunctor.Sieve
@@ -168,6 +169,7 @@ import Util ((<₪>))
 -- >>> import Control.Monad.State
 -- >>> import Data.Char (chr)
 -- >>> import Data.List.NonEmpty (NonEmpty ((:|)))
+-- >>> import Data.Monoid (Sum (..))
 -- >>> import Data.Tree (Tree (Node))
 -- >>> import Debug.SimpleReflect.Expr
 -- >>> import Debug.SimpleReflect.Vars as Vars hiding (f,g,h)
@@ -351,47 +353,6 @@ l %%= f = do
 -------------------------------------------------------------------------------
 -- General Purpose Combinators
 -------------------------------------------------------------------------------
-
-
-#if !(MIN_VERSION_base(4,8,0))
--- | Passes the result of the left side to the function on the right side (forward pipe operator).
---
--- This is the flipped version of ('$'), which is more common in languages like F# as (@|>@) where it is needed
--- for inference. Here it is supplied for notational convenience and given a precedence that allows it
--- to be nested inside uses of ('$').
---
--- >>> a & f
--- f a
---
--- >>> "hello" & length & succ
--- 6
---
--- This combinator is commonly used when applying multiple 'Lens' operations in sequence.
---
--- >>> ("hello","world") & _1.element 0 .~ 'j' & _1.element 4 .~ 'y'
--- ("jelly","world")
---
--- This reads somewhat similar to:
---
--- >>> flip execState ("hello","world") $ do _1.element 0 .= 'j'; _1.element 4 .= 'y'
--- ("jelly","world")
-(&) :: a -> (a -> b) -> b
-a & f = f a
-{-# INLINE (&) #-}
-infixl 1 &
-#endif
-
-#if !(MIN_VERSION_base(4,11,0))
--- | Infix flipped 'fmap'.
---
--- @
--- ('<₪>') = 'flip' 'fmap'
--- @
-(<₪>) :: Functor f => f a -> (a -> b) -> f b
-as <₪> f = f <$> as
-{-# INLINE (<₪>) #-}
-infixl 1 <₪>
-#endif
 
 -- | This is convenient to 'flip' argument order of composite functions defined as:
 --
@@ -891,7 +852,7 @@ l <<||~ b = l $ \a -> (a, b || a)
 l <<&&~ b = l $ \a -> (a, b && a)
 {-# INLINE (<<&&~) #-}
 
--- | Modify the target of a monoidally valued 'Lens' by 'mappend'ing a new value and return the old value.
+-- | Modify the target of a monoidally valued 'Lens' by using ('<>') a new value and return the old value.
 --
 -- When you do not need the old value, ('Control.Lens.Setter.<>~') is more flexible.
 --
@@ -902,11 +863,11 @@ l <<&&~ b = l $ \a -> (a, b && a)
 -- ("Bond",("James","Bond, 007"))
 --
 -- @
--- ('<<<>~') :: 'Monoid' r => 'Lens'' s r -> r -> s -> (r, s)
--- ('<<<>~') :: 'Monoid' r => 'Iso'' s r -> r -> s -> (r, s)
+-- ('<<<>~') :: 'Semigroup' r => 'Lens'' s r -> r -> s -> (r, s)
+-- ('<<<>~') :: 'Semigroup' r => 'Iso'' s r -> r -> s -> (r, s)
 -- @
-(<<<>~) :: Monoid r => LensLike' ((,) r) s r -> r -> s -> (r, s)
-l <<<>~ b = l $ \a -> (a, a `mappend` b)
+(<<<>~) :: Semigroup r => LensLike' ((,) r) s r -> r -> s -> (r, s)
+l <<<>~ b = l $ \a -> (a, a <> b)
 {-# INLINE (<<<>~) #-}
 
 -------------------------------------------------------------------------------
@@ -1221,17 +1182,17 @@ l <<||= b = l %%= \a -> (a, a || b)
 l <<&&= b = l %%= \a -> (a, a && b)
 {-# INLINE (<<&&=) #-}
 
--- | Modify the target of a 'Lens' into your 'Monad''s state by 'mappend'ing a value
+-- | Modify the target of a 'Lens' into your 'Monad''s state by using ('<>')
 -- and return the /old/ value that was replaced.
 --
 -- When you do not need the result of the operation, ('Control.Lens.Setter.<>=') is more flexible.
 --
 -- @
--- ('<<<>=') :: ('MonadState' s m, 'Monoid' r) => 'Lens'' s r -> r -> m r
--- ('<<<>=') :: ('MonadState' s m, 'Monoid' r) => 'Iso'' s r -> r -> m r
+-- ('<<<>=') :: ('MonadState' s m, 'Semigroup' r) => 'Lens'' s r -> r -> m r
+-- ('<<<>=') :: ('MonadState' s m, 'Semigroup' r) => 'Iso'' s r -> r -> m r
 -- @
-(<<<>=) :: (MonadState s m, Monoid r) => LensLike' ((,) r) s r -> r -> m r
-l <<<>= b = l %%= \a -> (a, a `mappend` b)
+(<<<>=) :: (MonadState s m, Semigroup r) => LensLike' ((,) r) s r -> r -> m r
+l <<<>= b = l %%= \a -> (a, a <> b)
 {-# INLINE (<<<>=) #-}
 
 {-
@@ -1252,20 +1213,20 @@ l <<~ mb = do
 {-# INLINE (<<~) #-}
 -}
 
--- | 'mappend' a monoidal value onto the end of the target of a 'Lens' and
+-- | ('<>') a 'Semigroup' value onto the end of the target of a 'Lens' and
 -- return the result.
 --
 -- When you do not need the result of the operation, ('Control.Lens.Setter.<>~') is more flexible.
-(<<>~) :: Monoid m => LensLike ((,)m) s t m m -> m -> s -> (m, t)
-l <<>~ m = l <%~ (`mappend` m)
+(<<>~) :: Semigroup m => LensLike ((,)m) s t m m -> m -> s -> (m, t)
+l <<>~ m = l <%~ (<> m)
 {-# INLINE (<<>~) #-}
 
--- | 'mappend' a monoidal value onto the end of the target of a 'Lens' into
+-- | ('<>') a 'Semigroup' value onto the end of the target of a 'Lens' into
 -- your 'Monad''s state and return the result.
 --
 -- When you do not need the result of the operation, ('Control.Lens.Setter.<>=') is more flexible.
-(<<>=) :: (MonadState s m, Monoid r) => LensLike' ((,)r) s r -> r -> m r
-l <<>= r = l <%= (`mappend` r)
+(<<>=) :: (MonadState s m, Semigroup r) => LensLike' ((,)r) s r -> r -> m r
+l <<>= r = l <%= (<> r)
 {-# INLINE (<<>=) #-}
 
 {-
