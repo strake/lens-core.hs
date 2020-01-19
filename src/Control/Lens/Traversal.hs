@@ -135,28 +135,29 @@ module Control.Lens.Traversal
 -}
   ) where
 
-import Control.Applicative as Applicative
+import Prelude ()
+
+import Control.Applicative (WrappedMonad (..), ZipList (..), Alternative (..))
 import Control.Applicative.Backwards
-import Control.Category
+import qualified Control.Category as C
 import Control.Comonad
 import Control.Lens.Fold
 import Control.Lens.Getter (Getting, getting)
 import Control.Lens.Internal.Bazaar
 import Control.Lens.Internal.Context
---import Control.Lens.Internal.Indexed
 import Control.Lens.Internal.Fold
+--import Control.Lens.Internal.Indexed
+import Control.Lens.Internal.Prelude
 import Control.Lens.Lens
 import Control.Lens.Setter (ASetter, sets)
 import Control.Lens.Type
-import Control.Monad
 import Control.Monad.Trans.State.Lazy
 import Data.Bitraversable
 import Data.CallStack
-import Data.Functor.Compose
 --import Data.Functor.Day.Curried
 --import Data.Functor.Yoneda
 import Data.Int
-import Data.IntMap as IntMap
+import qualified Data.IntMap as IntMap
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map as Map
 import Data.Map (Map)
@@ -171,16 +172,6 @@ import Data.Profunctor.Unsafe
 import Data.Traversable
 import Data.Tuple (swap)
 import GHC.Magic (inline)
-import Prelude hiding ((.),id)
-
-#if !(MIN_VERSION_base(4,8,0))
-import Data.Foldable (Foldable)
-import Data.Monoid (Monoid (..))
-#endif
-
-#if !(MIN_VERSION_base(4,11,0))
-import Data.Semigroup (Semigroup (..))
-#endif
 
 -- $setup
 -- >>> :set -XNoOverloadedStrings -XFlexibleContexts
@@ -539,11 +530,11 @@ pins = getConst #. bazaar (cotabulate $ \ra -> Const [ra])
 {-# INLINE pins #-}
 -}
 
-parr :: (Profunctor p, Category p) => (a -> b) -> p a b
-parr f = lmap f id
+parr :: (Profunctor p, C.Category p) => (a -> b) -> p a b
+parr f = lmap f C.id
 {-# INLINE parr #-}
 
-outs :: (Bizarre p w, Category p) => w a a t -> [a] -> t
+outs :: (Bizarre p w, C.Category p) => w a a t -> [a] -> t
 outs = evalState `rmap` bazaar (parr (state . unconsWithDefault))
 {-# INLINE outs #-}
 
@@ -622,11 +613,11 @@ holes1Of f xs = flip getNonEmptyDList [] . fst $
   runHoles (runBazaar1 (f sell xs) (cotabulate holeInOne1)) id
 {-# INLINE holes1Of #-}
 
-holeInOne1 :: forall p a t. (Corepresentable p, Category p)
+holeInOne1 :: forall p a t. (Corepresentable p, C.Category p)
           => Corep p a -> Holes t (NonEmptyDList (Pretext p a a t)) a
 holeInOne1 x = Holes $ \xt ->
     ( NonEmptyDList (fmap xt (cosieve sell x) :|)
-    , cosieve (id :: p a a) x)
+    , cosieve (C.id :: p a a) x)
 -}
 
 -- We are very careful to share as much structure as possible among
@@ -1030,7 +1021,7 @@ class Ord k => TraverseMin k m | m -> k where
   -- | 'IndexedTraversal' of the element with the smallest index.
   traverseMin :: IndexedTraversal' k (m v) v
 
-instance TraverseMin Int IntMap where
+instance TraverseMin Int IntMap.IntMap where
   traverseMin f m = case IntMap.minViewWithKey m of
 #if MIN_VERSION_containers(0,5,0)
     Just ((k,a), _) -> indexed f k a <₪> \v -> IntMap.updateMin (const (Just v)) m
@@ -1051,7 +1042,7 @@ class Ord k => TraverseMax k m | m -> k where
   -- | 'IndexedTraversal' of the element at the largest index.
   traverseMax :: IndexedTraversal' k (m v) v
 
-instance TraverseMax Int IntMap where
+instance TraverseMax Int IntMap.IntMap where
   traverseMax f m = case IntMap.maxViewWithKey m of
 #if MIN_VERSION_containers(0,5,0)
     Just ((k,a), _) -> indexed f k a <₪> \v -> IntMap.updateMax (const (Just v)) m
@@ -1142,7 +1133,7 @@ elements = elementsOf traverse
 failover :: Alternative m => LensLike ((,) Any) s t a b -> (a -> b) -> s -> m t
 failover l afb s = case l ((,) (Any True) . afb) s of
   (Any True, t)  -> pure t
-  (Any False, _) -> Applicative.empty
+  (Any False, _) -> empty
 {-# INLINE failover #-}
 
 {-
@@ -1154,7 +1145,7 @@ failover l afb s = case l ((,) (Any True) . afb) s of
 ifailover :: Alternative m => Over (Indexed i) ((,) Any) s t a b -> (i -> a -> b) -> s -> m t
 ifailover l iafb s = case l ((,) (Any True) `rmap` Indexed iafb) s of
   (Any True, t) -> pure t
-  (Any False, _) -> Applicative.empty
+  (Any False, _) -> empty
 {-# INLINE ifailover #-}
 
 -- | Try the first 'Traversal' (or 'Fold'), falling back on the second 'Traversal' (or 'Fold') if it returns no entries.
