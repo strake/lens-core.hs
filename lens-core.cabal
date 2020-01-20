@@ -1,6 +1,6 @@
 name:          lens-core
 category:      Data, Lenses, Generics
-version:       0.0.0.0
+version:       0.1.0.0
 license:       BSD2
 cabal-version: 1.18
 license-file:  LICENSE
