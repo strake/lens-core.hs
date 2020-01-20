@@ -52,7 +52,7 @@ import Data.Void
 -- >>> let isLeft  (Left  _) = True; isLeft  _ = False
 -- >>> let isRight (Right _) = True; isRight _ = False
 
-infixr 8 #
+--infixr 8 #
 
 ------------------------------------------------------------------------------
 -- Review
@@ -106,7 +106,7 @@ un = unto . view
 -- 're' :: 'Iso' s t a b   -> 'Getter' b t
 -- @
 re :: AReview t b -> Getter b t
-re p = to (runIdentity #. unTagged #. p .# Tagged .# Identity)
+re p = to (runIdentity . unTagged . p . Tagged . Identity)
 {-# INLINE re #-}
 
 -- | This can be used to turn an 'Control.Lens.Iso.Iso' or 'Prism' around and 'view' a value (or the current environment) through it the other way.
@@ -138,7 +138,7 @@ re p = to (runIdentity #. unTagged #. p .# Tagged .# Identity)
 -- 'review' :: 'MonadReader' a m => 'Prism'' s a -> m s
 -- @
 review :: MonadReader b m => AReview t b -> m t
-review p = asks (runIdentity #. unTagged #. p .# Tagged .# Identity)
+review p = asks (runIdentity . unTagged . p . Tagged . Identity)
 {-# INLINE review #-}
 
 -- | An infix alias for 'review'.
@@ -165,7 +165,7 @@ review p = asks (runIdentity #. unTagged #. p .# Tagged .# Identity)
 -- (#) :: 'Equality'' s a -> a -> s
 -- @
 ( # ) :: AReview t b -> b -> t
-( # ) p = runIdentity #. unTagged #. p .# Tagged .# Identity
+( # ) = review
 {-# INLINE ( # ) #-}
 
 -- | This can be used to turn an 'Control.Lens.Iso.Iso' or 'Prism' around and 'view' a value (or the current environment) through it the other way,
@@ -198,7 +198,7 @@ review p = asks (runIdentity #. unTagged #. p .# Tagged .# Identity)
 -- 'reviews' :: 'MonadReader' a m => 'Prism'' s a -> (s -> r) -> m r
 -- @
 reviews :: MonadReader b m => AReview t b -> (t -> r) -> m r
-reviews p tr = asks (tr . runIdentity #. unTagged #. p .# Tagged .# Identity)
+reviews p tr = asks (tr . runIdentity . unTagged . p . Tagged . Identity)
 {-# INLINE reviews #-}
 
 -- | This can be used to turn an 'Control.Lens.Iso.Iso' or 'Prism' around and 'use' a value (or the current environment) through it the other way.
@@ -219,7 +219,7 @@ reviews p tr = asks (tr . runIdentity #. unTagged #. p .# Tagged .# Identity)
 -- 'reuse' :: 'MonadState' a m => 'Iso'' s a   -> m s
 -- @
 reuse :: MonadState b m => AReview t b -> m t
-reuse p = gets (runIdentity #. unTagged #. p .# Tagged .# Identity)
+reuse p = gets (runIdentity . unTagged . p . Tagged . Identity)
 {-# INLINE reuse #-}
 
 -- | This can be used to turn an 'Control.Lens.Iso.Iso' or 'Prism' around and 'use' the current state through it the other way,
@@ -238,5 +238,5 @@ reuse p = gets (runIdentity #. unTagged #. p .# Tagged .# Identity)
 -- 'reuses' :: 'MonadState' a m => 'Iso'' s a   -> (s -> r) -> m r
 -- @
 reuses :: MonadState b m => AReview t b -> (t -> r) -> m r
-reuses p tr = gets (tr . runIdentity #. unTagged #. p .# Tagged .# Identity)
+reuses p tr = gets (tr . runIdentity . unTagged . p . Tagged . Identity)
 {-# INLINE reuses #-}

@@ -23,10 +23,10 @@
 module Control.Lens.Internal.Bazaar
   ( Bizarre(..)
   , Bazaar(..), Bazaar'
-  , BazaarT(..), BazaarT'
+--  , BazaarT(..), BazaarT'
   , Bizarre1(..)
   , Bazaar1(..), Bazaar1'
-  , BazaarT1(..), BazaarT1'
+--  , BazaarT1(..), BazaarT1'
   ) where
 
 import Control.Applicative
@@ -34,15 +34,15 @@ import Control.Arrow as Arrow
 import Control.Category
 import Control.Comonad
 import Control.Lens.Internal.Context
-import Control.Lens.Internal.Indexed
-import Data.Functor.Apply
+--import Control.Lens.Internal.Indexed
+--import Data.Functor.Apply
 import Data.Functor.Compose
-import Data.Functor.Contravariant
+import qualified Data.Functor.Contravariant as Contravar
 import Data.Functor.Identity
 import Data.Semigroup
 import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
+--import Data.Profunctor.Rep
+--import Data.Profunctor.Sieve
 import Data.Profunctor.Unsafe
 import Prelude hiding ((.),id)
 
@@ -88,6 +88,7 @@ instance IndexedFunctor (Bazaar p) where
   ifmap f (Bazaar k) = Bazaar (fmap f . k)
   {-# INLINE ifmap #-}
 
+{-
 instance Conjoined p => IndexedComonad (Bazaar p) where
   iextract (Bazaar m) = runIdentity $ m (arr Identity)
   {-# INLINE iextract #-}
@@ -97,6 +98,7 @@ instance Conjoined p => IndexedComonad (Bazaar p) where
 instance Corepresentable p => Sellable p (Bazaar p) where
   sell = cotabulate $ \ w -> Bazaar $ tabulate $ \k -> pure (cosieve k w)
   {-# INLINE sell #-}
+-}
 
 instance Profunctor p => Bizarre p (Bazaar p) where
   bazaar g (Bazaar f) = f g
@@ -108,6 +110,7 @@ instance Functor (Bazaar p a b) where
   x <$ Bazaar k = Bazaar ( (x <$) . k )
   {-# INLINE (<$) #-}
 
+{-
 instance Apply (Bazaar p a b) where
   (<.>) = (<*>)
   {-# INLINE (<.>) #-}
@@ -115,6 +118,7 @@ instance Apply (Bazaar p a b) where
   {-# INLINE (.>) #-}
   (<.) = (<*)
   {-# INLINE (<.) #-}
+-}
 
 instance Applicative (Bazaar p a b) where
   pure a = Bazaar $ \_ -> pure a
@@ -130,6 +134,7 @@ instance Applicative (Bazaar p a b) where
   Bazaar mx <* Bazaar my = Bazaar $ \pafb -> mx pafb <* my pafb
   {-# INLINE (<*) #-}
 
+{-
 instance (a ~ b, Conjoined p) => Comonad (Bazaar p a b) where
   extract = iextract
   {-# INLINE extract #-}
@@ -148,8 +153,8 @@ instance (a ~ b, Conjoined p) => ComonadApply (Bazaar p a b) where
 -- BazaarT
 ------------------------------------------------------------------------------
 
--- | 'BazaarT' is like 'Bazaar', except that it provides a questionable 'Contravariant' instance
--- To protect this instance it relies on the soundness of another 'Contravariant' type, and usage conventions.
+-- | 'BazaarT' is like 'Bazaar', except that it provides a questionable 'Contravar.Functor' instance
+-- To protect this instance it relies on the soundness of another 'Contravar.Functor' type, and usage conventions.
 --
 -- For example. This lets us write a suitably polymorphic and lazy 'Control.Lens.Traversal.taking', but there
 -- must be a better way!
@@ -198,7 +203,7 @@ instance Apply (BazaarT p g a b) where
   {-# INLINE (<.) #-}
 
 instance Applicative (BazaarT p g a b) where
-  pure a = BazaarT $ tabulate $ \_ -> pure (pure a)
+  pure a = BazaarT $ pure $ pure a
   {-# INLINE pure #-}
   BazaarT mf <*> BazaarT ma = BazaarT $ \ pafb -> mf pafb <*> ma pafb
   {-# INLINE (<*>) #-}
@@ -225,19 +230,10 @@ instance (a ~ b, Conjoined p) => ComonadApply (BazaarT p g a b) where
   (<@) = (<*)
   {-# INLINE (<@) #-}
 
-instance (Profunctor p, Contravariant g) => Contravariant (BazaarT p g a b) where
-  contramap _ = (<$) (error "contramap: BazaarT")
-  {-# INLINE contramap #-}
-
-instance Contravariant g => Semigroup (BazaarT p g a b t) where
+instance Contravar.Functor g => Semigroup (BazaarT p g a b t) where
   BazaarT a <> BazaarT b = BazaarT $ \f -> a f <* b f
   {-# INLINE (<>) #-}
-
-instance Contravariant g => Monoid (BazaarT p g a b t) where
-  mempty = BazaarT $ \_ -> pure (error "mempty: BazaarT")
-  {-# INLINE mempty #-}
-  BazaarT a `mappend` BazaarT b = BazaarT $ \f -> a f <* b f
-  {-# INLINE mappend #-}
+-}
 
 
 ------------------------------------------------------------------------------
@@ -245,7 +241,7 @@ instance Contravariant g => Monoid (BazaarT p g a b t) where
 ------------------------------------------------------------------------------
 
 class Profunctor p => Bizarre1 p w | w -> p where
-  bazaar1 :: Apply f => p a (f b) -> w a b t -> f t
+  bazaar1 :: Applicative f => p a (f b) -> w a b t -> f t
 
 ------------------------------------------------------------------------------
 -- Bazaar1
@@ -266,7 +262,7 @@ class Profunctor p => Bizarre1 p w | w -> p where
 -- Mnemonically, a 'Bazaar1' holds many stores and you can easily add more.
 --
 -- This is a final encoding of 'Bazaar1'.
-newtype Bazaar1 p a b t = Bazaar1 { runBazaar1 :: forall f. Apply f => p a (f b) -> f t }
+newtype Bazaar1 p a b t = Bazaar1 { runBazaar1 :: forall f. Applicative f => p a (f b) -> f t }
 -- type role Bazaar1 representatonal nominal nominal nominal
 
 -- | This alias is helpful when it comes to reducing repetition in type signatures.
@@ -280,6 +276,7 @@ instance IndexedFunctor (Bazaar1 p) where
   ifmap f (Bazaar1 k) = Bazaar1 (fmap f . k)
   {-# INLINE ifmap #-}
 
+{-
 instance Conjoined p => IndexedComonad (Bazaar1 p) where
   iextract (Bazaar1 m) = runIdentity $ m (arr Identity)
   {-# INLINE iextract #-}
@@ -289,6 +286,7 @@ instance Conjoined p => IndexedComonad (Bazaar1 p) where
 instance Corepresentable p => Sellable p (Bazaar1 p) where
   sell = cotabulate $ \ w -> Bazaar1 $ tabulate $ \k -> pure (cosieve k w)
   {-# INLINE sell #-}
+-}
 
 instance Profunctor p => Bizarre1 p (Bazaar1 p) where
   bazaar1 g (Bazaar1 f) = f g
@@ -300,6 +298,7 @@ instance Functor (Bazaar1 p a b) where
   x <$ Bazaar1 k = Bazaar1 ((x <$) . k)
   {-# INLINE (<$) #-}
 
+{-
 instance Apply (Bazaar1 p a b) where
   Bazaar1 mf <.> Bazaar1 ma = Bazaar1 $ \ pafb -> mf pafb <.> ma pafb
   {-# INLINE (<.>) #-}
@@ -326,12 +325,12 @@ instance (a ~ b, Conjoined p) => ComonadApply (Bazaar1 p a b) where
 -- BazaarT1
 ------------------------------------------------------------------------------
 
--- | 'BazaarT1' is like 'Bazaar1', except that it provides a questionable 'Contravariant' instance
--- To protect this instance it relies on the soundness of another 'Contravariant' type, and usage conventions.
+-- | 'BazaarT1' is like 'Bazaar1', except that it provides a questionable 'Contravar.Functor' instance
+-- To protect this instance it relies on the soundness of another 'Contravar.Functor' type, and usage conventions.
 --
 -- For example. This lets us write a suitably polymorphic and lazy 'Control.Lens.Traversal.taking', but there
 -- must be a better way!
-newtype BazaarT1 p (g :: * -> *) a b t = BazaarT1 { runBazaarT1 :: forall f. Apply f => p a (f b) -> f t }
+newtype BazaarT1 p (g :: * -> *) a b t = BazaarT1 { runBazaarT1 :: forall f. Applicative f => p a (f b) -> f t }
 #if __GLASGOW_HASKELL__ >= 707
 type role BazaarT1 representational nominal nominal nominal nominal
 #endif
@@ -389,10 +388,7 @@ instance (a ~ b, Conjoined p) => ComonadApply (BazaarT1 p g a b) where
   (<@) = (<.)
   {-# INLINE (<@) #-}
 
-instance (Profunctor p, Contravariant g) => Contravariant (BazaarT1 p g a b) where
-  contramap _ = (<$) (error "contramap: BazaarT1")
-  {-# INLINE contramap #-}
-
-instance Contravariant g => Semigroup (BazaarT1 p g a b t) where
-  BazaarT1 a <> BazaarT1 b = BazaarT1 $ \f -> a f <. b f
+instance Contravar.Functor g => Semigroup (BazaarT1 p g a b t) where
+  BazaarT1 a <> BazaarT1 b = BazaarT1 $ \f -> a f <* b f
   {-# INLINE (<>) #-}
+-}

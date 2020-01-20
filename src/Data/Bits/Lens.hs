@@ -19,10 +19,12 @@
 module Data.Bits.Lens
   ( (.|.~), (.&.~), (<.|.~), (<.&.~), (<<.|.~), (<<.&.~)
   , (.|.=), (.&.=), (<.|.=), (<.&.=), (<<.|.=), (<<.&.=)
+{-
   , bitAt
   , bits
   , byteAt
   , bytewise
+-}
   ) where
 
 import Control.Lens
@@ -227,6 +229,7 @@ l <<.&.= b = l %%= \a -> (a, a .&. b)
 l <<.|.= b = l %%= \a -> (a, a .|. b)
 {-# INLINE (<<.|.=) #-}
 
+{-
 -- | This 'Lens' can be used to access the value of the nth bit in a number.
 --
 -- @'bitAt' n@ is only a legal 'Lens' into @b@ if @0 '<=' n '<' 'bitSize' ('undefined' :: b)@.
@@ -243,7 +246,7 @@ l <<.|.= b = l %%= \a -> (a, a .|. b)
 -- >>> 16 & bitAt 4 .~ False
 -- 0
 bitAt :: Bits b => Int -> IndexedLens' Int b Bool
-bitAt n f b = indexed f n (testBit b n) <&> \x -> if x then setBit b n else clearBit b n
+bitAt n f b = indexed f n (testBit b n) <₪> \x -> if x then setBit b n else clearBit b n
 {-# INLINE bitAt #-}
 
 -- | Get the nth byte, counting from the low end.
@@ -305,3 +308,4 @@ bytewise f b = Prelude.foldr step 0 <$> traverse g bs where
   hasByte n = complementBit b (n*8) /= b
   step (n,x) r = r .|. (fromIntegral x `shiftL` (n*8))
 {-# INLINE bytewise #-}
+-}

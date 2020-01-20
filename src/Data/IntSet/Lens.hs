@@ -11,7 +11,7 @@
 ----------------------------------------------------------------------------
 module Data.IntSet.Lens
   ( members
-  , setmapped
+--  , setmapped
   , setOf
   ) where
 
@@ -30,6 +30,7 @@ members :: Fold IntSet Int
 members = folding IntSet.toAscList
 {-# INLINE members #-}
 
+{-
 -- | This 'Setter' can be used to change the contents of an 'IntSet' by mapping
 -- the elements to new values.
 --
@@ -42,6 +43,7 @@ members = folding IntSet.toAscList
 setmapped :: IndexPreservingSetter' IntSet Int
 setmapped = setting IntSet.map
 {-# INLINE setmapped #-}
+-}
 
 -- | Construct an 'IntSet' from a 'Getter', 'Fold', 'Traversal', 'Lens' or 'Iso'.
 --

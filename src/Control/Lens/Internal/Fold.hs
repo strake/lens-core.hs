@@ -27,18 +27,18 @@ module Control.Lens.Internal.Fold
   , Min(..), getMin
   , Leftmost(..), getLeftmost
   , Rightmost(..), getRightmost
-  , ReifiedMonoid(..)
+--  , ReifiedMonoid(..)
   -- * Semigroups for folding
   , NonEmptyDList(..)
   ) where
 
 import Control.Applicative
 import Control.Lens.Internal.Getter
-import Data.Functor.Bind
-import Data.Functor.Contravariant
+--import Data.Functor.Bind
+import qualified Data.Functor.Contravariant as Contravar
 import Data.Maybe
 import Data.Semigroup hiding (Min, getMin, Max, getMax)
-import Data.Reflection
+--import Data.Reflection
 import Prelude
 
 import qualified Data.List.NonEmpty as NonEmpty
@@ -51,14 +51,14 @@ import qualified Data.List.NonEmpty as NonEmpty
 -- Folding
 ------------------------------------------------------------------------------
 
--- | A 'Monoid' for a 'Contravariant' 'Applicative'.
+-- | A 'Monoid' for a 'Contravar.Functor' 'Applicative'.
 newtype Folding f a = Folding { getFolding :: f a }
 
-instance (Contravariant f, Applicative f) => Semigroup (Folding f a) where
+instance (Contravar.Functor f, Applicative f) => Semigroup (Folding f a) where
   Folding fr <> Folding fs = Folding (fr *> fs)
   {-# INLINE (<>) #-}
 
-instance (Contravariant f, Applicative f) => Monoid (Folding f a) where
+instance (Contravar.Functor f, Applicative f) => Monoid (Folding f a) where
   mempty = Folding noEffect
   {-# INLINE mempty #-}
   Folding fr `mappend` Folding fs = Folding (fr *> fs)
@@ -78,12 +78,6 @@ instance Applicative f => Semigroup (Traversed a f) where
   Traversed ma <> Traversed mb = Traversed (ma *> mb)
   {-# INLINE (<>) #-}
 
-instance Applicative f => Monoid (Traversed a f) where
-  mempty = Traversed (pure (error "Traversed: value used"))
-  {-# INLINE mempty #-}
-  Traversed ma `mappend` Traversed mb = Traversed (ma *> mb)
-  {-# INLINE mappend #-}
-
 ------------------------------------------------------------------------------
 -- TraversedF
 ------------------------------------------------------------------------------
@@ -93,15 +87,9 @@ instance Applicative f => Monoid (Traversed a f) where
 -- @since 4.16
 newtype TraversedF a f = TraversedF { getTraversedF :: f a }
 
-instance Apply f => Semigroup (TraversedF a f) where
-  TraversedF ma <> TraversedF mb = TraversedF (ma .> mb)
+instance Applicative f => Semigroup (TraversedF a f) where
+  TraversedF ma <> TraversedF mb = TraversedF (ma *> mb)
   {-# INLINE (<>) #-}
-
-instance (Apply f, Applicative f) => Monoid (TraversedF a f) where
-  mempty = TraversedF (pure (error "TraversedF: value used"))
-  {-# INLINE mempty #-}
-  TraversedF ma `mappend` TraversedF mb = TraversedF (ma *> mb)
-  {-# INLINE mappend #-}
 
 ------------------------------------------------------------------------------
 -- Sequenced
@@ -117,12 +105,6 @@ newtype Sequenced a m = Sequenced { getSequenced :: m a }
 instance Monad m => Semigroup (Sequenced a m) where
   Sequenced ma <> Sequenced mb = Sequenced (ma >> mb)
   {-# INLINE (<>) #-}
-
-instance Monad m => Monoid (Sequenced a m) where
-  mempty = Sequenced (return (error "Sequenced: value used"))
-  {-# INLINE mempty #-}
-  Sequenced ma `mappend` Sequenced mb = Sequenced (ma >> mb)
-  {-# INLINE mappend #-}
 
 ------------------------------------------------------------------------------
 -- Min

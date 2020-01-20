@@ -30,7 +30,7 @@ module Control.Lens.Prism
   -- * Consuming Prisms
   , withPrism
   , clonePrism
-  , outside
+--  , outside
   , aside
   , without
   , below
@@ -46,7 +46,7 @@ module Control.Lens.Prism
   , only
   , nearly
   -- * Prismatic profunctors
-  , Choice(..)
+  , Lift(..)
   ) where
 
 import Control.Applicative
@@ -57,8 +57,8 @@ import Control.Lens.Type
 import Control.Monad
 import Data.Functor.Identity
 import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
+--import Data.Profunctor.Rep
+--import Data.Profunctor.Sieve
 import Data.Traversable
 import Data.Void
 #if MIN_VERSION_base(4,7,0)
@@ -127,7 +127,7 @@ clonePrism k = withPrism k prism
 -- @'Either' t a@ is used instead of @'Maybe' a@ to permit the types of @s@ and @t@ to differ.
 --
 prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
-prism bt seta = dimap seta (either pure (fmap bt)) . right'
+prism bt seta = dimap seta (either pure (fmap bt)) . lift
 {-# INLINE prism #-}
 
 -- | This is usually used to build a 'Prism'', when you have to use an operation like
@@ -140,11 +140,13 @@ prism' bs sma = prism bs (\s -> maybe (Left s) Right (sma s))
 --
 -- @'outside' :: 'Prism' s t a b -> 'Lens' (t -> r) (s -> r) (b -> r) (a -> r)@
 
+{-
 -- TODO: can we make this work with merely Strong?
 outside :: Representable p => APrism s t a b -> Lens (p t r) (p s r) (p b r) (p a r)
 outside k = withPrism k $ \bt seta f ft ->
-  f (lmap bt ft) <&> \fa -> tabulate $ either (sieve ft) (sieve fa) . seta
+  f (lmap bt ft) <₪> \fa -> tabulate $ either (sieve ft) (sieve fa) . seta
 {-# INLINE outside #-}
+-}
 
 -- | Given a pair of prisms, project sums.
 --

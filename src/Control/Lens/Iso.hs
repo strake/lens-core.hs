@@ -42,8 +42,10 @@ module Control.Lens.Iso
   -- * Working with isomorphisms
   , au
   , auf
+{-
   , xplat
   , xplatf
+-}
   , under
   , mapping
   -- ** Common Isomorphisms
@@ -73,10 +75,10 @@ module Control.Lens.Iso
   , pattern List
 #endif
   -- ** Uncommon Isomorphisms
-  , magma
-  , imagma
+--  , magma
+--  , imagma
   , Magma
-  -- ** Contravariant functors
+  -- ** Contravar.Functor functors
   , contramapping
   -- * Profunctors
   , Profunctor(dimap,rmap,lmap)
@@ -93,12 +95,13 @@ module Control.Lens.Iso
 #endif
   ) where
 
+import Control.Category.Dual
 import Control.Lens.Equality (simple)
 import Control.Lens.Getter
 import Control.Lens.Fold
 import Control.Lens.Internal.Context
 import Control.Lens.Internal.Coerce
-import Control.Lens.Internal.Indexed
+--import Control.Lens.Internal.Indexed
 import Control.Lens.Internal.Iso as Iso
 import Control.Lens.Internal.Magma
 import Control.Lens.Prism
@@ -106,24 +109,25 @@ import Control.Lens.Review
 import Control.Lens.Type
 import Control.Monad.State.Lazy as Lazy
 import Control.Monad.State.Strict as Strict
-import Control.Monad.Writer.Lazy as Lazy hiding (Product, Sum)
-import Control.Monad.Writer.Strict as Strict hiding (Product, Sum)
-import Control.Monad.RWS.Lazy as Lazy hiding (Product, Sum)
-import Control.Monad.RWS.Strict as Strict hiding (Product, Sum)
+import Control.Monad.Writer.Lazy as Lazy hiding (Dual (..), Product, Sum)
+import Control.Monad.Writer.Strict as Strict hiding (Dual (..), Product, Sum)
+import Control.Monad.RWS.Lazy as Lazy hiding (Dual (..), Product, Sum)
+import Control.Monad.RWS.Strict as Strict hiding (Dual (..), Product, Sum)
 import Control.Monad.ST.Lazy as Lazy
 import Control.Monad.ST as Strict
 
 import Data.Bifunctor
 import Data.Bifunctor.Biff
-import Data.Bifunctor.Flip
-import Data.Bifunctor.Product
-import Data.Bifunctor.Sum
+--import Data.Bifunctor.Product
+--import Data.Bifunctor.Sum
 import Data.Bifunctor.Tannen
-import Data.ByteString as StrictB hiding (reverse)
-import Data.ByteString.Lazy as LazyB hiding (reverse)
+--import Data.ByteString as StrictB hiding (reverse)
+--import Data.ByteString.Lazy as LazyB hiding (reverse)
+import Data.Functor.Contravariant (gmap, phantom)
+import qualified Data.Functor.Contravariant as Contravar
 import Data.Functor.Identity
-import Data.Text as StrictT hiding (reverse)
-import Data.Text.Lazy as LazyT hiding (reverse)
+--import Data.Text as StrictT hiding (reverse)
+--import Data.Text.Lazy as LazyT hiding (reverse)
 import Data.Tuple (swap)
 import Data.Maybe
 import Data.Profunctor
@@ -266,6 +270,7 @@ auf :: (Functor f, Functor g) => AnIso s t a b -> (f t -> g s) -> f b -> g a
 auf k ftgs fb = withIso k $ \sa bt -> sa <$> ftgs (bt <$> fb)
 {-# INLINE auf #-}
 
+{-
 -- | @'xplat' = 'au' . 'from'@ but with a nicer signature.
 xplat :: Optic (Costar ((->) s)) g s t a b -> ((s -> a) -> g b) -> g t
 xplat f g = xplatf f g id
@@ -281,6 +286,7 @@ xplat f g = xplatf f g id
 xplatf :: Optic (Costar f) g s t a b -> (f a -> g b) -> f s -> g t
 xplatf = coerce
 {-# INLINE xplat #-}
+-}
 
 -- | The opposite of working 'Control.Lens.Setter.over' a 'Setter' is working 'under' an isomorphism.
 --
@@ -458,6 +464,7 @@ instance Swapped (,) where
 instance Swapped Either where
   swapped = iso (either Right Left) (either Right Left)
 
+{-
 instance (Swapped f, Swapped g) => Swapped (Product f g) where
   swapped = iso f f
     where
@@ -468,11 +475,12 @@ instance (Swapped p, Swapped q) => Swapped (Sum p q) where
     where
       f (L2 x) = L2 (x ^. swapped)
       f (R2 x) = R2 (x ^. swapped)
+-}
 
-instance (Swapped p) => Swapped (Flip p) where
+instance (Swapped p) => Swapped (Dual p) where
   swapped = iso f f
     where
-      f (Flip p) = Flip (p ^. swapped)
+      f (Dual p) = Dual (p ^. swapped)
 
 instance (f ~ g, Functor f, Swapped p) => Swapped (Biff p f g) where
   swapped = iso f f
@@ -528,6 +536,7 @@ pattern Reversed a <- (view reversed -> a) where
   Reversed a = review reversed a
 #endif
 
+{-
 instance Strict LazyB.ByteString StrictB.ByteString where
 #if MIN_VERSION_bytestring(0,10,0)
   strict = iso LazyB.toStrict LazyB.fromStrict
@@ -539,6 +548,7 @@ instance Strict LazyB.ByteString StrictB.ByteString where
 instance Strict LazyT.Text StrictT.Text where
   strict = iso LazyT.toStrict LazyT.fromStrict
   {-# INLINE strict #-}
+-}
 
 instance Strict (Lazy.StateT s m a) (Strict.StateT s m a) where
   strict = iso (Strict.StateT . Lazy.runStateT) (Lazy.StateT . Strict.runStateT)
@@ -598,6 +608,7 @@ pattern List a <- (Exts.toList -> a) where
   List a = Exts.fromList a
 #endif
 
+{-
 ------------------------------------------------------------------------------
 -- Magma
 ------------------------------------------------------------------------------
@@ -615,19 +626,20 @@ magma l = iso (runMafic `rmap` l sell) runMagma
 imagma :: Over (Indexed i) (Molten i a b) s t a b -> Iso s t' (Magma i t b a) (Magma j t' c c)
 imagma l = iso (runMolten #. l sell) (iextract .# Molten)
 {-# INLINE imagma #-}
+-}
 
 ------------------------------------------------------------------------------
--- Contravariant
+-- Contravar.Functor
 ------------------------------------------------------------------------------
 
--- | Lift an 'Iso' into a 'Contravariant' functor.
+-- | Lift an 'Iso' into a 'Contravar.Functor' functor.
 --
 -- @
--- contramapping :: 'Contravariant' f => 'Iso' s t a b -> 'Iso' (f a) (f b) (f s) (f t)
--- contramapping :: 'Contravariant' f => 'Iso'' s a -> 'Iso'' (f a) (f s)
+-- contramapping :: 'Contravar.Functor' f => 'Iso' s t a b -> 'Iso' (f a) (f b) (f s) (f t)
+-- contramapping :: 'Contravar.Functor' f => 'Iso'' s a -> 'Iso'' (f a) (f s)
 -- @
-contramapping :: Contravariant f => AnIso s t a b -> Iso (f a) (f b) (f s) (f t)
-contramapping f = withIso f $ \ sa bt -> iso (contramap sa) (contramap bt)
+contramapping :: Contravar.Functor f => AnIso s t a b -> Iso (f a) (f b) (f s) (f t)
+contramapping f = withIso f $ \ sa bt -> iso (gmap sa) (gmap bt)
 {-# INLINE contramapping #-}
 
 ------------------------------------------------------------------------------
@@ -710,7 +722,7 @@ seconding p = withIso p $ \ sa bt -> iso (second sa) (second bt)
 -- @since 4.13
 coerced :: forall s t a b. (Coercible s a, Coercible t b) => Iso s t a b
 # if __GLASGOW_HASKELL__ >= 710
-coerced l = rmap (fmap coerce') l .# coerce
+coerced l = lmap coerce $ rmap (fmap coerce') l
 # else
 coerced l = case sym Coercion :: Coercion a s of
               Coercion -> rmap (fmap coerce') l .# coerce

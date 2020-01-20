@@ -44,7 +44,7 @@
 --
 -- Every 'Lens' can be used for 'Control.Lens.Getter.Getting' like a
 -- 'Control.Lens.Fold.Fold' that doesn't use the 'Applicative' or
--- 'Contravariant'.
+-- 'Contravar.Functor'.
 --
 -- Every 'Lens' is a valid 'Control.Lens.Traversal.Traversal' that only uses
 -- the 'Functor' part of the 'Applicative' it is supplied.
@@ -67,25 +67,24 @@ module Control.Lens.Lens
   (
   -- * Lenses
     Lens, Lens'
-  , IndexedLens, IndexedLens'
+--  , IndexedLens, IndexedLens'
   -- ** Concrete Lenses
   , ALens, ALens'
-  , AnIndexedLens, AnIndexedLens'
+--  , AnIndexedLens, AnIndexedLens'
 
   -- * Combinators
-  , lens, ilens, iplens, withLens
+  , lens -- , ilens, iplens, withLens
   , (%%~), (%%=)
+{-
   , (%%@~), (%%@=)
   , (<%@~), (<%@=)
   , (<<%@~), (<<%@=)
-  -- ** General Purpose Combinators
-  , (&), (<&>), (??)
-  , (&~)
+-}
   -- * Lateral Composition
   , choosing
-  , chosen
+--  , chosen
   , alongside
-  , inside
+--  , inside
 
   -- * Setting Functionally with Passthrough
   , (<%~), (<+~), (<-~), (<*~), (<//~)
@@ -102,8 +101,9 @@ module Control.Lens.Lens
   , (<<%=), (<<.=), (<<?=), (<<+=), (<<-=), (<<*=)
   , (<<//=), (<<^=), (<<^^=), (<<**=)
   , (<<||=), (<<&&=), (<<<>=)
-  , (<<~)
+--  , (<<~)
 
+{-
   -- * Cloning Lenses
   , cloneLens
   , cloneIndexPreservingLens
@@ -117,19 +117,22 @@ module Control.Lens.Lens
   , (^#)
   , ( #~ ), ( #%~ ), ( #%%~ ), (<#~), (<#%~)
   , ( #= ), ( #%= ), ( #%%= ), (<#=), (<#%=)
+-}
 
   -- * Common Lenses
   , devoid
   , united
-  , head1, last1
+--  , head1, last1
 
   -- * Context
   , Context(..)
   , Context'
-  , locus
+--  , locus
 
+{-
   -- * Lens fusion
   , fusing
+-}
   ) where
 
 import Control.Applicative
@@ -137,29 +140,23 @@ import Control.Arrow
 import Control.Comonad
 import Control.Lens.Internal.Context
 import Control.Lens.Internal.Getter
-import Control.Lens.Internal.Indexed
+--import Control.Lens.Internal.Indexed
 import Control.Lens.Type
-import Control.Monad.State as State
-import Data.Functor.Apply
+import Control.Monad.State as State (MonadState (..), State, execState)
+--import Data.Functor.Apply
 import Data.Functor.Reverse
-import Data.Functor.Yoneda
+--import Data.Functor.Yoneda
 import Data.Monoid
 import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
+--import Data.Profunctor.Rep
+--import Data.Profunctor.Sieve
 import Data.Profunctor.Unsafe
-import Data.Semigroup.Traversable
 import Data.Void
 import Prelude
-#if MIN_VERSION_base(4,8,0)
-import Data.Function ((&))
-#endif
-#if MIN_VERSION_base(4,11,0)
-import Data.Functor ((<&>))
-#endif
 #if __GLASGOW_HASKELL__ >= 800
 import GHC.Exts (TYPE)
 #endif
+import Util ((<₪>))
 
 #ifdef HLINT
 {-# ANN module "HLint: ignore Use ***" #-}
@@ -180,13 +177,12 @@ import GHC.Exts (TYPE)
 -- >>> let getter :: Expr -> Expr; getter = fun "getter"
 -- >>> let setter :: Expr -> Expr -> Expr; setter = fun "setter"
 
-infixl 8 ^#
-infixr 4 %%@~, <%@~, <<%@~, %%~, <+~, <*~, <-~, <//~, <^~, <^^~, <**~, <&&~, <||~, <<>~, <%~, <<%~, <<.~, <<?~, <#~, #~, #%~, <#%~, #%%~
+--infixl 8 ^#
+infixr 4 {- %%@~, <%@~, <<%@~, -} %%~, <+~, <*~, <-~, <//~, <^~, <^^~, <**~, <&&~, <||~, <<>~, <%~, <<%~, <<.~, <<?~ {- , <#~, #~, #%~, <#%~, #%%~ -}
        , <<+~, <<-~, <<*~, <<//~, <<^~, <<^^~, <<**~, <<||~, <<&&~, <<<>~
-infix  4 %%@=, <%@=, <<%@=, %%=, <+=, <*=, <-=, <//=, <^=, <^^=, <**=, <&&=, <||=, <<>=, <%=, <<%=, <<.=, <<?=, <#=, #=, #%=, <#%=, #%%=
+infix  4 {- %%@=, <%@=, <<%@=, -} %%=, <+=, <*=, <-=, <//=, <^=, <^^=, <**=, <&&=, <||=, <<>=, <%=, <<%=, <<.=, <<?= {- , <#=, #=, #%=, <#%=, #%%= -}
        , <<+=, <<-=, <<*=, <<//=, <<^=, <<^^=, <<**=, <<||=, <<&&=, <<<>=
-infixr 2 <<~
-infixl 1 ??, &~
+--infixr 2 <<~
 
 -------------------------------------------------------------------------------
 -- Lenses
@@ -204,6 +200,7 @@ type ALens s t a b = LensLike (Pretext (->) a b) s t a b
 -- @
 type ALens' s a = ALens s s a a
 
+{-
 -- | When you see this as an argument to a function, it expects an 'IndexedLens'
 type AnIndexedLens i s t a b = Optical (Indexed i) (->) (Pretext (Indexed i) a b) s t a b
 
@@ -211,6 +208,7 @@ type AnIndexedLens i s t a b = Optical (Indexed i) (->) (Pretext (Indexed i) a b
 -- type 'AnIndexedLens'' = 'Simple' ('AnIndexedLens' i)
 -- @
 type AnIndexedLens' i s a  = AnIndexedLens i s s a a
+-}
 
 --------------------------
 -- Constructing Lenses
@@ -238,6 +236,7 @@ lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
 lens sa sbt afb s = sbt s <$> afb (sa s)
 {-# INLINE lens #-}
 
+{-
 -- | Obtain a getter and a setter from a lens, reversing 'lens'.
 #if __GLASGOW_HASKELL__ >= 800
 withLens :: forall s t a b rep (r :: TYPE rep).
@@ -276,6 +275,7 @@ ilens sia sbt iafb s = sbt s <$> uncurry (indexed iafb) (sia s)
 (&~) :: s -> State s a -> s
 s &~ l = execState l s
 {-# INLINE (&~) #-}
+-}
 
 -- | ('%%~') can be used in one of two scenarios:
 --
@@ -385,12 +385,12 @@ infixl 1 &
 -- | Infix flipped 'fmap'.
 --
 -- @
--- ('<&>') = 'flip' 'fmap'
+-- ('<₪>') = 'flip' 'fmap'
 -- @
-(<&>) :: Functor f => f a -> (a -> b) -> f b
-as <&> f = f <$> as
-{-# INLINE (<&>) #-}
-infixl 1 <&>
+(<₪>) :: Functor f => f a -> (a -> b) -> f b
+as <₪> f = f <$> as
+{-# INLINE (<₪>) #-}
+infixl 1 <₪>
 #endif
 
 -- | This is convenient to 'flip' argument order of composite functions defined as:
@@ -420,6 +420,7 @@ fab ?? a = fmap ($ a) fab
 -- Common Lenses
 -------------------------------------------------------------------------------
 
+{-
 -- | Lift a 'Lens' so it can run under a function (or other corepresentable profunctor).
 --
 -- @
@@ -438,7 +439,6 @@ inside l f es = o <$> f i where
   o ea = cotabulate $ \ e -> ipeek (cosieve ea e) $ l sell (cosieve es e)
 {-# INLINE inside #-}
 
-{-
 -- | Lift a 'Lens' so it can run under a function (or any other corepresentable functor).
 insideF :: F.Representable f => ALens s t a b -> Lens (f s) (f t) (f a) (f b)
 insideF l f es = o <$> f i where
@@ -468,6 +468,7 @@ choosing l _ f (Left a)   = Left <$> l f a
 choosing _ r f (Right a') = Right <$> r f a'
 {-# INLINE choosing #-}
 
+{-
 -- | This is a 'Lens' that updates either side of an 'Either', where both sides have the same type.
 --
 -- @
@@ -492,10 +493,11 @@ choosing _ r f (Right a') = Right <$> r f a'
 -- 'chosen' f ('Right' a) = 'Right' '<$>' f a
 -- @
 chosen :: IndexPreservingLens (Either a a) (Either b b) a b
-chosen pafb = cotabulate $ \weaa -> cosieve (either id id `lmap` pafb) weaa <&> \b -> case extract weaa of
+chosen pafb = cotabulate $ \weaa -> cosieve (either id id `lmap` pafb) weaa <₪> \b -> case extract weaa of
   Left _  -> Left  b
   Right _ -> Right b
 {-# INLINE chosen #-}
+-}
 
 -- | 'alongside' makes a 'Lens' from two other lenses or a 'Getter' from two other getters
 -- by executing them on their respective halves of a product.
@@ -519,6 +521,7 @@ alongside l1 l2 f (a1, a2)
   $ f (b1,b2)
 {-# INLINE alongside #-}
 
+{-
 -- | This 'Lens' lets you 'view' the current 'pos' of any indexed
 -- store comonad and 'seek' to a new position. This reduces the API
 -- for working these instances to a single 'Lens'.
@@ -564,6 +567,7 @@ cloneIndexPreservingLens l pafb = cotabulate $ \ws -> runPretext (l sell (extrac
 cloneIndexedLens :: AnIndexedLens i s t a b -> IndexedLens i s t a b
 cloneIndexedLens l f s = runPretext (l sell s) (Indexed (indexed f))
 {-# INLINE cloneIndexedLens #-}
+-}
 
 -------------------------------------------------------------------------------
 -- Setting and Remembering
@@ -704,7 +708,7 @@ l <&&~ b = l <%~ (&& b)
 -- ('<<%~') :: 'Monoid' a => 'Control.Lens.Traversal.Traversal' s t a b -> (a -> b) -> s -> (a, t)
 -- @
 (<<%~) :: LensLike ((,)a) s t a b -> (a -> b) -> s -> (a, t)
-(<<%~) l = l . lmap (\a -> (a, a)) . second'
+(<<%~) l = l . lmap (\a -> (a, a)) . lift
 {-# INLINE (<<%~) #-}
 
 -- | Replace the target of a 'Lens', but return the old value.
@@ -1062,8 +1066,8 @@ l <&&= b = l <%= (&& b)
 -- @
 --
 -- @('<<%=') :: 'MonadState' s m => 'LensLike' ((,)a) s s a b -> (a -> b) -> m a@
-(<<%=) :: (Strong p, MonadState s m) => Over p ((,)a) s s a b -> p a b -> m a
-l <<%= f = l %%= lmap (\a -> (a,a)) (second' f)
+(<<%=) :: (∀ a . Lift ((,) a) p, MonadState s m) => Over p ((,)a) s s a b -> p a b -> m a
+l <<%= f = l %%= lmap (\a -> (a,a)) (lift f)
 {-# INLINE (<<%=) #-}
 
 -- | Replace the target of a 'Lens' into your 'Monad''s state with a user supplied
@@ -1230,6 +1234,7 @@ l <<&&= b = l %%= \a -> (a, a && b)
 l <<<>= b = l %%= \a -> (a, a `mappend` b)
 {-# INLINE (<<<>=) #-}
 
+{-
 -- | Run a monadic action, and set the target of 'Lens' to its result.
 --
 -- @
@@ -1245,6 +1250,7 @@ l <<~ mb = do
   modify $ \s -> ipeek b (l sell s)
   return b
 {-# INLINE (<<~) #-}
+-}
 
 -- | 'mappend' a monoidal value onto the end of the target of a 'Lens' and
 -- return the result.
@@ -1262,6 +1268,7 @@ l <<>~ m = l <%~ (`mappend` m)
 l <<>= r = l <%= (`mappend` r)
 {-# INLINE (<<>=) #-}
 
+{-
 ------------------------------------------------------------------------------
 -- Arrow operators
 ------------------------------------------------------------------------------
@@ -1397,11 +1404,13 @@ l <<%@= f = do
   return r
 #endif
 {-# INLINE (<<%@=) #-}
+-}
 
 ------------------------------------------------------------------------------
 -- ALens Combinators
 ------------------------------------------------------------------------------
 
+{-
 -- | A version of ('Control.Lens.Getter.^.') that works on 'ALens'.
 --
 -- >>> ("hello","world")^#_2
@@ -1492,6 +1501,7 @@ l <#= b = do
   l #= b
   return b
 {-# INLINE (<#=) #-}
+-}
 
 -- | There is a field for every type in the 'Void'. Very zen.
 --
@@ -1516,9 +1526,10 @@ devoid _ = absurd
 -- >>> "hello" & united .~ ()
 -- "hello"
 united :: Lens' a ()
-united f v = f () <&> \ () -> v
+united f v = f () <₪> \ () -> v
 {-# INLINE united #-}
 
+{-
 data First1 f a = First1 (f a) a
 
 instance (Functor f) => Functor (First1 f) where
@@ -1577,3 +1588,4 @@ last1 f = fmap getReverse . head1 f . Reverse
 fusing :: Functor f => LensLike (Yoneda f) s t a b -> LensLike f s t a b
 fusing t = \f -> lowerYoneda . t (liftYoneda . f)
 {-# INLINE fusing #-}
+-}

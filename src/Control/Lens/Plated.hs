@@ -90,17 +90,14 @@ module Control.Lens.Plated
   , cosmos, cosmosOf, cosmosOn, cosmosOnOf
   , transform, transformOf, transformOn, transformOnOf
   , transformM, transformMOf, transformMOn, transformMOnOf
-  , contexts, contextsOf, contextsOn, contextsOnOf
-  , holes, holesOn, holesOnOf
+--  , contexts, contextsOf, contextsOn, contextsOnOf
+--  , holes, holesOn, holesOnOf
   , para, paraOf
-  , (...), deep
+  , (...) -- , deep
 
   -- * Compos
   -- $compos
   , composOpFold
-
-  -- * Parts
-  , parts
 
   -- * Generics
   , gplate
@@ -112,23 +109,24 @@ module Control.Lens.Plated
 
 import Control.Applicative
 import Control.Comonad.Cofree
-import qualified Control.Comonad.Trans.Cofree as CoTrans
+--import qualified Control.Comonad.Trans.Cofree as CoTrans
 import Control.Lens.Fold
 import Control.Lens.Getter
-import Control.Lens.Indexed
+--import Control.Lens.Indexed
 import Control.Lens.Internal.Context
 import Control.Lens.Type
 import Control.Lens.Setter
 import Control.Lens.Traversal
 import Control.Monad.Free as Monad
-import Control.Monad.Free.Church as Church
-import Control.Monad.Trans.Free as Trans
+--import Control.Monad.Free.Church as Church
+--import Control.Monad.Trans.Free as Trans
 #if !(MIN_VERSION_free(4,6,0))
 import Control.MonadPlus.Free as MonadPlus
 #endif
-import qualified Language.Haskell.TH as TH
+--import qualified Language.Haskell.TH as TH
 import Data.Data
-import Data.Data.Lens
+--import Data.Data.Lens
+import qualified Data.Functor.Contravariant as Contravar
 import Data.Monoid
 import Data.Tree
 import GHC.Generics
@@ -232,8 +230,10 @@ class Plated a where
   -- 'plate' will default to 'uniplate' and you can choose to not override
   -- it with your own definition.
   plate :: Traversal' a a
+{-
   default plate :: Data a => Traversal' a a
   plate = uniplate
+-}
 
 instance Plated [a] where
   plate f (x:xs) = (x:) <$> f xs
@@ -243,8 +243,10 @@ instance Traversable f => Plated (Monad.Free f a) where
   plate f (Monad.Free as) = Monad.Free <$> traverse f as
   plate _ x         = pure x
 
+{-
 instance (Traversable f, Traversable m) => Plated (Trans.FreeT f m a) where
   plate f (Trans.FreeT xs) = Trans.FreeT <$> traverse (traverse f) xs
+-}
 
 #if !(MIN_VERSION_free(4,6,0))
 instance Traversable f => Plated (MonadPlus.Free f a) where
@@ -253,6 +255,7 @@ instance Traversable f => Plated (MonadPlus.Free f a) where
   plate _ x         = pure x
 #endif
 
+{-
 instance Traversable f => Plated (Church.F f a) where
   plate f = fmap Church.toF . plate (fmap Church.fromF . f . Church.toF) . Church.fromF
 
@@ -263,13 +266,15 @@ instance Traversable f => Plated (Church.F f a) where
 
 instance (Traversable f, Traversable w) => Plated (CoTrans.CofreeT f w a) where
   plate f (CoTrans.CofreeT xs) = CoTrans.CofreeT <$> traverse (traverse f) xs
+-}
 
 instance Traversable f => Plated (Cofree f a) where
-  plate f (a :< as) = (:<) a <$> traverse f as
+  plate f (Cofree a as) = Cofree a <$> traverse f as
 
 instance Plated (Tree a) where
   plate f (Node a as) = Node a <$> traverse f as
 
+{-
 {- Default uniplate instances -}
 instance Plated TH.Exp
 instance Plated TH.Dec
@@ -280,6 +285,7 @@ instance Plated TH.Kind -- in 2.8 Kind is an alias for Type
 #endif
 instance Plated TH.Stmt
 instance Plated TH.Pat
+-}
 
 
 infixr 9 ...
@@ -289,6 +295,7 @@ l ... m = l . plate . m
 {-# INLINE (...) #-}
 
 
+{-
 -- | Try to apply a traversal to all transitive descendants of a 'Plated' container, but
 -- do not recurse through matching descendants.
 --
@@ -300,6 +307,7 @@ l ... m = l . plate . m
 -- @
 deep :: (Conjoined p, Applicative f, Plated s) => Traversing p f s s a b -> Over p f s s a b
 deep = deepOf plate
+-}
 
 -------------------------------------------------------------------------------
 -- Children
@@ -447,7 +455,7 @@ cosmos = cosmosOf plate
 -- @
 -- 'cosmosOf' :: 'Fold' a a -> 'Fold' a a
 -- @
-cosmosOf :: (Applicative f, Contravariant f) => LensLike' f a a -> LensLike' f a a
+cosmosOf :: (Applicative f, Contravar.Functor f) => LensLike' f a a -> LensLike' f a a
 cosmosOf d f s = f s *> d (cosmosOf d f) s
 {-# INLINE cosmosOf #-}
 
@@ -456,7 +464,7 @@ cosmosOf d f s = f s *> d (cosmosOf d f) s
 -- @
 -- 'cosmosOn' :: 'Plated' a => 'Fold' s a -> 'Fold' s a
 -- @
-cosmosOn :: (Applicative f, Contravariant f, Plated a) => LensLike' f s a -> LensLike' f s a
+cosmosOn :: (Applicative f, Contravar.Functor f, Plated a) => LensLike' f s a -> LensLike' f s a
 cosmosOn d = cosmosOnOf d plate
 {-# INLINE cosmosOn #-}
 
@@ -466,7 +474,7 @@ cosmosOn d = cosmosOnOf d plate
 -- @
 -- 'cosmosOnOf' :: 'Fold' s a -> 'Fold' a a -> 'Fold' s a
 -- @
-cosmosOnOf :: (Applicative f, Contravariant f) => LensLike' f s a -> LensLike' f a a -> LensLike' f s a
+cosmosOnOf :: (Applicative f, Contravar.Functor f) => LensLike' f s a -> LensLike' f a a -> LensLike' f s a
 cosmosOnOf d p = d . cosmosOf p
 {-# INLINE cosmosOnOf #-}
 
@@ -553,6 +561,7 @@ transformMOnOf :: Monad m => LensLike (WrappedMonad m) s t a b -> LensLike (Wrap
 transformMOnOf b l = mapMOf b . transformMOf l
 {-# INLINE transformMOnOf #-}
 
+{-
 -------------------------------------------------------------------------------
 -- Holes and Contexts
 -------------------------------------------------------------------------------
@@ -582,7 +591,7 @@ contexts = contextsOf plate
 -- 'contextsOf' :: 'Traversal'' a a -> a -> ['Context' a a a]
 -- @
 contextsOf :: ATraversal' a a -> a -> [Context a a a]
-contextsOf l x = sell x : f (map context (holesOf l x)) where
+contextsOf l x = sell x : f (fmap context (holesOf l x)) where
   f xs = do
     Context ctx child <- xs
     Context cont y <- contextsOf l child
@@ -609,7 +618,7 @@ contextsOn b = contextsOnOf b plate
 -- 'contextsOnOf' :: 'Traversal'' s a -> 'Traversal'' a a -> s -> ['Context' a a s]
 -- @
 contextsOnOf :: ATraversal s t a a -> ATraversal' a a -> s -> [Context a a t]
-contextsOnOf b l = f . map context . holesOf b where
+contextsOnOf b l = f . fmap context . holesOf b where
   f xs = do
     Context ctx child <- xs
     Context cont y <- contextsOf l child
@@ -668,6 +677,7 @@ holesOnOf :: Conjoined p
           -> s -> [Pretext p r r t]
 holesOnOf b l = holesOf (b . l)
 {-# INLINE holesOnOf #-}
+-}
 
 -------------------------------------------------------------------------------
 -- Paramorphisms
@@ -721,22 +731,6 @@ composOpFold z c f = foldrOf plate (c . f) z
 {-# INLINE composOpFold #-}
 
 -------------------------------------------------------------------------------
--- Parts
--------------------------------------------------------------------------------
-
--- | The original @uniplate@ combinator, implemented in terms of 'Plated' as a 'Lens'.
---
--- @
--- 'parts' ≡ 'partsOf' 'plate'
--- @
---
--- The resulting 'Lens' is safer to use as it ignores 'over-application' and deals gracefully with under-application,
--- but it is only a proper 'Lens' if you don't change the list 'length'!
-parts :: Plated a => Lens' a [a]
-parts = partsOf plate
-{-# INLINE parts #-}
-
--------------------------------------------------------------------------------
 -- Generics
 -------------------------------------------------------------------------------
 
@@ -774,7 +768,7 @@ instance GPlated a U1 where
   {-# INLINE gplate' #-}
 
 instance GPlated a V1 where
-  gplate' _ v = v `seq` error "GPlated/V1"
+  gplate' _ = \ case
   {-# INLINE gplate' #-}
 
 #if MIN_VERSION_base(4,9,0)

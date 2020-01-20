@@ -18,7 +18,7 @@ module Control.Lens.Internal
   , module Control.Lens.Internal.Context
   , module Control.Lens.Internal.Fold
   , module Control.Lens.Internal.Getter
-  , module Control.Lens.Internal.Indexed
+--  , module Control.Lens.Internal.Indexed
   , module Control.Lens.Internal.Iso
   , module Control.Lens.Internal.Level
   , module Control.Lens.Internal.Magma
@@ -32,7 +32,7 @@ import Control.Lens.Internal.Bazaar
 import Control.Lens.Internal.Context
 import Control.Lens.Internal.Fold
 import Control.Lens.Internal.Getter
-import Control.Lens.Internal.Indexed
+--import Control.Lens.Internal.Indexed
 import Control.Lens.Internal.Instances ()
 import Control.Lens.Internal.Iso
 import Control.Lens.Internal.Level

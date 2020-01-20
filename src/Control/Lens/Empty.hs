@@ -35,10 +35,12 @@ import Control.Lens.Fold
 import Control.Applicative (ZipList(..))
 import Control.Lens.Prism
 import Control.Lens.Review
+{-
 import Data.ByteString as StrictB
 import Data.ByteString.Lazy as LazyB
 import Data.HashMap.Lazy as HashMap
 import Data.HashSet as HashSet
+-}
 import Data.IntMap as IntMap
 import Data.IntSet as IntSet
 import Data.Map as Map
@@ -47,8 +49,10 @@ import Data.Monoid
 import Data.Profunctor.Unsafe
 import qualified Data.Sequence as Seq
 import Data.Set as Set
+{-
 import Data.Text as StrictT
 import Data.Text.Lazy as LazyT
+-}
 import Data.Vector as Vector
 import Data.Vector.Unboxed as Unboxed
 import Data.Vector.Storable as Storable
@@ -88,11 +92,11 @@ instance AsEmpty (Maybe a) where
   {-# INLINE _Empty #-}
 
 instance AsEmpty (Last a) where
-  _Empty = nearly (Last Nothing) (isNothing .# getLast)
+  _Empty = nearly (Last Nothing) (isNothing . getLast)
   {-# INLINE _Empty #-}
 
 instance AsEmpty (First a) where
-  _Empty = nearly (First Nothing) (isNothing .# getFirst)
+  _Empty = nearly (First Nothing) (isNothing . getFirst)
   {-# INLINE _Empty #-}
 
 instance AsEmpty a => AsEmpty (Dual a) where
@@ -129,9 +133,11 @@ instance AsEmpty (Map k a) where
   _Empty = nearly Map.empty Map.null
   {-# INLINE _Empty #-}
 
+{-
 instance AsEmpty (HashMap k a) where
   _Empty = nearly HashMap.empty HashMap.null
   {-# INLINE _Empty #-}
+-}
 
 instance AsEmpty (IntMap a) where
   _Empty = nearly IntMap.empty IntMap.null
@@ -141,9 +147,11 @@ instance AsEmpty (Set a) where
   _Empty = nearly Set.empty Set.null
   {-# INLINE _Empty #-}
 
+{-
 instance AsEmpty (HashSet a) where
   _Empty = nearly HashSet.empty HashSet.null
   {-# INLINE _Empty #-}
+-}
 
 instance AsEmpty IntSet where
   _Empty = nearly IntSet.empty IntSet.null
@@ -165,6 +173,7 @@ instance AsEmpty (Seq.Seq a) where
   _Empty = nearly Seq.empty Seq.null
   {-# INLINE _Empty #-}
 
+{-
 instance AsEmpty StrictB.ByteString where
   _Empty = nearly StrictB.empty StrictB.null
   {-# INLINE _Empty #-}
@@ -180,3 +189,4 @@ instance AsEmpty StrictT.Text where
 instance AsEmpty LazyT.Text where
   _Empty = nearly LazyT.empty LazyT.null
   {-# INLINE _Empty #-}
+-}

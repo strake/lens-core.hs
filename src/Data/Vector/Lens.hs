@@ -24,8 +24,10 @@ module Data.Vector.Lens
   , forced
   -- * Lenses
   , sliced
+{-
   -- * Traversal of individual indices
   , ordinals
+-}
   ) where
 
 import Control.Applicative
@@ -34,6 +36,7 @@ import Control.Lens.Internal.List (ordinalNub)
 import Data.Vector as Vector hiding (zip, filter, indexed)
 import Prelude hiding ((++), length, null, head, tail, init, last, map, reverse)
 import Data.Monoid
+import Util ((<₪>))
 
 -- | @sliced i n@ provides a 'Lens' that edits the @n@ elements starting
 -- at index @i@ from a 'Lens'.
@@ -52,7 +55,7 @@ import Data.Monoid
 sliced :: Int -- ^ @i@ starting index
        -> Int -- ^ @n@ length
        -> Lens' (Vector a) (Vector a)
-sliced i n f v = f (slice i n v) <&> \ v0 -> v // zip [i..i+n-1] (toList v0)
+sliced i n f v = f (slice i n v) <₪> \ v0 -> v // zip [i..i+n-1] (toList v0)
 {-# INLINE sliced #-}
 
 -- | Similar to 'toListOf', but returning a 'Vector'.
@@ -83,6 +86,7 @@ forced :: Iso (Vector a) (Vector b) (Vector a) (Vector b)
 forced = iso force force
 {-# INLINE forced #-}
 
+{-
 -- | This 'Traversal' will ignore any duplicates in the supplied list
 -- of indices.
 --
@@ -91,3 +95,4 @@ forced = iso force force
 ordinals :: [Int] -> IndexedTraversal' Int (Vector a) a
 ordinals is f v = fmap (v //) $ traverse (\i -> (,) i <$> indexed f i (v ! i)) $ ordinalNub (length v) is
 {-# INLINE ordinals #-}
+-}

@@ -67,6 +67,7 @@ import           GHC.Generics          ((:*:) (..), Generic (..), K1 (..),
 #if !MIN_VERSION_base(4,8,0)
 import           Control.Applicative
 #endif
+import           Util ((<₪>))
 
 -- $setup
 -- >>> :set -XNoOverloadedStrings
@@ -120,75 +121,75 @@ instance Field1 ((f :*: g) p) ((f' :*: g) p) (f p) (f' p) where
 -- '_1' k ~(a,b) = (\\a' -> (a',b)) 'Data.Functor.<$>' k a
 -- @
 instance Field1 (a,b) (a',b) a a' where
-  _1 k ~(a,b) = k a <&> \a' -> (a',b)
+  _1 k ~(a,b) = k a <₪> \a' -> (a',b)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c) (a',b,c) a a' where
-  _1 k ~(a,b,c) = k a <&> \a' -> (a',b,c)
+  _1 k ~(a,b,c) = k a <₪> \a' -> (a',b,c)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d) (a',b,c,d) a a' where
-  _1 k ~(a,b,c,d) = k a <&> \a' -> (a',b,c,d)
+  _1 k ~(a,b,c,d) = k a <₪> \a' -> (a',b,c,d)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e) (a',b,c,d,e) a a' where
-  _1 k ~(a,b,c,d,e) = k a <&> \a' -> (a',b,c,d,e)
+  _1 k ~(a,b,c,d,e) = k a <₪> \a' -> (a',b,c,d,e)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f) (a',b,c,d,e,f) a a' where
-  _1 k ~(a,b,c,d,e,f) = k a <&> \a' -> (a',b,c,d,e,f)
+  _1 k ~(a,b,c,d,e,f) = k a <₪> \a' -> (a',b,c,d,e,f)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g) (a',b,c,d,e,f,g) a a' where
-  _1 k ~(a,b,c,d,e,f,g) = k a <&> \a' -> (a',b,c,d,e,f,g)
+  _1 k ~(a,b,c,d,e,f,g) = k a <₪> \a' -> (a',b,c,d,e,f,g)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h) (a',b,c,d,e,f,g,h) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h) = k a <&> \a' -> (a',b,c,d,e,f,g,h)
+  _1 k ~(a,b,c,d,e,f,g,h) = k a <₪> \a' -> (a',b,c,d,e,f,g,h)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i) (a',b,c,d,e,f,g,h,i) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i)
+  _1 k ~(a,b,c,d,e,f,g,h,i) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i,j) (a',b,c,d,e,f,g,h,i,j) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i,j) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i,j)
+  _1 k ~(a,b,c,d,e,f,g,h,i,j) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i,j)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i,j,kk) (a',b,c,d,e,f,g,h,i,j,kk) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i,j,kk)
+  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i,j,kk)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i,j,kk,l) (a',b,c,d,e,f,g,h,i,j,kk,l) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l)
+  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a',b,c,d,e,f,g,h,i,j,kk,l,m) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m)
+  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a',b,c,d,e,f,g,h,i,j,kk,l,m,n) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n)
+  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o)
+  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p)
+  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q)
+  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r)
+  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r)
   {-# INLINE _1 #-}
 
 instance Field1 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) a a' where
-  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k a <&> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s)
+  _1 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k a <₪> \a' -> (a',b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s)
   {-# INLINE _1 #-}
 
 -- | Provides access to the 2nd field of a tuple.
@@ -226,75 +227,75 @@ instance Field2 ((f :*: g) p) ((f :*: g') p) (g p) (g' p) where
 -- '_2' k ~(a,b) = (\\b' -> (a,b')) 'Data.Functor.<$>' k b
 -- @
 instance Field2 (a,b) (a,b') b b' where
-  _2 k ~(a,b) = k b <&> \b' -> (a,b')
+  _2 k ~(a,b) = k b <₪> \b' -> (a,b')
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c) (a,b',c) b b' where
-  _2 k ~(a,b,c) = k b <&> \b' -> (a,b',c)
+  _2 k ~(a,b,c) = k b <₪> \b' -> (a,b',c)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d) (a,b',c,d) b b' where
-  _2 k ~(a,b,c,d) = k b <&> \b' -> (a,b',c,d)
+  _2 k ~(a,b,c,d) = k b <₪> \b' -> (a,b',c,d)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e) (a,b',c,d,e) b b' where
-  _2 k ~(a,b,c,d,e) = k b <&> \b' -> (a,b',c,d,e)
+  _2 k ~(a,b,c,d,e) = k b <₪> \b' -> (a,b',c,d,e)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f) (a,b',c,d,e,f) b b' where
-  _2 k ~(a,b,c,d,e,f) = k b <&> \b' -> (a,b',c,d,e,f)
+  _2 k ~(a,b,c,d,e,f) = k b <₪> \b' -> (a,b',c,d,e,f)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g) (a,b',c,d,e,f,g) b b' where
-  _2 k ~(a,b,c,d,e,f,g) = k b <&> \b' -> (a,b',c,d,e,f,g)
+  _2 k ~(a,b,c,d,e,f,g) = k b <₪> \b' -> (a,b',c,d,e,f,g)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h) (a,b',c,d,e,f,g,h) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h) = k b <&> \b' -> (a,b',c,d,e,f,g,h)
+  _2 k ~(a,b,c,d,e,f,g,h) = k b <₪> \b' -> (a,b',c,d,e,f,g,h)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i) (a,b',c,d,e,f,g,h,i) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i)
+  _2 k ~(a,b,c,d,e,f,g,h,i) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i,j) (a,b',c,d,e,f,g,h,i,j) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i,j) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i,j)
+  _2 k ~(a,b,c,d,e,f,g,h,i,j) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i,j)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i,j,kk) (a,b',c,d,e,f,g,h,i,j,kk) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i,j,kk)
+  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i,j,kk)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b',c,d,e,f,g,h,i,j,kk,l) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l)
+  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b',c,d,e,f,g,h,i,j,kk,l,m) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m)
+  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b',c,d,e,f,g,h,i,j,kk,l,m,n) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n)
+  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o)
+  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p)
+  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q)
+  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r)
+  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r)
   {-# INLINE _2 #-}
 
 instance Field2 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) b b' where
-  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k b <&> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s)
+  _2 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k b <₪> \b' -> (a,b',c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s)
   {-# INLINE _2 #-}
 
 
@@ -308,71 +309,71 @@ class Field3 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c) (a,b,c') c c' where
-  _3 k ~(a,b,c) = k c <&> \c' -> (a,b,c')
+  _3 k ~(a,b,c) = k c <₪> \c' -> (a,b,c')
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d) (a,b,c',d) c c' where
-  _3 k ~(a,b,c,d) = k c <&> \c' -> (a,b,c',d)
+  _3 k ~(a,b,c,d) = k c <₪> \c' -> (a,b,c',d)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e) (a,b,c',d,e) c c' where
-  _3 k ~(a,b,c,d,e) = k c <&> \c' -> (a,b,c',d,e)
+  _3 k ~(a,b,c,d,e) = k c <₪> \c' -> (a,b,c',d,e)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f) (a,b,c',d,e,f) c c' where
-  _3 k ~(a,b,c,d,e,f) = k c <&> \c' -> (a,b,c',d,e,f)
+  _3 k ~(a,b,c,d,e,f) = k c <₪> \c' -> (a,b,c',d,e,f)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g) (a,b,c',d,e,f,g) c c' where
-  _3 k ~(a,b,c,d,e,f,g) = k c <&> \c' -> (a,b,c',d,e,f,g)
+  _3 k ~(a,b,c,d,e,f,g) = k c <₪> \c' -> (a,b,c',d,e,f,g)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h) (a,b,c',d,e,f,g,h) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h) = k c <&> \c' -> (a,b,c',d,e,f,g,h)
+  _3 k ~(a,b,c,d,e,f,g,h) = k c <₪> \c' -> (a,b,c',d,e,f,g,h)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i) (a,b,c',d,e,f,g,h,i) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i)
+  _3 k ~(a,b,c,d,e,f,g,h,i) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i,j) (a,b,c',d,e,f,g,h,i,j) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i,j) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i,j)
+  _3 k ~(a,b,c,d,e,f,g,h,i,j) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i,j)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i,j,kk) (a,b,c',d,e,f,g,h,i,j,kk) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i,j,kk)
+  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i,j,kk)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b,c',d,e,f,g,h,i,j,kk,l) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l)
+  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c',d,e,f,g,h,i,j,kk,l,m) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m)
+  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c',d,e,f,g,h,i,j,kk,l,m,n) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n)
+  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o)
+  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p)
+  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p,q) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p,q)
+  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p,q)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r)
+  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r)
   {-# INLINE _3 #-}
 
 instance Field3 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) c c' where
-  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k c <&> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s)
+  _3 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k c <₪> \c' -> (a,b,c',d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s)
   {-# INLINE _3 #-}
 
 -- | Provide access to the 4th field of a tuple.
@@ -385,67 +386,67 @@ class Field4 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d) (a,b,c,d') d d' where
-  _4 k ~(a,b,c,d) = k d <&> \d' -> (a,b,c,d')
+  _4 k ~(a,b,c,d) = k d <₪> \d' -> (a,b,c,d')
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e) (a,b,c,d',e) d d' where
-  _4 k ~(a,b,c,d,e) = k d <&> \d' -> (a,b,c,d',e)
+  _4 k ~(a,b,c,d,e) = k d <₪> \d' -> (a,b,c,d',e)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f) (a,b,c,d',e,f) d d' where
-  _4 k ~(a,b,c,d,e,f) = k d <&> \d' -> (a,b,c,d',e,f)
+  _4 k ~(a,b,c,d,e,f) = k d <₪> \d' -> (a,b,c,d',e,f)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g) (a,b,c,d',e,f,g) d d' where
-  _4 k ~(a,b,c,d,e,f,g) = k d <&> \d' -> (a,b,c,d',e,f,g)
+  _4 k ~(a,b,c,d,e,f,g) = k d <₪> \d' -> (a,b,c,d',e,f,g)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h) (a,b,c,d',e,f,g,h) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h) = k d <&> \d' -> (a,b,c,d',e,f,g,h)
+  _4 k ~(a,b,c,d,e,f,g,h) = k d <₪> \d' -> (a,b,c,d',e,f,g,h)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i) (a,b,c,d',e,f,g,h,i) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i)
+  _4 k ~(a,b,c,d,e,f,g,h,i) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i,j) (a,b,c,d',e,f,g,h,i,j) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i,j) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i,j)
+  _4 k ~(a,b,c,d,e,f,g,h,i,j) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i,j)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i,j,kk) (a,b,c,d',e,f,g,h,i,j,kk) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i,j,kk)
+  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i,j,kk)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b,c,d',e,f,g,h,i,j,kk,l) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l)
+  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c,d',e,f,g,h,i,j,kk,l,m) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m)
+  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d',e,f,g,h,i,j,kk,l,m,n) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n)
+  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o)
+  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p)
+  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p,q) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p,q)
+  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p,q)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p,q,r) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p,q,r)
+  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p,q,r)
   {-# INLINE _4 #-}
 
 instance Field4 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) d d' where
-  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k d <&> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s)
+  _4 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k d <₪> \d' -> (a,b,c,d',e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s)
   {-# INLINE _4 #-}
 
 -- | Provides access to the 5th field of a tuple.
@@ -458,63 +459,63 @@ class Field5 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e) (a,b,c,d,e') e e' where
-  _5 k ~(a,b,c,d,e) = k e <&> \e' -> (a,b,c,d,e')
+  _5 k ~(a,b,c,d,e) = k e <₪> \e' -> (a,b,c,d,e')
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f) (a,b,c,d,e',f) e e' where
-  _5 k ~(a,b,c,d,e,f) = k e <&> \e' -> (a,b,c,d,e',f)
+  _5 k ~(a,b,c,d,e,f) = k e <₪> \e' -> (a,b,c,d,e',f)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g) (a,b,c,d,e',f,g) e e' where
-  _5 k ~(a,b,c,d,e,f,g) = k e <&> \e' -> (a,b,c,d,e',f,g)
+  _5 k ~(a,b,c,d,e,f,g) = k e <₪> \e' -> (a,b,c,d,e',f,g)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h) (a,b,c,d,e',f,g,h) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h) = k e <&> \e' -> (a,b,c,d,e',f,g,h)
+  _5 k ~(a,b,c,d,e,f,g,h) = k e <₪> \e' -> (a,b,c,d,e',f,g,h)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i) (a,b,c,d,e',f,g,h,i) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i)
+  _5 k ~(a,b,c,d,e,f,g,h,i) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i,j) (a,b,c,d,e',f,g,h,i,j) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i,j) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i,j)
+  _5 k ~(a,b,c,d,e,f,g,h,i,j) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i,j)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i,j,kk) (a,b,c,d,e',f,g,h,i,j,kk) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i,j,kk)
+  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i,j,kk)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b,c,d,e',f,g,h,i,j,kk,l) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l)
+  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c,d,e',f,g,h,i,j,kk,l,m) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m)
+  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d,e',f,g,h,i,j,kk,l,m,n) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n)
+  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o)
+  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p)
+  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p,q) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p,q)
+  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p,q)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p,q,r) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p,q,r)
+  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p,q,r)
   {-# INLINE _5 #-}
 
 instance Field5 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p,q,r,s) e e' where
-  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k e <&> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p,q,r,s)
+  _5 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k e <₪> \e' -> (a,b,c,d,e',f,g,h,i,j,kk,l,m,n,o,p,q,r,s)
   {-# INLINE _5 #-}
 
 -- | Provides access to the 6th element of a tuple.
@@ -527,59 +528,59 @@ class Field6 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f) (a,b,c,d,e,f') f f' where
-  _6 k ~(a,b,c,d,e,f) = k f <&> \f' -> (a,b,c,d,e,f')
+  _6 k ~(a,b,c,d,e,f) = k f <₪> \f' -> (a,b,c,d,e,f')
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g) (a,b,c,d,e,f',g) f f' where
-  _6 k ~(a,b,c,d,e,f,g) = k f <&> \f' -> (a,b,c,d,e,f',g)
+  _6 k ~(a,b,c,d,e,f,g) = k f <₪> \f' -> (a,b,c,d,e,f',g)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h) (a,b,c,d,e,f',g,h) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h) = k f <&> \f' -> (a,b,c,d,e,f',g,h)
+  _6 k ~(a,b,c,d,e,f,g,h) = k f <₪> \f' -> (a,b,c,d,e,f',g,h)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i) (a,b,c,d,e,f',g,h,i) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i)
+  _6 k ~(a,b,c,d,e,f,g,h,i) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i,j) (a,b,c,d,e,f',g,h,i,j) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i,j) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i,j)
+  _6 k ~(a,b,c,d,e,f,g,h,i,j) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i,j)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i,j,kk) (a,b,c,d,e,f',g,h,i,j,kk) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i,j,kk)
+  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i,j,kk)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b,c,d,e,f',g,h,i,j,kk,l) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l)
+  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c,d,e,f',g,h,i,j,kk,l,m) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m)
+  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d,e,f',g,h,i,j,kk,l,m,n) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n)
+  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o)
+  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p)
+  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p,q) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p,q)
+  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p,q)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p,q,r) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p,q,r)
+  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p,q,r)
   {-# INLINE _6 #-}
 
 instance Field6 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p,q,r,s) f f' where
-  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k f <&> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p,q,r,s)
+  _6 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k f <₪> \f' -> (a,b,c,d,e,f',g,h,i,j,kk,l,m,n,o,p,q,r,s)
   {-# INLINE _6 #-}
 
 -- | Provide access to the 7th field of a tuple.
@@ -592,55 +593,55 @@ class Field7 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g) (a,b,c,d,e,f,g') g g' where
-  _7 k ~(a,b,c,d,e,f,g) = k g <&> \g' -> (a,b,c,d,e,f,g')
+  _7 k ~(a,b,c,d,e,f,g) = k g <₪> \g' -> (a,b,c,d,e,f,g')
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h) (a,b,c,d,e,f,g',h) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h) = k g <&> \g' -> (a,b,c,d,e,f,g',h)
+  _7 k ~(a,b,c,d,e,f,g,h) = k g <₪> \g' -> (a,b,c,d,e,f,g',h)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i) (a,b,c,d,e,f,g',h,i) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i)
+  _7 k ~(a,b,c,d,e,f,g,h,i) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i,j) (a,b,c,d,e,f,g',h,i,j) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i,j) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i,j)
+  _7 k ~(a,b,c,d,e,f,g,h,i,j) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i,j)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i,j,kk) (a,b,c,d,e,f,g',h,i,j,kk) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i,j,kk)
+  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i,j,kk)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b,c,d,e,f,g',h,i,j,kk,l) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l)
+  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c,d,e,f,g',h,i,j,kk,l,m) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m)
+  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d,e,f,g',h,i,j,kk,l,m,n) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n)
+  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o)
+  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p)
+  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p,q) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p,q)
+  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p,q)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p,q,r) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p,q,r)
+  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p,q,r)
   {-# INLINE _7 #-}
 
 instance Field7 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p,q,r,s) g g' where
-  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k g <&> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p,q,r,s)
+  _7 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k g <₪> \g' -> (a,b,c,d,e,f,g',h,i,j,kk,l,m,n,o,p,q,r,s)
   {-# INLINE _7 #-}
 
 -- | Provide access to the 8th field of a tuple.
@@ -653,51 +654,51 @@ class Field8 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h) (a,b,c,d,e,f,g,h') h h' where
-  _8 k ~(a,b,c,d,e,f,g,h) = k h <&> \h' -> (a,b,c,d,e,f,g,h')
+  _8 k ~(a,b,c,d,e,f,g,h) = k h <₪> \h' -> (a,b,c,d,e,f,g,h')
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i) (a,b,c,d,e,f,g,h',i) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i)
+  _8 k ~(a,b,c,d,e,f,g,h,i) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i)
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i,j) (a,b,c,d,e,f,g,h',i,j) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i,j) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i,j)
+  _8 k ~(a,b,c,d,e,f,g,h,i,j) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i,j)
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i,j,kk) (a,b,c,d,e,f,g,h',i,j,kk) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i,j,kk)
+  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i,j,kk)
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b,c,d,e,f,g,h',i,j,kk,l) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l)
+  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l)
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c,d,e,f,g,h',i,j,kk,l,m) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m)
+  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m)
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d,e,f,g,h',i,j,kk,l,m,n) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n)
+  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n)
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o)
+  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o)
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p)
+  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p)
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p,q) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p,q)
+  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p,q)
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p,q,r) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p,q,r)
+  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p,q,r)
   {-# INLINE _8 #-}
 
 instance Field8 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p,q,r,s) h h' where
-  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k h <&> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p,q,r,s)
+  _8 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k h <₪> \h' -> (a,b,c,d,e,f,g,h',i,j,kk,l,m,n,o,p,q,r,s)
   {-# INLINE _8 #-}
 
 -- | Provides access to the 9th field of a tuple.
@@ -710,47 +711,47 @@ class Field9 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i) (a,b,c,d,e,f,g,h,i') i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i')
+  _9 k ~(a,b,c,d,e,f,g,h,i) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i')
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i,j) (a,b,c,d,e,f,g,h,i',j) i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i,j) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i',j)
+  _9 k ~(a,b,c,d,e,f,g,h,i,j) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i',j)
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i,j,kk) (a,b,c,d,e,f,g,h,i',j,kk) i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i',j,kk)
+  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i',j,kk)
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b,c,d,e,f,g,h,i',j,kk,l) i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l)
+  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l)
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c,d,e,f,g,h,i',j,kk,l,m) i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m)
+  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m)
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d,e,f,g,h,i',j,kk,l,m,n) i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n)
+  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n)
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o) i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o)
+  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o)
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p) i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p)
+  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p)
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p,q) i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p,q)
+  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p,q)
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p,q,r) i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p,q,r)
+  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p,q,r)
   {-# INLINE _9 #-}
 
 instance Field9 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p,q,r,s) i i' where
-  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k i <&> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p,q,r,s)
+  _9 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k i <₪> \i' -> (a,b,c,d,e,f,g,h,i',j,kk,l,m,n,o,p,q,r,s)
   {-# INLINE _9 #-}
 
 -- | Provides access to the 10th field of a tuple.
@@ -763,43 +764,43 @@ class Field10 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _10 #-}
 
 instance Field10 (a,b,c,d,e,f,g,h,i,j) (a,b,c,d,e,f,g,h,i,j') j j' where
-  _10 k ~(a,b,c,d,e,f,g,h,i,j) = k j <&> \j' -> (a,b,c,d,e,f,g,h,i,j')
+  _10 k ~(a,b,c,d,e,f,g,h,i,j) = k j <₪> \j' -> (a,b,c,d,e,f,g,h,i,j')
   {-# INLINE _10 #-}
 
 instance Field10 (a,b,c,d,e,f,g,h,i,j,kk) (a,b,c,d,e,f,g,h,i,j',kk) j j' where
-  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k j <&> \j' -> (a,b,c,d,e,f,g,h,i,j',kk)
+  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k j <₪> \j' -> (a,b,c,d,e,f,g,h,i,j',kk)
   {-# INLINE _10 #-}
 
 instance Field10 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b,c,d,e,f,g,h,i,j',kk,l) j j' where
-  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k j <&> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l)
+  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k j <₪> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l)
   {-# INLINE _10 #-}
 
 instance Field10 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c,d,e,f,g,h,i,j',kk,l,m) j j' where
-  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k j <&> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m)
+  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k j <₪> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m)
   {-# INLINE _10 #-}
 
 instance Field10 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d,e,f,g,h,i,j',kk,l,m,n) j j' where
-  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k j <&> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n)
+  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k j <₪> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n)
   {-# INLINE _10 #-}
 
 instance Field10 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o) j j' where
-  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k j <&> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o)
+  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k j <₪> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o)
   {-# INLINE _10 #-}
 
 instance Field10 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p) j j' where
-  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k j <&> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p)
+  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k j <₪> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p)
   {-# INLINE _10 #-}
 
 instance Field10 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p,q) j j' where
-  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k j <&> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p,q)
+  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k j <₪> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p,q)
   {-# INLINE _10 #-}
 
 instance Field10 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p,q,r) j j' where
-  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k j <&> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p,q,r)
+  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k j <₪> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p,q,r)
   {-# INLINE _10 #-}
 
 instance Field10 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p,q,r,s) j j' where
-  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k j <&> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p,q,r,s)
+  _10 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k j <₪> \j' -> (a,b,c,d,e,f,g,h,i,j',kk,l,m,n,o,p,q,r,s)
   {-# INLINE _10 #-}
 
 -- | Provides access to the 11th field of a tuple.
@@ -812,39 +813,39 @@ class Field11 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _11 #-}
 
 instance Field11 (a,b,c,d,e,f,g,h,i,j,kk) (a,b,c,d,e,f,g,h,i,j,kk') kk kk' where
-  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k kk <&> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk')
+  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk) = k kk <₪> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk')
   {-# INLINE _11 #-}
 
 instance Field11 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b,c,d,e,f,g,h,i,j,kk',l) kk kk' where
-  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k kk <&> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l)
+  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k kk <₪> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l)
   {-# INLINE _11 #-}
 
 instance Field11 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c,d,e,f,g,h,i,j,kk',l,m) kk kk' where
-  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k kk <&> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m)
+  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k kk <₪> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m)
   {-# INLINE _11 #-}
 
 instance Field11 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d,e,f,g,h,i,j,kk',l,m,n) kk kk' where
-  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k kk <&> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n)
+  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k kk <₪> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n)
   {-# INLINE _11 #-}
 
 instance Field11 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o) kk kk' where
-  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k kk <&> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o)
+  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k kk <₪> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o)
   {-# INLINE _11 #-}
 
 instance Field11 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p) kk kk' where
-  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k kk <&> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p)
+  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k kk <₪> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p)
   {-# INLINE _11 #-}
 
 instance Field11 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p,q) kk kk' where
-  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k kk <&> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p,q)
+  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k kk <₪> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p,q)
   {-# INLINE _11 #-}
 
 instance Field11 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p,q,r) kk kk' where
-  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k kk <&> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p,q,r)
+  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k kk <₪> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p,q,r)
   {-# INLINE _11 #-}
 
 instance Field11 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p,q,r,s) kk kk' where
-  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k kk <&> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p,q,r,s)
+  _11 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k kk <₪> \kk' -> (a,b,c,d,e,f,g,h,i,j,kk',l,m,n,o,p,q,r,s)
   {-# INLINE _11 #-}
 
 -- | Provides access to the 12th field of a tuple.
@@ -857,35 +858,35 @@ class Field12 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _12 #-}
 
 instance Field12 (a,b,c,d,e,f,g,h,i,j,kk,l) (a,b,c,d,e,f,g,h,i,j,kk,l') l l' where
-  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k l <&> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l')
+  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l) = k l <₪> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l')
   {-# INLINE _12 #-}
 
 instance Field12 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c,d,e,f,g,h,i,j,kk,l',m) l l' where
-  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k l <&> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m)
+  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k l <₪> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m)
   {-# INLINE _12 #-}
 
 instance Field12 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d,e,f,g,h,i,j,kk,l',m,n) l l' where
-  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k l <&> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n)
+  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k l <₪> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n)
   {-# INLINE _12 #-}
 
 instance Field12 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o) l l' where
-  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k l <&> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o)
+  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k l <₪> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o)
   {-# INLINE _12 #-}
 
 instance Field12 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p) l l' where
-  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k l <&> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p)
+  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k l <₪> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p)
   {-# INLINE _12 #-}
 
 instance Field12 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p,q) l l' where
-  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k l <&> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p,q)
+  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k l <₪> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p,q)
   {-# INLINE _12 #-}
 
 instance Field12 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p,q,r) l l' where
-  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k l <&> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p,q,r)
+  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k l <₪> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p,q,r)
   {-# INLINE _12 #-}
 
 instance Field12 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p,q,r,s) l l' where
-  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k l <&> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p,q,r,s)
+  _12 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k l <₪> \l' -> (a,b,c,d,e,f,g,h,i,j,kk,l',m,n,o,p,q,r,s)
   {-# INLINE _12 #-}
 
 -- | Provides access to the 13th field of a tuple.
@@ -898,31 +899,31 @@ class Field13 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _13 #-}
 
 instance Field13 (a,b,c,d,e,f,g,h,i,j,kk,l,m) (a,b,c,d,e,f,g,h,i,j,kk,l,m') m m' where
-  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k m <&> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m')
+  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m) = k m <₪> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m')
   {-# INLINE _13 #-}
 
 instance Field13 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d,e,f,g,h,i,j,kk,l,m',n) m m' where
-  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k m <&> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n)
+  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k m <₪> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n)
   {-# INLINE _13 #-}
 
 instance Field13 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o) m m' where
-  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k m <&> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o)
+  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k m <₪> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o)
   {-# INLINE _13 #-}
 
 instance Field13 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p) m m' where
-  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k m <&> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p)
+  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k m <₪> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p)
   {-# INLINE _13 #-}
 
 instance Field13 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p,q) m m' where
-  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k m <&> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p,q)
+  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k m <₪> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p,q)
   {-# INLINE _13 #-}
 
 instance Field13 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p,q,r) m m' where
-  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k m <&> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p,q,r)
+  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k m <₪> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p,q,r)
   {-# INLINE _13 #-}
 
 instance Field13 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p,q,r,s) m m' where
-  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k m <&> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p,q,r,s)
+  _13 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k m <₪> \m' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m',n,o,p,q,r,s)
   {-# INLINE _13 #-}
 
 -- | Provides access to the 14th field of a tuple.
@@ -935,27 +936,27 @@ class Field14 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _14 #-}
 
 instance Field14 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n') n n' where
-  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k n <&> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n')
+  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n) = k n <₪> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n')
   {-# INLINE _14 #-}
 
 instance Field14 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o) n n' where
-  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k n <&> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o)
+  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k n <₪> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o)
   {-# INLINE _14 #-}
 
 instance Field14 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p) n n' where
-  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k n <&> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p)
+  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k n <₪> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p)
   {-# INLINE _14 #-}
 
 instance Field14 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p,q) n n' where
-  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k n <&> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p,q)
+  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k n <₪> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p,q)
   {-# INLINE _14 #-}
 
 instance Field14 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p,q,r) n n' where
-  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k n <&> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p,q,r)
+  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k n <₪> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p,q,r)
   {-# INLINE _14 #-}
 
 instance Field14 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p,q,r,s) n n' where
-  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k n <&> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p,q,r,s)
+  _14 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k n <₪> \n' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n',o,p,q,r,s)
   {-# INLINE _14 #-}
 
 -- | Provides access to the 15th field of a tuple.
@@ -968,23 +969,23 @@ class Field15 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _15 #-}
 
 instance Field15 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o') o o' where
-  _15 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k o <&> \o' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o')
+  _15 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o) = k o <₪> \o' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o')
   {-# INLINE _15 #-}
 
 instance Field15 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p) o o' where
-  _15 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k o <&> \o' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p)
+  _15 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k o <₪> \o' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p)
   {-# INLINE _15 #-}
 
 instance Field15 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p,q) o o' where
-  _15 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k o <&> \o' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p,q)
+  _15 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k o <₪> \o' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p,q)
   {-# INLINE _15 #-}
 
 instance Field15 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p,q,r) o o' where
-  _15 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k o <&> \o' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p,q,r)
+  _15 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k o <₪> \o' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p,q,r)
   {-# INLINE _15 #-}
 
 instance Field15 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p,q,r,s) o o' where
-  _15 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k o <&> \o' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p,q,r,s)
+  _15 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k o <₪> \o' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o',p,q,r,s)
   {-# INLINE _15 #-}
 
 -- | Provides access to the 16th field of a tuple.
@@ -997,19 +998,19 @@ class Field16 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _16 #-}
 
 instance Field16 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p') p p' where
-  _16 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k p <&> \p' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p')
+  _16 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p) = k p <₪> \p' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p')
   {-# INLINE _16 #-}
 
 instance Field16 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p',q) p p' where
-  _16 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k p <&> \p' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p',q)
+  _16 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k p <₪> \p' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p',q)
   {-# INLINE _16 #-}
 
 instance Field16 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p',q,r) p p' where
-  _16 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k p <&> \p' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p',q,r)
+  _16 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k p <₪> \p' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p',q,r)
   {-# INLINE _16 #-}
 
 instance Field16 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p',q,r,s) p p' where
-  _16 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k p <&> \p' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p',q,r,s)
+  _16 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k p <₪> \p' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p',q,r,s)
   {-# INLINE _16 #-}
 
 -- | Provides access to the 17th field of a tuple.
@@ -1022,15 +1023,15 @@ class Field17 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _17 #-}
 
 instance Field17 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q') q q' where
-  _17 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k q <&> \q' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q')
+  _17 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q) = k q <₪> \q' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q')
   {-# INLINE _17 #-}
 
 instance Field17 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q',r) q q' where
-  _17 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k q <&> \q' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q',r)
+  _17 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k q <₪> \q' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q',r)
   {-# INLINE _17 #-}
 
 instance Field17 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q',r,s) q q' where
-  _17 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k q <&> \q' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q',r,s)
+  _17 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k q <₪> \q' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q',r,s)
   {-# INLINE _17 #-}
 
 -- | Provides access to the 18th field of a tuple.
@@ -1043,11 +1044,11 @@ class Field18 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _18 #-}
 
 instance Field18 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r') r r' where
-  _18 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k r <&> \r' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r')
+  _18 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r) = k r <₪> \r' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r')
   {-# INLINE _18 #-}
 
 instance Field18 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r',s) r r' where
-  _18 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k r <&> \r' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r',s)
+  _18 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k r <₪> \r' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r',s)
   {-# INLINE _18 #-}
 
 -- | Provides access to the 19th field of a tuple.
@@ -1060,7 +1061,7 @@ class Field19 s t a b | s -> a, t -> b, s b -> t, t a -> s where
   {-# INLINE _19 #-}
 
 instance Field19 (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s') s s' where
-  _19 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k s <&> \s' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s')
+  _19 k ~(a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s) = k s <₪> \s' -> (a,b,c,d,e,f,g,h,i,j,kk,l,m,n,o,p,q,r,s')
   {-# INLINE _19 #-}
 
 -- Strict versions of the _1 .. _19 operations

@@ -12,12 +12,13 @@
 module Data.Array.Lens
   (
   -- * Setters
-    ixmapped
+--    ixmapped
   ) where
 
 import Control.Lens
 import Data.Array.IArray hiding (index)
 
+{-
 -- | This 'setter' can be used to derive a new 'IArray' from an old 'IAarray' by
 -- applying a function to each of the indices to look it up in the old 'IArray'.
 --
@@ -32,3 +33,4 @@ import Data.Array.IArray hiding (index)
 ixmapped :: (IArray a e, Ix i, Ix j) => (i,i) -> IndexPreservingSetter (a j e) (a i e) i j
 ixmapped = setting . ixmap
 {-# INLINE ixmapped #-}
+-}

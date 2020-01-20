@@ -3,7 +3,6 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE ConstraintKinds #-}
@@ -45,15 +44,19 @@ module Control.Lens.Traversal
   (
   -- * Traversals
     Traversal, Traversal'
+{-
   , Traversal1, Traversal1'
   , IndexedTraversal, IndexedTraversal'
   , IndexedTraversal1, IndexedTraversal1'
+-}
   , ATraversal, ATraversal'
   , ATraversal1, ATraversal1'
+{-
   , AnIndexedTraversal, AnIndexedTraversal'
   , AnIndexedTraversal1, AnIndexedTraversal1'
   , Traversing, Traversing'
   , Traversing1, Traversing1'
+-}
 
   -- * Traversing and Lensing
   , traverseOf, forOf, sequenceAOf
@@ -61,8 +64,9 @@ module Control.Lens.Traversal
   , transposeOf
   , mapAccumLOf, mapAccumROf
   , scanr1Of, scanl1Of
-  , failover, ifailover
+  , failover -- , ifailover
 
+{-
   -- * Monomorphic Traversals
   , cloneTraversal
   , cloneIndexPreservingTraversal
@@ -70,17 +74,16 @@ module Control.Lens.Traversal
   , cloneTraversal1
   , cloneIndexPreservingTraversal1
   , cloneIndexedTraversal1
+-}
 
   -- * Parts and Holes
-  , partsOf, partsOf'
-  , unsafePartsOf, unsafePartsOf'
-  , holesOf, holes1Of
-  , singular, unsafeSingular
+--  , holesOf, holes1Of
 
   -- * Common Traversals
   , Traversable(traverse)
-  , Traversable1(traverse1)
-  , both, both1
+  , ignored
+--  , Traversable1(traverse1)
+  , both {- , both1
   , beside
   , taking
   , dropping
@@ -118,15 +121,18 @@ module Control.Lens.Traversal
   , traverseByOf
   , sequenceBy
   , sequenceByOf
+-}
 
   -- * Implementation Details
   , Bazaar(..), Bazaar'
   , Bazaar1(..), Bazaar1'
+{-
   , loci
   , iloci
 
   -- * Fusion
   , confusing
+-}
   ) where
 
 import Control.Applicative as Applicative
@@ -134,22 +140,21 @@ import Control.Applicative.Backwards
 import Control.Category
 import Control.Comonad
 import Control.Lens.Fold
-import Control.Lens.Getter (Getting, IndexedGetting, getting)
+import Control.Lens.Getter (Getting, getting)
 import Control.Lens.Internal.Bazaar
 import Control.Lens.Internal.Context
-import Control.Lens.Internal.Indexed
+--import Control.Lens.Internal.Indexed
 import Control.Lens.Internal.Fold
 import Control.Lens.Lens
-import Control.Lens.Setter (ASetter, AnIndexedSetter, isets, sets)
+import Control.Lens.Setter (ASetter, sets)
 import Control.Lens.Type
 import Control.Monad
 import Control.Monad.Trans.State.Lazy
 import Data.Bitraversable
 import Data.CallStack
-import Data.Functor.Apply
 import Data.Functor.Compose
-import Data.Functor.Day.Curried
-import Data.Functor.Yoneda
+--import Data.Functor.Day.Curried
+--import Data.Functor.Yoneda
 import Data.Int
 import Data.IntMap as IntMap
 import Data.List.NonEmpty (NonEmpty (..))
@@ -159,12 +164,10 @@ import Data.Sequence (Seq, mapWithIndex)
 import Data.Vector as Vector (Vector, imap)
 import Data.Monoid (Any (..), Endo (..))
 import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
+--import Data.Profunctor.Rep
+--import Data.Profunctor.Sieve
 import Data.Profunctor.Unsafe
-import Data.Reflection
-import Data.Semigroup.Traversable
-import Data.Semigroup.Bitraversable
+--import Data.Reflection
 import Data.Traversable
 import Data.Tuple (swap)
 import GHC.Magic (inline)
@@ -214,6 +217,7 @@ type ATraversal1 s t a b = LensLike (Bazaar1 (->) a b) s t a b
 -- @
 type ATraversal1' s a = ATraversal1 s s a a
 
+{-
 -- | When you see this as an argument to a function, it expects an 'IndexedTraversal'.
 type AnIndexedTraversal i s t a b = Over (Indexed i) (Bazaar (Indexed i) a b) s t a b
 
@@ -239,11 +243,11 @@ type AnIndexedTraversal1' i s a = AnIndexedTraversal1 i s s a a
 --
 --  * a 'Traversal' if @f@ is 'Applicative',
 --
---  * a 'Getter' if @f@ is only a 'Functor' and 'Data.Functor.Contravariant.Contravariant',
+--  * a 'Getter' if @f@ is only a 'Functor' and 'Data.Functor.Contravariant.Contravar.Functor',
 --
 --  * a 'Lens' if @f@ is only a 'Functor',
 --
---  * a 'Fold' if @f@ is 'Applicative' and 'Data.Functor.Contravariant.Contravariant'.
+--  * a 'Fold' if @f@ is 'Applicative' and 'Data.Functor.Contravariant.Contravar.Functor'.
 type Traversing p f s t a b = Over p (BazaarT p f a b) s t a b
 
 type Traversing1 p f s t a b = Over p (BazaarT1 p f a b) s t a b
@@ -253,6 +257,7 @@ type Traversing1 p f s t a b = Over p (BazaarT1 p f a b) s t a b
 -- @
 type Traversing' p f s a = Traversing p f s s a a
 type Traversing1' p f s a = Traversing1 p f s s a a
+-}
 
 --------------------------
 -- Traversal Combinators
@@ -502,6 +507,7 @@ scanl1Of l f = snd . mapAccumLOf l step Nothing where
   step (Just s) a = (Just r, r) where r = f s a
 {-# INLINE scanl1Of #-}
 
+{-
 -- | This 'Traversal' allows you to 'traverse' the individual stores in a 'Bazaar'.
 loci :: Traversal (Bazaar (->) a c s) (Bazaar (->) b c s) a b
 loci f w = getCompose (runBazaar w (Compose #. fmap sell . f))
@@ -512,170 +518,8 @@ loci f w = getCompose (runBazaar w (Compose #. fmap sell . f))
 iloci :: IndexedTraversal i (Bazaar (Indexed i) a c s) (Bazaar (Indexed i) b c s) a b
 iloci f w = getCompose (runBazaar w (Compose #. Indexed (\i -> fmap (indexed sell i) . indexed f i)))
 {-# INLINE iloci #-}
+-}
 
--------------------------------------------------------------------------------
--- Parts
--------------------------------------------------------------------------------
-
--- | 'partsOf' turns a 'Traversal' into a 'Lens' that resembles an early version of the 'Data.Data.Lens.uniplate' (or 'Data.Data.Lens.biplate') type.
---
--- /Note:/ You should really try to maintain the invariant of the number of children in the list.
---
--- >>> (a,b,c) & partsOf each .~ [x,y,z]
--- (x,y,z)
---
--- Any extras will be lost. If you do not supply enough, then the remainder will come from the original structure.
---
--- >>> (a,b,c) & partsOf each .~ [w,x,y,z]
--- (w,x,y)
---
--- >>> (a,b,c) & partsOf each .~ [x,y]
--- (x,y,c)
---
--- >>> ('b', 'a', 'd', 'c') & partsOf each %~ sort
--- ('a','b','c','d')
---
--- So technically, this is only a 'Lens' if you do not change the number of results it returns.
---
--- When applied to a 'Fold' the result is merely a 'Getter'.
---
--- @
--- 'partsOf' :: 'Iso'' s a       -> 'Lens'' s [a]
--- 'partsOf' :: 'Lens'' s a      -> 'Lens'' s [a]
--- 'partsOf' :: 'Traversal'' s a -> 'Lens'' s [a]
--- 'partsOf' :: 'Fold' s a       -> 'Getter' s [a]
--- 'partsOf' :: 'Getter' s a     -> 'Getter' s [a]
--- @
-partsOf :: Functor f => Traversing (->) f s t a a -> LensLike f s t [a] [a]
-partsOf l f s = outs b <$> f (ins b) where b = l sell s
-{-# INLINE partsOf #-}
-
--- | An indexed version of 'partsOf' that receives the entire list of indices as its index.
-ipartsOf :: forall i p f s t a. (Indexable [i] p, Functor f) => Traversing (Indexed i) f s t a a -> Over p f s t [a] [a]
-ipartsOf l = conjoined
-  (\f s -> let b = inline l sell s                            in outs b <$> f (wins b))
-  (\f s -> let b = inline l sell s; (is, as) = unzip (pins b) in outs b <$> indexed f (is :: [i]) as)
-{-# INLINE ipartsOf #-}
-
--- | A type-restricted version of 'partsOf' that can only be used with a 'Traversal'.
-partsOf' :: ATraversal s t a a -> Lens s t [a] [a]
-partsOf' l f s = outs b <$> f (ins b) where b = l sell s
-{-# INLINE partsOf' #-}
-
--- | A type-restricted version of 'ipartsOf' that can only be used with an 'IndexedTraversal'.
-ipartsOf' :: forall i p f s t a. (Indexable [i] p, Functor f) => Over (Indexed i) (Bazaar' (Indexed i) a) s t a a -> Over p f s t [a] [a]
-ipartsOf' l = conjoined
-  (\f s -> let b = inline l sell s                            in outs b <$> f (wins b))
-  (\f s -> let b = inline l sell s; (is, as) = unzip (pins b) in outs b <$> indexed f (is :: [i]) as)
-{-# INLINE ipartsOf' #-}
-
--- | 'unsafePartsOf' turns a 'Traversal' into a 'Data.Data.Lens.uniplate' (or 'Data.Data.Lens.biplate') family.
---
--- If you do not need the types of @s@ and @t@ to be different, it is recommended that
--- you use 'partsOf'.
---
--- It is generally safer to traverse with the 'Bazaar' rather than use this
--- combinator. However, it is sometimes convenient.
---
--- This is unsafe because if you don't supply at least as many @b@'s as you were
--- given @a@'s, then the reconstruction of @t@ /will/ result in an error!
---
--- When applied to a 'Fold' the result is merely a 'Getter' (and becomes safe).
---
--- @
--- 'unsafePartsOf' :: 'Iso' s t a b       -> 'Lens' s t [a] [b]
--- 'unsafePartsOf' :: 'Lens' s t a b      -> 'Lens' s t [a] [b]
--- 'unsafePartsOf' :: 'Traversal' s t a b -> 'Lens' s t [a] [b]
--- 'unsafePartsOf' :: 'Fold' s a          -> 'Getter' s [a]
--- 'unsafePartsOf' :: 'Getter' s a        -> 'Getter' s [a]
--- @
-unsafePartsOf :: Functor f => Traversing (->) f s t a b -> LensLike f s t [a] [b]
-unsafePartsOf l f s = unsafeOuts b <$> f (ins b) where b = l sell s
-{-# INLINE unsafePartsOf #-}
-
--- | An indexed version of 'unsafePartsOf' that receives the entire list of indices as its index.
-iunsafePartsOf :: forall i p f s t a b. (Indexable [i] p, Functor f) => Traversing (Indexed i) f s t a b -> Over p f s t [a] [b]
-iunsafePartsOf l = conjoined
-  (\f s -> let b = inline l sell s                           in unsafeOuts b <$> f (wins b))
-  (\f s -> let b = inline l sell s; (is,as) = unzip (pins b) in unsafeOuts b <$> indexed f (is :: [i]) as)
-{-# INLINE iunsafePartsOf #-}
-
-unsafePartsOf' :: ATraversal s t a b -> Lens s t [a] [b]
-unsafePartsOf' l f s = unsafeOuts b <$> f (ins b) where b = l sell s
-{-# INLINE unsafePartsOf' #-}
-
-iunsafePartsOf' :: forall i s t a b. Over (Indexed i) (Bazaar (Indexed i) a b) s t a b -> IndexedLens [i] s t [a] [b]
-iunsafePartsOf' l = conjoined
-  (\f s -> let b = inline l sell s                            in unsafeOuts b <$> f (wins b))
-  (\f s -> let b = inline l sell s; (is, as) = unzip (pins b) in unsafeOuts b <$> indexed f (is :: [i]) as)
-{-# INLINE iunsafePartsOf' #-}
-
-
--- | This converts a 'Traversal' that you \"know\" will target one or more elements to a 'Lens'. It can
--- also be used to transform a non-empty 'Fold' into a 'Getter'.
---
--- The resulting 'Lens' or 'Getter' will be partial if the supplied 'Traversal' returns
--- no results.
---
--- >>> [1,2,3] ^. singular _head
--- 1
---
--- >>> Left (ErrorCall "singular: empty traversal") <- try (evaluate ([] ^. singular _head)) :: IO (Either ErrorCall ())
---
--- >>> Left 4 ^. singular _Left
--- 4
---
--- >>> [1..10] ^. singular (ix 7)
--- 8
---
--- >>> [] & singular traverse .~ 0
--- []
---
--- @
--- 'singular' :: 'Traversal' s t a a          -> 'Lens' s t a a
--- 'singular' :: 'Fold' s a                   -> 'Getter' s a
--- 'singular' :: 'IndexedTraversal' i s t a a -> 'IndexedLens' i s t a a
--- 'singular' :: 'IndexedFold' i s a          -> 'IndexedGetter' i s a
--- @
-singular :: (HasCallStack, Conjoined p, Functor f)
-         => Traversing p f s t a a
-         -> Over p f s t a a
-singular l = conjoined
-  (\afb s -> let b = l sell s in case ins b of
-    (w:ws) -> unsafeOuts b . (:ws) <$> afb w
-    []     -> unsafeOuts b . return <$> afb (error "singular: empty traversal"))
-  (\pafb s -> let b = l sell s in case pins b of
-    (w:ws) -> unsafeOuts b . (:Prelude.map extract ws) <$> cosieve pafb w
-    []     -> unsafeOuts b . return                    <$> cosieve pafb (error "singular: empty traversal"))
-{-# INLINE singular #-}
-
--- | This converts a 'Traversal' that you \"know\" will target only one element to a 'Lens'. It can also be
--- used to transform a 'Fold' into a 'Getter'.
---
--- The resulting 'Lens' or 'Getter' will be partial if the 'Traversal' targets nothing
--- or more than one element.
---
--- >>> Left (ErrorCall "unsafeSingular: empty traversal") <- try (evaluate ([] & unsafeSingular traverse .~ 0)) :: IO (Either ErrorCall [Integer])
---
--- @
--- 'unsafeSingular' :: 'Traversal' s t a b          -> 'Lens' s t a b
--- 'unsafeSingular' :: 'Fold' s a                   -> 'Getter' s a
--- 'unsafeSingular' :: 'IndexedTraversal' i s t a b -> 'IndexedLens' i s t a b
--- 'unsafeSingular' :: 'IndexedFold' i s a          -> 'IndexedGetter' i s a
--- @
-unsafeSingular :: (HasCallStack, Conjoined p, Functor f)
-               => Traversing p f s t a b
-               -> Over p f s t a b
-unsafeSingular l = conjoined
-  (\afb s -> let b = inline l sell s in case ins b of
-    [w] -> unsafeOuts b . return <$> afb w
-    []  -> error "unsafeSingular: empty traversal"
-    _   -> error "unsafeSingular: traversing multiple results")
-  (\pafb s -> let b = inline l sell s in case pins b of
-    [w] -> unsafeOuts b . return <$> cosieve pafb w
-    []  -> error "unsafeSingular: empty traversal"
-    _   -> error "unsafeSingular: traversing multiple results")
-{-# INLINE unsafeSingular #-}
 
 ------------------------------------------------------------------------------
 -- Internal functions used by 'partsOf', etc.
@@ -685,6 +529,7 @@ ins :: Bizarre (->) w => w a b t -> [a]
 ins = toListOf (getting bazaar)
 {-# INLINE ins #-}
 
+{-
 wins :: (Bizarre p w, Corepresentable p, Comonad (Corep p)) => w a b t -> [a]
 wins = getConst #. bazaar (cotabulate $ \ra -> Const [extract ra])
 {-# INLINE wins #-}
@@ -692,6 +537,7 @@ wins = getConst #. bazaar (cotabulate $ \ra -> Const [extract ra])
 pins :: (Bizarre p w, Corepresentable p) => w a b t -> [Corep p a]
 pins = getConst #. bazaar (cotabulate $ \ra -> Const [ra])
 {-# INLINE pins #-}
+-}
 
 parr :: (Profunctor p, Category p) => (a -> b) -> p a b
 parr f = lmap f id
@@ -701,10 +547,12 @@ outs :: (Bizarre p w, Category p) => w a a t -> [a] -> t
 outs = evalState `rmap` bazaar (parr (state . unconsWithDefault))
 {-# INLINE outs #-}
 
+{-
 unsafeOuts :: (Bizarre p w, Corepresentable p) => w a b t -> [b] -> t
 unsafeOuts = evalState `rmap` bazaar (cotabulate (\_ -> state (unconsWithDefault fakeVal)))
   where fakeVal = error "unsafePartsOf': not enough elements were supplied"
 {-# INLINE unsafeOuts #-}
+-}
 
 unconsWithDefault :: a -> [a] -> (a,[a])
 unconsWithDefault d []     = (d,[])
@@ -716,6 +564,7 @@ unconsWithDefault _ (x:xs) = (x,xs)
 -- Holes
 -------------------------------------------------------------------------------
 
+{-
 -- | The one-level version of 'Control.Lens.Plated.contextsOf'. This extracts a
 -- list of the immediate children according to a given 'Traversal' as editable
 -- contexts.
@@ -778,6 +627,7 @@ holeInOne1 :: forall p a t. (Corepresentable p, Category p)
 holeInOne1 x = Holes $ \xt ->
     ( NonEmptyDList (fmap xt (cosieve sell x) :|)
     , cosieve (id :: p a a) x)
+-}
 
 -- We are very careful to share as much structure as possible among
 -- the results (in the common case where the traversal allows for such).
@@ -795,12 +645,14 @@ instance Functor (Holes t m) where
       (qf, qv) = runHoles xs (xt . f)
     in (qf, f qv)
 
+{-
 instance Semigroup m => Apply (Holes t m) where
   fs <.> xs = Holes $ \xt ->
     let
      (pf, pv) = runHoles fs (xt . ($ qv))
      (qf, qv) = runHoles xs (xt . pv)
     in (pf <> qf, pv qv)
+-}
 
 instance Monoid m => Applicative (Holes t m) where
   pure x = Holes $ \_ -> (mempty, x)
@@ -846,6 +698,7 @@ both :: Bitraversable r => Traversal (r a a) (r b b) a b
 both f = bitraverse f f
 {-# INLINE both #-}
 
+{-
 -- | Traverse both parts of a 'Bitraversable1' container with matching types.
 --
 -- Usually that type will be a pair.
@@ -1153,6 +1006,7 @@ traversed1 = conjoined traverse1 (indexing traverse1)
 traversed64 :: Traversable f => IndexedTraversal Int64 (f a) (f b) a b
 traversed64 = conjoined traverse (indexing64 traverse)
 {-# INLINE traversed64 #-}
+-}
 
 -- | This is the trivial empty 'Traversal'.
 --
@@ -1170,6 +1024,7 @@ ignored :: Applicative f => pafb -> s -> f s
 ignored _ = pure
 {-# INLINE ignored #-}
 
+{-
 -- | Allows 'IndexedTraversal' the value at the smallest index.
 class Ord k => TraverseMin k m | m -> k where
   -- | 'IndexedTraversal' of the element with the smallest index.
@@ -1178,16 +1033,16 @@ class Ord k => TraverseMin k m | m -> k where
 instance TraverseMin Int IntMap where
   traverseMin f m = case IntMap.minViewWithKey m of
 #if MIN_VERSION_containers(0,5,0)
-    Just ((k,a), _) -> indexed f k a <&> \v -> IntMap.updateMin (const (Just v)) m
+    Just ((k,a), _) -> indexed f k a <₪> \v -> IntMap.updateMin (const (Just v)) m
 #else
-    Just ((k,a), _) -> indexed f k a <&> \v -> IntMap.updateMin (const v) m
+    Just ((k,a), _) -> indexed f k a <₪> \v -> IntMap.updateMin (const v) m
 #endif
     Nothing     -> pure m
   {-# INLINE traverseMin #-}
 
 instance Ord k => TraverseMin k (Map k) where
   traverseMin f m = case Map.minViewWithKey m of
-    Just ((k, a), _) -> indexed f k a <&> \v -> Map.updateMin (const (Just v)) m
+    Just ((k, a), _) -> indexed f k a <₪> \v -> Map.updateMin (const (Just v)) m
     Nothing          -> pure m
   {-# INLINE traverseMin #-}
 
@@ -1199,16 +1054,16 @@ class Ord k => TraverseMax k m | m -> k where
 instance TraverseMax Int IntMap where
   traverseMax f m = case IntMap.maxViewWithKey m of
 #if MIN_VERSION_containers(0,5,0)
-    Just ((k,a), _) -> indexed f k a <&> \v -> IntMap.updateMax (const (Just v)) m
+    Just ((k,a), _) -> indexed f k a <₪> \v -> IntMap.updateMax (const (Just v)) m
 #else
-    Just ((k,a), _) -> indexed f k a <&> \v -> IntMap.updateMax (const v) m
+    Just ((k,a), _) -> indexed f k a <₪> \v -> IntMap.updateMax (const v) m
 #endif
     Nothing     -> pure m
   {-# INLINE traverseMax #-}
 
 instance Ord k => TraverseMax k (Map k) where
   traverseMax f m = case Map.maxViewWithKey m of
-    Just ((k, a), _) -> indexed f k a <&> \v -> Map.updateMax (const (Just v)) m
+    Just ((k, a), _) -> indexed f k a <₪> \v -> Map.updateMax (const (Just v)) m
     Nothing          -> pure m
   {-# INLINE traverseMax #-}
 
@@ -1268,6 +1123,7 @@ elementsOf l p iafb s = snd $ runIndexing (l (\a -> Indexing (\i -> i `seq` (i +
 elements :: Traversable t => (Int -> Bool) -> IndexedTraversal' Int (t a) a
 elements = elementsOf traverse
 {-# INLINE elements #-}
+-}
 
 -- | Try to map a function over this 'Traversal', failing if the 'Traversal' has no targets.
 --
@@ -1289,6 +1145,7 @@ failover l afb s = case l ((,) (Any True) . afb) s of
   (Any False, _) -> Applicative.empty
 {-# INLINE failover #-}
 
+{-
 -- | Try to map a function which uses the index over this 'IndexedTraversal', failing if the 'IndexedTraversal' has no targets.
 --
 -- @
@@ -1420,3 +1277,4 @@ traverseByOf l pur app f = reifyApplicative pur app (l (ReflectedApplicative #. 
 -- @
 sequenceByOf :: Traversal s t (f b) b -> (forall x. x -> f x) -> (forall x y. f (x -> y) -> f x -> f y) -> s -> f t
 sequenceByOf l pur app = reifyApplicative pur app (l ReflectedApplicative)
+-}

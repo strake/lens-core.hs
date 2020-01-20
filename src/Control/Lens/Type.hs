@@ -39,10 +39,11 @@ module Control.Lens.Type
   -- * Lenses, Folds and Traversals
   , Lens, Lens'
   , Traversal, Traversal'
-  , Traversal1, Traversal1'
+--  , Traversal1, Traversal1'
   , Setter, Setter'
   , Getter, Fold
   , Fold1
+{-
   -- * Indexed
   , IndexedLens, IndexedLens'
   , IndexedTraversal, IndexedTraversal'
@@ -57,28 +58,28 @@ module Control.Lens.Type
   , IndexPreservingSetter, IndexPreservingSetter'
   , IndexPreservingGetter, IndexPreservingFold
   , IndexPreservingFold1
+-}
   -- * Common
   , Simple
   , LensLike, LensLike'
   , Over, Over'
-  , IndexedLensLike, IndexedLensLike'
+--  , IndexedLensLike, IndexedLensLike'
   , Optical, Optical'
   , Optic, Optic'
   ) where
 
 import Control.Applicative
 import Control.Lens.Internal.Setter
-import Control.Lens.Internal.Indexed
+--import Control.Lens.Internal.Indexed
 import Data.Bifunctor
 import Data.Functor.Identity
-import Data.Functor.Contravariant
-import Data.Functor.Apply
+import qualified Data.Functor.Contravariant as Contravar
 #if __GLASGOW_HASKELL__ >= 800
 import Data.Kind
 #endif
 import Data.Profunctor
 import Data.Tagged
-import Prelude ()
+import Prelude (Functor (..), Either (..))
 
 -- $setup
 -- >>> :set -XNoOverloadedStrings
@@ -162,6 +163,7 @@ type Lens s t a b = forall f. Functor f => (a -> f b) -> s -> f t
 -- @
 type Lens' s a = Lens s s a a
 
+{-
 -- | Every 'IndexedLens' is a valid 'Lens' and a valid 'Control.Lens.Traversal.IndexedTraversal'.
 type IndexedLens i s t a b = forall f p. (Indexable i p, Functor f) => p a (f b) -> s -> f t
 
@@ -177,6 +179,7 @@ type IndexPreservingLens s t a b = forall p f. (Conjoined p, Functor f) => p a (
 -- type 'IndexPreservingLens'' = 'Simple' 'IndexPreservingLens'
 -- @
 type IndexPreservingLens' s a = IndexPreservingLens s s a a
+-}
 
 ------------------------------------------------------------------------------
 -- Traversals
@@ -216,6 +219,7 @@ type Traversal s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
 -- @
 type Traversal' s a = Traversal s s a a
 
+{-
 type Traversal1 s t a b = forall f. Apply f => (a -> f b) -> s -> f t
 type Traversal1' s a = Traversal1 s s a a
 
@@ -250,6 +254,7 @@ type IndexPreservingTraversal' s a = IndexPreservingTraversal s s a a
 
 type IndexPreservingTraversal1 s t a b = forall p f. (Conjoined p, Apply f) => p a (f b) -> p s (f t)
 type IndexPreservingTraversal1' s a = IndexPreservingTraversal1 s s a a
+-}
 
 ------------------------------------------------------------------------------
 -- Setters
@@ -309,6 +314,7 @@ type Setter s t a b = forall f. Settable f => (a -> f b) -> s -> f t
 -- @
 type Setter' s a = Setter s s a a
 
+{-
 -- | Every 'IndexedSetter' is a valid 'Setter'.
 --
 -- The 'Setter' laws are still required to hold.
@@ -328,6 +334,7 @@ type IndexPreservingSetter s t a b = forall p f. (Conjoined p, Settable f) => p 
 -- type 'IndexedPreservingSetter'' i = 'Simple' 'IndexedPreservingSetter'
 -- @
 type IndexPreservingSetter' s a = IndexPreservingSetter s s a a
+-}
 
 -----------------------------------------------------------------------------
 -- Isomorphisms
@@ -361,7 +368,7 @@ type Iso' s a = Iso s s a a
 --
 -- You can generate a 'Review' by using 'unto'. You can also use any 'Prism' or 'Iso'
 -- directly as a 'Review'.
-type Review t b = forall p f. (Choice p, Bifunctor p, Settable f) => Optic' p f t b
+type Review t b = forall p f. (∀ a . Lift (Either a) p, Bifunctor p, Settable f) => Optic' p f t b
 
 -- | If you see this in a signature for a function, the function is expecting a 'Review'
 -- (in practice, this usually means a 'Prism').
@@ -457,7 +464,7 @@ type AReview t b = Optic' Tagged Identity t b
 -- -- a co-'Lens', so to speak. This is what permits the construction of 'Control.Lens.Prism.outside'.
 --
 -- Note: Composition with a 'Prism' is index-preserving.
-type Prism s t a b = forall p f. (Choice p, Applicative f) => p a (f b) -> p s (f t)
+type Prism s t a b = forall p f. (∀ a . Lift (Either a) p, Applicative f) => p a (f b) -> p s (f t)
 
 -- | A 'Simple' 'Prism'.
 type Prism' s a = Prism s s a a
@@ -498,14 +505,16 @@ type As a = Equality' a a
 --
 -- Moreover, a 'Getter' can be used directly as a 'Control.Lens.Fold.Fold',
 -- since it just ignores the 'Applicative'.
-type Getter s a = forall f. (Contravariant f, Functor f) => (a -> f a) -> s -> f s
+type Getter s a = forall f. (Contravar.Functor f, Functor f) => (a -> f a) -> s -> f s
 
+{-
 -- | Every 'IndexedGetter' is a valid 'Control.Lens.Fold.IndexedFold' and can be used for 'Control.Lens.Getter.Getting' like a 'Getter'.
-type IndexedGetter i s a = forall p f. (Indexable i p, Contravariant f, Functor f) => p a (f a) -> s -> f s
+type IndexedGetter i s a = forall p f. (Indexable i p, Contravar.Functor f, Functor f) => p a (f a) -> s -> f s
 
 -- | An 'IndexPreservingGetter' can be used as a 'Getter', but when composed with an 'IndexedTraversal',
 -- 'IndexedFold', or 'IndexedLens' yields an 'IndexedFold', 'IndexedFold' or 'IndexedGetter' respectively.
-type IndexPreservingGetter s a = forall p f. (Conjoined p, Contravariant f, Functor f) => p a (f a) -> p s (f s)
+type IndexPreservingGetter s a = forall p f. (Conjoined p, Contravar.Functor f, Functor f) => p a (f a) -> p s (f s)
+-}
 
 --------------------------
 -- Folds
@@ -524,19 +533,21 @@ type IndexPreservingGetter s a = forall p f. (Conjoined p, Contravariant f, Func
 --
 -- Unlike a 'Control.Lens.Traversal.Traversal' a 'Fold' is read-only. Since a 'Fold' cannot be used to write back
 -- there are no 'Lens' laws that apply.
-type Fold s a = forall f. (Contravariant f, Applicative f) => (a -> f a) -> s -> f s
+type Fold s a = forall f. (Contravar.Functor f, Applicative f) => (a -> f a) -> s -> f s
 
+{-
 -- | Every 'IndexedFold' is a valid 'Control.Lens.Fold.Fold' and can be used for 'Control.Lens.Getter.Getting'.
-type IndexedFold i s a = forall p f.  (Indexable i p, Contravariant f, Applicative f) => p a (f a) -> s -> f s
+type IndexedFold i s a = forall p f.  (Indexable i p, Contravar.Functor f, Applicative f) => p a (f a) -> s -> f s
 
 -- | An 'IndexPreservingFold' can be used as a 'Fold', but when composed with an 'IndexedTraversal',
 -- 'IndexedFold', or 'IndexedLens' yields an 'IndexedFold' respectively.
-type IndexPreservingFold s a = forall p f. (Conjoined p, Contravariant f, Applicative f) => p a (f a) -> p s (f s)
+type IndexPreservingFold s a = forall p f. (Conjoined p, Contravar.Functor f, Applicative f) => p a (f a) -> p s (f s)
+-}
 
 -- | A relevant Fold (aka 'Fold1') has one or more targets.
-type Fold1 s a = forall f. (Contravariant f, Apply f) => (a -> f a) -> s -> f s
-type IndexedFold1 i s a = forall p f.  (Indexable i p, Contravariant f, Apply f) => p a (f a) -> s -> f s
-type IndexPreservingFold1 s a = forall p f. (Conjoined p, Contravariant f, Apply f) => p a (f a) -> p s (f s)
+type Fold1 s a = forall f. (Contravar.Functor f, Applicative f) => (a -> f a) -> s -> f s
+--type IndexedFold1 i s a = forall p f.  (Indexable i p, Contravar.Functor f, Apply f) => p a (f a) -> s -> f s
+--type IndexPreservingFold1 s a = forall p f. (Conjoined p, Contravar.Functor f, Apply f) => p a (f a) -> p s (f s)
 
 -------------------------------------------------------------------------------
 -- Simple Overloading
@@ -619,11 +630,13 @@ type LensLike f s t a b = (a -> f b) -> s -> f t
 -- @
 type LensLike' f s a = LensLike f s s a a
 
+{-
 -- | Convenient alias for constructing indexed lenses and their ilk.
 type IndexedLensLike i f s t a b = forall p. Indexable i p => p a (f b) -> s -> f t
 
 -- | Convenient alias for constructing simple indexed lenses and their ilk.
 type IndexedLensLike' i f s a = IndexedLensLike i f s s a a
+-}
 
 -- | This is a convenient alias for use when you need to consume either indexed or non-indexed lens-likes based on context.
 type Over p f s t a b = p a (f b) -> s -> f t

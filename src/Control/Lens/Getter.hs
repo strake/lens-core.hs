@@ -40,9 +40,9 @@
 -- @type 'Getter' s a = forall r. 'Getting' r s a@
 --
 -- However, for 'Getter' (but not for 'Getting') we actually permit any
--- functor @f@ which is an instance of both 'Functor' and 'Contravariant':
+-- functor @f@ which is an instance of both 'Functor' and 'Contravar.Functor':
 --
--- @type 'Getter' s a = forall f. ('Contravariant' f, 'Functor' f) => (a -> f a) -> s -> f s@
+-- @type 'Getter' s a = forall f. ('Contravar.Functor' f, 'Functor' f) => (a -> f a) -> s -> f s@
 --
 -- Everything you can do with a function, you can do with a 'Getter', but
 -- note that because of the continuation passing style ('.') composes them
@@ -65,38 +65,40 @@
 module Control.Lens.Getter
   (
   -- * Getters
-    Getter, IndexedGetter
-  , Getting, IndexedGetting
+    Getter -- , IndexedGetter
+  , Getting -- , IndexedGetting
   , Accessing
   -- * Building Getters
   , to
-  , ito
+--  , ito
   , like
-  , ilike
+--  , ilike
   -- * Combinators for Getters and Folds
   , (^.)
   , view, views
   , use, uses
   , listening, listenings
+{-
   -- * Indexed Getters
   -- ** Indexed Getter Combinators
   , (^@.)
   , iview, iviews
   , iuse, iuses
   , ilistening, ilistenings
+-}
   -- * Implementation Details
-  , Contravariant(..)
   , getting
   , Const(..)
   ) where
 
 import Control.Applicative
-import Control.Lens.Internal.Indexed
+--import Control.Lens.Internal.Indexed
 import Control.Lens.Type
 import Control.Monad.Reader.Class as Reader
 import Control.Monad.State        as State
 import Control.Monad.Writer       as Writer
-import Data.Functor.Contravariant
+import Data.Functor.Contravariant (gmap, phantom)
+import qualified Data.Functor.Contravariant as Contravar
 import Data.Profunctor
 import Data.Profunctor.Unsafe
 
@@ -109,7 +111,7 @@ import Data.Profunctor.Unsafe
 -- >>> let f :: Expr -> Expr; f = Debug.SimpleReflect.Vars.f
 -- >>> let g :: Expr -> Expr; g = Debug.SimpleReflect.Vars.g
 
-infixl 8 ^., ^@.
+infixl 8 ^. {- , ^@. -}
 
 -------------------------------------------------------------------------------
 -- Getters
@@ -140,17 +142,19 @@ infixl 8 ^., ^@.
 -- @
 -- 'to' :: (s -> a) -> 'IndexPreservingGetter' s a
 -- @
-to :: (Profunctor p, Contravariant f) => (s -> a) -> Optic' p f s a
-to k = dimap k (contramap k)
+to :: (Profunctor p, Contravar.Functor f) => (s -> a) -> Optic' p f s a
+to k = dimap k (gmap k)
 {-# INLINE to #-}
 
+{-
 -- |
 -- @
 -- 'ito' :: (s -> (i, a)) -> 'IndexedGetter' i s a
 -- @
-ito :: (Indexable i p, Contravariant f) => (s -> (i, a)) -> Over' p f s a
-ito k = dimap k (contramap (snd . k)) . uncurry . indexed
+ito :: (Indexable i p, Contravar.Functor f) => (s -> (i, a)) -> Over' p f s a
+ito k = dimap k (gmap (snd . k)) . uncurry . indexed
 {-# INLINE ito #-}
+-}
 
 
 -- | Build an constant-valued (index-preserving) 'Getter' from an arbitrary Haskell value.
@@ -167,17 +171,19 @@ ito k = dimap k (contramap (snd . k)) . uncurry . indexed
 -- @
 -- 'like' :: a -> 'IndexPreservingGetter' s a
 -- @
-like :: (Profunctor p, Contravariant f, Functor f) => a -> Optic' p f s a
+like :: (Profunctor p, Contravar.Functor f, Functor f) => a -> Optic' p f s a
 like a = to (const a)
 {-# INLINE like #-}
 
+{-
 -- |
 -- @
 -- 'ilike' :: i -> a -> 'IndexedGetter' i s a
 -- @
-ilike :: (Indexable i p, Contravariant f, Functor f) => i -> a -> Over' p f s a
+ilike :: (Indexable i p, Contravar.Functor f, Functor f) => i -> a -> Over' p f s a
 ilike i a = ito (const (i, a))
 {-# INLINE ilike #-}
+-}
 
 -- | When you see this in a type signature it indicates that you can
 -- pass the function a 'Lens', 'Getter',
@@ -198,8 +204,10 @@ ilike i a = ito (const (i, a))
 -- 'Getter' or 'Lens'.
 type Getting r s a = (a -> Const r a) -> s -> Const r s
 
+{-
 -- | Used to consume an 'Control.Lens.Fold.IndexedFold'.
 type IndexedGetting i m s a = Indexed i a (Const m a) -> s -> Const m s
+-}
 
 -- | This is a convenient alias used when consuming (indexed) getters and (indexed) folds
 -- in a highly general fashion.
@@ -395,6 +403,7 @@ listening l m = do
   return (a, view l w)
 {-# INLINE listening #-}
 
+{-
 -- | This is a generalized form of 'listen' that only extracts the portion of
 -- the log that is focused on by a 'Getter'. If given a 'Fold' or a 'Traversal'
 -- then a monoidal summary of the parts of the log that are visited will be
@@ -411,6 +420,7 @@ ilistening l m = do
   (a, w) <- listen m
   return (a, iview l w)
 {-# INLINE ilistening #-}
+-}
 
 -- | This is a generalized form of 'listen' that only extracts the portion of
 -- the log that is focused on by a 'Getter'. If given a 'Fold' or a 'Traversal'
@@ -431,6 +441,7 @@ listenings l uv m = do
   return (a, views l uv w)
 {-# INLINE listenings #-}
 
+{-
 -- | This is a generalized form of 'listen' that only extracts the portion of
 -- the log that is focused on by a 'Getter'. If given a 'Fold' or a 'Traversal'
 -- then a monoidal summary of the parts of the log that are visited will be
@@ -447,11 +458,13 @@ ilistenings l iuv m = do
   (a, w) <- listen m
   return (a, iviews l iuv w)
 {-# INLINE ilistenings #-}
+-}
 
 ------------------------------------------------------------------------------
 -- Indexed Getters
 ------------------------------------------------------------------------------
 
+{-
 -- | View the index and value of an 'IndexedGetter' into the current environment as a pair.
 --
 -- When applied to an 'IndexedFold' the result will most likely be a nonsensical monoidal summary of
@@ -502,6 +515,7 @@ iuses l f = gets (getConst #. l (Const #. Indexed f))
 (^@.) :: s -> IndexedGetting i (i, a) s a -> (i, a)
 s ^@. l = getConst $ l (Indexed $ \i -> Const #. (,) i) s
 {-# INLINE (^@.) #-}
+-}
 
 -- | Coerce a 'Getter'-compatible 'Optical' to an 'Optical''. This
 -- is useful when using a 'Traversal' that is not simple as a 'Getter' or a
@@ -513,6 +527,6 @@ s ^@. l = getConst $ l (Indexed $ \i -> Const #. (,) i) s
 -- 'getting' :: 'IndexedTraversal' i s t a b -> 'IndexedFold' i s a
 -- 'getting' :: 'IndexedLens' i s t a b      -> 'IndexedGetter' i s a
 -- @
-getting :: (Profunctor p, Profunctor q, Functor f, Contravariant f)
+getting :: (Profunctor p, Profunctor q, Functor f, Contravar.Functor f)
         => Optical p q f s t a b -> Optical' p q f s a
 getting l f = rmap phantom . l $ rmap phantom f

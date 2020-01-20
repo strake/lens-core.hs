@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Lens.Internal.Prism
@@ -15,10 +16,6 @@ module Control.Lens.Internal.Prism
   ) where
 
 import Data.Profunctor
-#ifndef SAFE
-import Data.Profunctor.Unsafe
-import Control.Lens.Internal.Coerce
-#endif
 
 ------------------------------------------------------------------------------
 -- Prism: Market
@@ -43,23 +40,10 @@ instance Profunctor (Market a b) where
   rmap f (Market bt seta) = Market (f . bt) (either (Left . f) Right . seta)
   {-# INLINE rmap #-}
 
-#ifndef SAFE
-  ( #. ) _ = coerce'
-  {-# INLINE ( #. ) #-}
-  ( .# ) p _ = coerce p
-  {-# INLINE ( .# ) #-}
-#endif
-
-instance Choice (Market a b) where
-  left' (Market bt seta) = Market (Left . bt) $ \sc -> case sc of
-    Left s -> case seta s of
-      Left t -> Left (Left t)
-      Right a -> Right a
-    Right c -> Left (Right c)
-  {-# INLINE left' #-}
-  right' (Market bt seta) = Market (Right . bt) $ \cs -> case cs of
+instance Lift (Either c) (Market a b) where
+  lift (Market bt seta) = Market (Right . bt) $ \cs -> case cs of
     Left c -> Left (Left c)
     Right s -> case seta s of
       Left t -> Left (Right t)
       Right a -> Right a
-  {-# INLINE right' #-}
+  {-# INLINE lift #-}

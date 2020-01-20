@@ -50,7 +50,8 @@ import Control.Monad.Trans.Except
 import Control.Monad.Trans.List
 import Control.Monad.Trans.Identity
 import Control.Monad.Trans.Maybe
-import Control.Monad.Trans.Free
+--import Control.Monad.Trans.Free
+import qualified Data.Functor.Contravariant as Contravar
 import Data.Monoid
 import Data.Profunctor.Unsafe
 import Prelude
@@ -90,7 +91,7 @@ type instance Zoomed (ListT m) = FocusingOn [] (Zoomed m)
 type instance Zoomed (MaybeT m) = FocusingMay (Zoomed m)
 type instance Zoomed (ErrorT e m) = FocusingErr e (Zoomed m)
 type instance Zoomed (ExceptT e m) = FocusingErr e (Zoomed m)
-type instance Zoomed (FreeT f m) = FocusingFree f m (Zoomed m)
+--type instance Zoomed (FreeT f m) = FocusingFree f m (Zoomed m)
 
 ------------------------------------------------------------------------------
 -- Magnified
@@ -198,8 +199,10 @@ instance Zoom m n s t => Zoom (ExceptT e m) (ExceptT e n) s t where
   zoom l = ExceptT . liftM getErr . zoom (\afb -> unfocusingErr #.. l (FocusingErr #.. afb)) . liftM Err . runExceptT
   {-# INLINE zoom #-}
 
+{-
 instance (Functor f, Zoom m n s t) => Zoom (FreeT f m) (FreeT f n) s t where
   zoom l = FreeT . liftM (fmap (zoom l) . getFreed) . zoom (\afb -> unfocusingFree #.. l (FocusingFree #.. afb)) . liftM Freed . runFreeT
+-}
 
 ------------------------------------------------------------------------------
 -- Magnify
@@ -248,7 +251,7 @@ class (Magnified m ~ Magnified n, MonadReader b m, MonadReader a n) => Magnify m
   -- 'magnify' :: ('Monoid' w, 'Monoid' c) => 'Fold' s a   -> 'RWS' a w st c -> 'RWS' s w st c
   -- ...
   -- @
-  magnify :: ((Functor (Magnified m c), Contravariant (Magnified m c))
+  magnify :: ((Functor (Magnified m c), Contravar.Functor (Magnified m c))
                 => LensLike' (Magnified m c) a b)
           -> m c -> n c
 

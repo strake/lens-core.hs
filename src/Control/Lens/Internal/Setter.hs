@@ -22,7 +22,7 @@ module Control.Lens.Internal.Setter
 
 import Control.Applicative
 import Control.Applicative.Backwards
-import Data.Distributive
+import Data.Cotraversable
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Profunctor
@@ -35,7 +35,7 @@ import Prelude
 -----------------------------------------------------------------------------
 
 -- | Anything 'Settable' must be isomorphic to the 'Identity' 'Functor'.
-class (Applicative f, Distributive f, Traversable f) => Settable f where
+class (Applicative f, Cotraversable f, Traversable f) => Settable f where
   untainted :: f a -> a
 
   untaintedDot :: Profunctor p => p a (f b) -> p a b

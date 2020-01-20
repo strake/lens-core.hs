@@ -52,8 +52,7 @@ _Sum :: Iso' Natural (Either Natural Natural)
 _Sum = iso hither yon where
   hither p = case quotRem p 2 of
     (q,0) -> Left q
-    (q,1) -> Right q
-    _     -> error "_Sum: impossible"
+    (q,_) -> Right q
   yon (Left q)  = 2*q
   yon (Right q) = 2*q+1
 

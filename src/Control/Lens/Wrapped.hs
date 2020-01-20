@@ -70,27 +70,30 @@ module Control.Lens.Wrapped
   , _Wrapping, _Unwrapping
   -- * Operations
   , op
-  , ala, alaf
+--  , ala, alaf
+{-
 #if __GLASGOW_HASKELL__ >= 710
   -- * Pattern Synonyms
   , pattern Wrapped
   , pattern Unwrapped
 #endif
+-}
   -- * Generics
   , _GWrapped'
   ) where
 
 #include "HsBaseConfig.h"
 
-import qualified Control.Alternative.Free as Free
+--import qualified Control.Alternative.Free as Free
 import qualified Control.Applicative as Applicative
 import           Control.Applicative hiding (WrappedArrow(..))
-import           Control.Applicative.Trans.Free
+--import           Control.Applicative.Trans.Free
 import           Control.Arrow
 import           Control.Applicative.Backwards
-import           Control.Comonad.Trans.Cofree
-import           Control.Comonad.Trans.Coiter
-import           Control.Comonad.Trans.Traced
+import qualified Control.Category.Dual as K
+--import           Control.Comonad.Trans.Cofree
+--import           Control.Comonad.Trans.Coiter
+--import           Control.Comonad.Trans.Traced
 import           Control.Exception
 import           Control.Lens.Getter
 import           Control.Lens.Internal.CTypes
@@ -98,13 +101,13 @@ import           Control.Lens.Iso
 #if __GLASGOW_HASKELL__ >= 710
 import           Control.Lens.Review
 #endif
-import           Control.Monad.Catch.Pure
+--import           Control.Monad.Catch.Pure
 import           Control.Monad.Trans.Cont
 import           Control.Monad.Trans.Error
 import           Control.Monad.Trans.Except
-import           Control.Monad.Trans.Free
+--import           Control.Monad.Trans.Free
 import           Control.Monad.Trans.Identity
-import           Control.Monad.Trans.Iter
+--import           Control.Monad.Trans.Iter
 import           Control.Monad.Trans.List
 import           Control.Monad.Trans.Maybe
 import           Control.Monad.Trans.Reader
@@ -115,36 +118,34 @@ import qualified Control.Monad.Trans.State.Strict  as Strict
 import qualified Control.Monad.Trans.Writer.Lazy   as Lazy
 import qualified Control.Monad.Trans.Writer.Strict as Strict
 import           Data.Bifunctor.Biff
-import           Data.Bifunctor.Clown
-import           Data.Bifunctor.Fix
-import           Data.Bifunctor.Flip
-import           Data.Bifunctor.Join
-import           Data.Bifunctor.Joker
+--import           Data.Bifunctor.Clown
+--import           Data.Bifunctor.Fix
+--import           Data.Bifunctor.Join
+--import           Data.Bifunctor.Joker
 import           Data.Bifunctor.Tannen
-import           Data.Bifunctor.Wrapped
+--import           Data.Bifunctor.Wrapped
 import           Data.Foldable as Foldable
-import           Data.Functor.Bind
 import           Data.Functor.Compose
-import           Data.Functor.Contravariant
-import qualified Data.Functor.Contravariant.Compose as Contravariant
+import qualified Data.Functor.Contravariant as Contravar
+--import qualified Data.Functor.Contravariant.Compose as Contravar.Functor
 import           Data.Functor.Constant
 import           Data.Functor.Identity
 import           Data.Functor.Reverse
-import           Data.Hashable
+--import           Data.Hashable
 import           Data.IntSet as IntSet
 import           Data.IntMap as IntMap
-import           Data.HashSet as HashSet
-import           Data.HashMap.Lazy as HashMap
+--import           Data.HashSet as HashSet
+--import           Data.HashMap.Lazy as HashMap
 import           Data.List.NonEmpty
 import           Data.Map as Map
 import           Data.Monoid
 import qualified Data.Profunctor as Profunctor
 import           Data.Profunctor hiding (WrappedArrow(..))
-import           Data.Profunctor.Cayley
+--import           Data.Profunctor.Cayley
 import qualified Data.Semigroup as S
-import           Data.Semigroupoid
-import qualified Data.Semigroupoid.Dual as Semigroupoid
-import           Data.Semigroupoid.Static
+--import           Data.Semigroupoid
+--import qualified Data.Semigroupoid.Dual as Semigroupoid
+--import           Data.Semigroupoid.Static
 import           Data.Sequence as Seq hiding (length)
 import           Data.Set as Set
 import           Data.Tagged
@@ -206,11 +207,13 @@ type instance GUnwrapped (D1 d (C1 c (S1 s (Rec0 a)))) = a
 
 #if __GLASGOW_HASKELL__ >= 710
 
+{-
 pattern Wrapped a <- (view _Wrapped -> a) where
   Wrapped a = review _Wrapped a
 
 pattern Unwrapped a <- (view _Unwrapped -> a) where
   Unwrapped a = review _Unwrapped a
+-}
 
 #endif
 
@@ -476,9 +479,10 @@ instance Wrapped (Strict.WriterT w m a) where
 instance (t ~ Biff p' f' g' a' b') => Rewrapped (Biff p f g a b) t
 instance Wrapped (Biff p f g a b) where
   type Unwrapped (Biff p f g a b) = p (f a) (g b)
-  _Wrapped' = iso runBiff Biff
+  _Wrapped' = iso unBiff Biff
   {-# INLINE _Wrapped' #-}
 
+{-
 instance (t ~ Clown f' a' b') => Rewrapped (Clown f a b) t
 instance Wrapped (Clown f a b) where
   type Unwrapped (Clown f a b) = f a
@@ -490,13 +494,15 @@ instance Wrapped (Fix p a) where
   type Unwrapped (Fix p a) = p (Fix p a) a
   _Wrapped' = iso out In
   {-# INLINE _Wrapped' #-}
+-}
 
-instance (t ~ Flip p' a' b') => Rewrapped (Flip p a b) t
-instance Wrapped (Flip p a b) where
-  type Unwrapped (Flip p a b) = p b a
-  _Wrapped' = iso runFlip Flip
+instance (t ~ K.Dual k' a' b') => Rewrapped (K.Dual k a b) t
+instance Wrapped (K.Dual k a b) where
+  type Unwrapped (K.Dual k a b) = k b a
+  _Wrapped' = iso K.dual K.Dual
   {-# INLINE _Wrapped' #-}
 
+{-
 instance (t ~ Join p' a') => Rewrapped (Join p a) t
 instance Wrapped (Join p a) where
   type Unwrapped (Join p a) = p a a
@@ -508,13 +514,15 @@ instance Wrapped (Joker g a b) where
   type Unwrapped (Joker g a b) = g b
   _Wrapped' = iso runJoker Joker
   {-# INLINE _Wrapped' #-}
+-}
 
 instance (t ~ Tannen f' p' a' b') => Rewrapped (Tannen f p a b) t
 instance Wrapped (Tannen f p a b) where
   type Unwrapped (Tannen f p a b) = f (p a b)
-  _Wrapped' = iso runTannen Tannen
+  _Wrapped' = iso unTannen Tannen
   {-# INLINE _Wrapped' #-}
 
+{-
 instance (t ~ WrappedBifunctor p' a' b') => Rewrapped (WrappedBifunctor p a b) t
 instance Wrapped (WrappedBifunctor p a b) where
   type Unwrapped (WrappedBifunctor p a b) = p a b
@@ -590,6 +598,7 @@ instance (Hashable a, Eq a) => Wrapped (HashSet a) where
   type Unwrapped (HashSet a) = [a]
   _Wrapped' = iso HashSet.toList HashSet.fromList
   {-# INLINE _Wrapped' #-}
+-}
 
 -- * containers
 
@@ -627,6 +636,7 @@ instance Wrapped (Seq a) where
   _Wrapped' = iso Foldable.toList Seq.fromList
   {-# INLINE _Wrapped' #-}
 
+{-
 -- * profunctors
 
 instance (t ~ Star f' d' c') => Rewrapped (Star f d c) t
@@ -658,6 +668,7 @@ instance Wrapped (Cayley f p a b) where
   type Unwrapped (Cayley f p a b) = f (p a b)
   _Wrapped' = iso runCayley Cayley
   {-# INLINE _Wrapped' #-}
+-}
 
 -- * vector
 
@@ -685,6 +696,7 @@ instance Storable a => Wrapped (Storable.Vector a) where
   _Wrapped' = iso Storable.toList Storable.fromList
   {-# INLINE _Wrapped' #-}
 
+{-
 -- * semigroupoids
 
 instance (t ~ WrappedApplicative f' a') => Rewrapped (WrappedApplicative f a) t
@@ -711,17 +723,12 @@ instance Wrapped (Semi m a b) where
   _Wrapped' = iso getSemi Semi
   {-# INLINE _Wrapped' #-}
 
-instance (t ~ Semigroupoid.Dual k' a' b') => Rewrapped (Semigroupoid.Dual k a b) t
-instance Wrapped (Semigroupoid.Dual k a b) where
-  type Unwrapped (Semigroupoid.Dual k a b) = k b a
-  _Wrapped' = iso Semigroupoid.getDual Semigroupoid.Dual
-  {-# INLINE _Wrapped' #-}
-
 instance (t ~ Static f' a' b') => Rewrapped (Static f a b) t
 instance Wrapped (Static f a b) where
   type Unwrapped (Static f a b) = f (a -> b)
   _Wrapped' = iso runStatic Static
   {-# INLINE _Wrapped' #-}
+-}
 
 -- * semigroups
 
@@ -761,6 +768,7 @@ instance Wrapped (S.Option a) where
   _Wrapped' = iso S.getOption S.Option
   {-# INLINE _Wrapped' #-}
 
+{-
 -- * contravariant
 
 instance (t ~ Predicate b) => Rewrapped (Predicate a) t
@@ -787,23 +795,24 @@ instance Wrapped (Op a b) where
   _Wrapped' = iso getOp Op
   {-# INLINE _Wrapped' #-}
 
-instance (t ~ Contravariant.Compose f' g' a') => Rewrapped (Contravariant.Compose f g a) t
-instance Wrapped (Contravariant.Compose f g a) where
-  type Unwrapped (Contravariant.Compose f g a) = f (g a)
-  _Wrapped' = iso Contravariant.getCompose Contravariant.Compose
+instance (t ~ Contravar.Functor.Compose f' g' a') => Rewrapped (Contravar.Functor.Compose f g a) t
+instance Wrapped (Contravar.Functor.Compose f g a) where
+  type Unwrapped (Contravar.Functor.Compose f g a) = f (g a)
+  _Wrapped' = iso Contravar.Functor.getCompose Contravar.Functor.Compose
   {-# INLINE _Wrapped' #-}
 
-instance (t ~ Contravariant.ComposeFC f' g' a') => Rewrapped (Contravariant.ComposeFC f g a) t
-instance Wrapped (Contravariant.ComposeFC f g a) where
-  type Unwrapped (Contravariant.ComposeFC f g a) = f (g a)
-  _Wrapped' = iso Contravariant.getComposeFC Contravariant.ComposeFC
+instance (t ~ Contravar.Functor.ComposeFC f' g' a') => Rewrapped (Contravar.Functor.ComposeFC f g a) t
+instance Wrapped (Contravar.Functor.ComposeFC f g a) where
+  type Unwrapped (Contravar.Functor.ComposeFC f g a) = f (g a)
+  _Wrapped' = iso Contravar.Functor.getComposeFC Contravar.Functor.ComposeFC
   {-# INLINE _Wrapped' #-}
 
-instance (t ~ Contravariant.ComposeCF f' g' a') => Rewrapped (Contravariant.ComposeCF f g a) t
-instance Wrapped (Contravariant.ComposeCF f g a) where
-  type Unwrapped (Contravariant.ComposeCF f g a) = f (g a)
-  _Wrapped' = iso Contravariant.getComposeCF Contravariant.ComposeCF
+instance (t ~ Contravar.Functor.ComposeCF f' g' a') => Rewrapped (Contravar.Functor.ComposeCF f g a) t
+instance Wrapped (Contravar.Functor.ComposeCF f g a) where
+  type Unwrapped (Contravar.Functor.ComposeCF f g a) = f (g a)
+  _Wrapped' = iso Contravar.Functor.getComposeCF Contravar.Functor.ComposeCF
   {-# INLINE _Wrapped' #-}
+-}
 
 -- * tagged
 
@@ -1329,6 +1338,7 @@ _Unwrapping :: Rewrapping s t => (Unwrapped s -> s) -> Iso (Unwrapped t) (Unwrap
 _Unwrapping _ = from _Wrapped
 {-# INLINE _Unwrapping #-}
 
+{-
 -- | This combinator is based on @ala@ from Conor McBride's work on Epigram.
 --
 -- As with '_Wrapping', the user supplied function for the newtype is /ignored/.
@@ -1375,3 +1385,4 @@ ala = xplat . _Unwrapping
 alaf :: (Functor f, Functor g, Rewrapping s t) => (Unwrapped s -> s) -> (f t -> g s) -> f (Unwrapped t) -> g (Unwrapped s)
 alaf = xplatf . _Unwrapping
 {-# INLINE alaf #-}
+-}

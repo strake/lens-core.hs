@@ -79,8 +79,7 @@ generic1 = iso from1 to1
 {-# INLINE generic1 #-}
 
 _V1 :: Over p f (V1 s) (V1 t) a b
-_V1 _ = absurd where
-  absurd !_a = undefined
+_V1 _ = \ case
 {-# INLINE _V1 #-}
 
 _U1 :: Iso (U1 p) (U1 q) () ()

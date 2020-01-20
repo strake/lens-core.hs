@@ -32,8 +32,8 @@ module System.Exit.Lens
 #endif
   ) where
 
-import Control.Exception
-import Control.Exception.Lens
+--import Control.Exception
+--import Control.Exception.Lens
 import Control.Lens
 import System.Exit
 
@@ -49,9 +49,11 @@ instance AsExitCode ExitCode where
   _ExitCode = id
   {-# INLINE _ExitCode #-}
 
+{-
 instance AsExitCode SomeException where
   _ExitCode = exception
   {-# INLINE _ExitCode #-}
+-}
 
 -- | indicates successful termination;
 --
@@ -60,7 +62,7 @@ instance AsExitCode SomeException where
 -- '_ExitSuccess' :: 'Prism'' 'SomeException' ()
 -- @
 _ExitSuccess :: AsExitCode t => Prism' t ()
-_ExitSuccess = _ExitCode . dimap seta (either id id) . right' . rmap (ExitSuccess <$) where
+_ExitSuccess = _ExitCode . dimap seta (either id id) . lift . rmap (ExitSuccess <$) where
   seta ExitSuccess = Right ()
   seta t           = Left  (pure t)
 {-# INLINE _ExitSuccess #-}
@@ -73,7 +75,7 @@ _ExitSuccess = _ExitCode . dimap seta (either id id) . right' . rmap (ExitSucces
 -- '_ExitFailure' :: 'Prism'' 'SomeException' 'Int'
 -- @
 _ExitFailure :: AsExitCode t => Prism' t Int
-_ExitFailure = _ExitCode . dimap seta (either id id) . right' . rmap (fmap ExitFailure) where
+_ExitFailure = _ExitCode . dimap seta (either id id) . lift . rmap (fmap ExitFailure) where
   seta (ExitFailure i) = Right i
   seta t               = Left  (pure t)
 {-# INLINE _ExitFailure #-}

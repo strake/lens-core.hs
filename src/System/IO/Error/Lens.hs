@@ -17,34 +17,35 @@ import Control.Lens
 import GHC.IO.Exception
 import System.IO
 import Foreign.C.Types
+import Util ((<₪>))
 
 -- * IOException Lenses
 
 -- | Where the error happened.
 location :: Lens' IOException String
-location f s = f (ioe_location s) <&> \e -> s { ioe_location = e }
+location f s = f (ioe_location s) <₪> \e -> s { ioe_location = e }
 {-# INLINE location #-}
 
 -- | Error type specific information.
 description :: Lens' IOException String
-description f s = f (ioe_description s) <&> \e -> s { ioe_description = e }
+description f s = f (ioe_description s) <₪> \e -> s { ioe_description = e }
 {-# INLINE description #-}
 
 -- | The handle used by the action flagging this error.
 handle :: Lens' IOException (Maybe Handle)
-handle f s = f (ioe_handle s) <&> \e -> s { ioe_handle = e }
+handle f s = f (ioe_handle s) <₪> \e -> s { ioe_handle = e }
 {-# INLINE handle #-}
 
 -- | 'fileName' the error is related to.
 --
 fileName :: Lens' IOException (Maybe FilePath)
-fileName f s = f (ioe_filename s) <&> \e -> s { ioe_filename = e }
+fileName f s = f (ioe_filename s) <₪> \e -> s { ioe_filename = e }
 {-# INLINE fileName #-}
 
 -- | 'errno' leading to this error, if any.
 --
 errno :: Lens' IOException (Maybe CInt)
-errno f s = f (ioe_errno s) <&> \e -> s { ioe_errno = e }
+errno f s = f (ioe_errno s) <₪> \e -> s { ioe_errno = e }
 {-# INLINE errno #-}
 
 ------------------------------------------------------------------------------
@@ -54,7 +55,7 @@ errno f s = f (ioe_errno s) <&> \e -> s { ioe_errno = e }
 -- | What type of error it is
 
 errorType :: Lens' IOException IOErrorType
-errorType f s = f (ioe_type s) <&> \e -> s { ioe_type = e }
+errorType f s = f (ioe_type s) <₪> \e -> s { ioe_type = e }
 {-# INLINE errorType #-}
 
 -- * IOErrorType Prisms

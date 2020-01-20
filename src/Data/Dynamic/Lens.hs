@@ -23,8 +23,8 @@ module Data.Dynamic.Lens
 #endif
   ) where
 
-import Control.Exception
-import Control.Exception.Lens
+--import Control.Exception
+--import Control.Exception.Lens
 import Control.Lens
 import Data.Dynamic
 
@@ -46,9 +46,11 @@ instance AsDynamic Dynamic where
   _Dynamic = prism' toDyn fromDynamic
   {-# INLINE _Dynamic #-}
 
+{-
 instance AsDynamic SomeException where
   _Dynamic = exception.prism' toDyn fromDynamic
   {-# INLINE _Dynamic #-}
+-}
 
 #if __GLASGOW_HASKELL__ >= 710
 pattern Dynamic a <- (preview _Dynamic -> Just a) where

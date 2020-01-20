@@ -21,23 +21,20 @@ import qualified Control.Category as Cat
 import Control.Comonad
 import Control.Lens.Fold
 import Control.Lens.Getter
-import Control.Lens.Internal.Indexed
+--import Control.Lens.Internal.Indexed
 import Control.Lens.Traversal (ignored)
 import Control.Lens.Type
 import Control.Monad
 import Control.Monad.Reader.Class
-import Data.Distributive
+import Data.Cotraversable
 import Data.Foldable
 import Data.Functor.Compose
-import Data.Functor.Contravariant
-import Data.Functor.Bind
-import Data.Functor.Extend
+import Data.Functor.Contravariant (gmap, phantom)
+import qualified Data.Functor.Contravariant as Contravar
 import Data.Functor.Identity
-import Data.Functor.Plus
-import Data.Profunctor.Closed
-import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
+import Data.Profunctor (Profunctor (..), Lift (..), Colift (..))
+--import Data.Profunctor.Rep
+--import Data.Profunctor.Sieve
 #if !(MIN_VERSION_base(4,11,0))
 import Data.Semigroup
 #endif
@@ -57,6 +54,7 @@ newtype ReifiedLens s t a b = Lens { runLens :: Lens s t a b }
 -- @
 type ReifiedLens' s a = ReifiedLens s s a a
 
+{-
 ------------------------------------------------------------------------------
 -- IndexedLens
 ------------------------------------------------------------------------------
@@ -80,6 +78,7 @@ newtype ReifiedIndexedTraversal i s t a b = IndexedTraversal { runIndexedTravers
 -- type 'ReifiedIndexedTraversal'' i = 'Simple' ('ReifiedIndexedTraversal' i)
 -- @
 type ReifiedIndexedTraversal' i s a = ReifiedIndexedTraversal i s s a a
+-}
 
 ------------------------------------------------------------------------------
 -- Traversal
@@ -106,23 +105,26 @@ type ReifiedTraversal' s a = ReifiedTraversal s s a a
 -- ("world",5)
 newtype ReifiedGetter s a = Getter { runGetter :: Getter s a }
 
-instance Distributive (ReifiedGetter s) where
-  distribute as = Getter $ to $ \s -> fmap (\(Getter l) -> view l s) as
+instance Cotraversable (ReifiedGetter s) where
+  cosequence as = Getter $ to $ \s -> fmap (\(Getter l) -> view l s) as
 
 instance Functor (ReifiedGetter s) where
   fmap f l = Getter (runGetter l.to f)
   {-# INLINE fmap #-}
 
+{-
 instance Semigroup s => Extend (ReifiedGetter s) where
   duplicated (Getter l) = Getter $ to $ \m -> Getter $ to $ \n -> view l (m <> n)
   {-# INLINE duplicated #-}
+-}
 
 instance Monoid s => Comonad (ReifiedGetter s) where
-  extract (Getter l) = view l mempty
-  {-# INLINE extract #-}
-  duplicate (Getter l) = Getter $ to $ \m -> Getter $ to $ \n -> view l (mappend m n)
-  {-# INLINE duplicate #-}
+  copure (Getter l) = view l mempty
+  {-# INLINE copure #-}
+  cut (Getter l) = Getter $ to $ \m -> Getter $ to $ \n -> view l (m <> n)
+  {-# INLINE cut #-}
 
+{-
 instance Monoid s => ComonadApply (ReifiedGetter s) where
   Getter mf <@> Getter ma = Getter $ to $ \s -> view mf s (view ma s)
   {-# INLINE (<@>) #-}
@@ -138,6 +140,7 @@ instance Apply (ReifiedGetter s) where
   {-# INLINE (<.) #-}
   _ .> m = m
   {-# INLINE (.>) #-}
+-}
 
 instance Applicative (ReifiedGetter s) where
   pure a = Getter $ to $ \_ -> a
@@ -149,9 +152,11 @@ instance Applicative (ReifiedGetter s) where
   _ *> m = m
   {-# INLINE (*>) #-}
 
+{-
 instance Bind (ReifiedGetter s) where
   Getter ma >>- f = Getter $ to $ \s -> view (runGetter (f (view ma s))) s
   {-# INLINE (>>-) #-}
+-}
 
 instance Monad (ReifiedGetter s) where
   return = pure
@@ -173,9 +178,10 @@ instance Profunctor ReifiedGetter where
   rmap f l    = Getter $ runGetter l.to f
   {-# INLINE rmap #-}
 
-instance Closed ReifiedGetter where
-  closed l = Getter $ to $ \f -> view (runGetter l) . f
+instance Lift ((->) a) ReifiedGetter where
+  lift l = Getter $ to $ \f -> view (runGetter l) . f
 
+{-
 instance Cosieve ReifiedGetter Identity where
   cosieve (Getter l) = view l . runIdentity
 
@@ -189,25 +195,21 @@ instance Sieve ReifiedGetter Identity where
 instance Representable ReifiedGetter where
   type Rep ReifiedGetter = Identity
   tabulate f = Getter $ to (runIdentity . f)
+-}
 
-instance Costrong ReifiedGetter where
-  unfirst l = Getter $ to $ unfirst $ view (runGetter l)
+instance Colift ((,) a) ReifiedGetter where
+  colift l = Getter $ to $ colift $ view (runGetter l)
 
-instance Conjoined ReifiedGetter
+--instance Conjoined ReifiedGetter
 
-instance Strong ReifiedGetter where
-  first' l = Getter $ \f (s,c) ->
-    phantom $ runGetter l (dimap (flip (,) c) phantom f) s
-  {-# INLINE first' #-}
-  second' l = Getter $ \f (c,s) ->
+instance Lift ((,) a) ReifiedGetter where
+  lift l = Getter $ \f (c,s) ->
     phantom $ runGetter l (dimap ((,) c) phantom f) s
-  {-# INLINE second' #-}
+  {-# INLINE lift #-}
 
-instance Choice ReifiedGetter where
-  left' l = Getter $ to $ left' $ view $ runGetter l
-  {-# INLINE left' #-}
-  right' l = Getter $ to $ right' $ view $ runGetter l
-  {-# INLINE right' #-}
+instance Lift (Either a) ReifiedGetter where
+  lift l = Getter $ to $ lift $ view $ runGetter l
+  {-# INLINE lift #-}
 
 instance Cat.Category ReifiedGetter where
   id = Getter id
@@ -244,6 +246,7 @@ instance ArrowLoop ReifiedGetter where
   loop l = Getter $ to $ loop $ view $ runGetter l
   {-# INLINE loop #-}
 
+{-
 ------------------------------------------------------------------------------
 -- IndexedGetter
 ------------------------------------------------------------------------------
@@ -282,6 +285,7 @@ instance Semigroup i => Apply (ReifiedIndexedGetter i s) where
       (i, f) -> case iview ma s of
         (j, a) -> phantom $ indexed k (i <> j) (f a)
   {-# INLINE (<.>) #-}
+-}
 
 
 ------------------------------------------------------------------------------
@@ -306,30 +310,25 @@ instance Profunctor ReifiedFold where
   lmap f l = Fold (to f . runFold l)
   {-# INLINE lmap #-}
 
+{-
 instance Sieve ReifiedFold [] where
   sieve = toListOf . runFold
 
 instance Representable ReifiedFold where
   type Rep ReifiedFold = []
   tabulate f = Fold (folding f)
+-}
 
-instance Strong ReifiedFold where
-  first' l = Fold $ \f (s,c) ->
-    phantom $ runFold l (dimap (flip (,) c) phantom f) s
-  {-# INLINE first' #-}
-  second' l = Fold $ \f (c,s) ->
+instance Lift ((,) a) ReifiedFold where
+  lift l = Fold $ \f (c,s) ->
     phantom $ runFold l (dimap ((,) c) phantom f) s
-  {-# INLINE second' #-}
+  {-# INLINE lift #-}
 
-instance Choice ReifiedFold where
-  left' (Fold l) = Fold $ folding $ \esc -> case esc of
-    Left s -> Left <$> toListOf l s
-    Right c -> [Right c]
-  {-# INLINE left' #-}
-  right' (Fold l) = Fold $ folding $ \ecs -> case ecs of
+instance Lift (Either a) ReifiedFold where
+  lift (Fold l) = Fold $ folding $ \ecs -> case ecs of
     Left c -> [Left c]
     Right s -> Right <$> toListOf l s
-  {-# INLINE right' #-}
+  {-# INLINE lift #-}
 
 instance Cat.Category ReifiedFold where
   id = Fold id
@@ -339,9 +338,7 @@ instance Cat.Category ReifiedFold where
 instance Arrow ReifiedFold where
   arr f = Fold (to f)
   {-# INLINE arr #-}
-  first = first'
-  {-# INLINE first #-}
-  second = second'
+  second = lift
   {-# INLINE second #-}
   Fold l *** Fold r = Fold $ folding $ \(x,y) -> (,) <$> toListOf l x <*> toListOf r y
   {-# INLINE (***) #-}
@@ -349,9 +346,7 @@ instance Arrow ReifiedFold where
   {-# INLINE (&&&) #-}
 
 instance ArrowChoice ReifiedFold where
-  left = left'
-  {-# INLINE left #-}
-  right = right'
+  right = lift
   {-# INLINE right #-}
 
 instance ArrowApply ReifiedFold where
@@ -362,6 +357,7 @@ instance Functor (ReifiedFold s) where
   fmap f l = Fold (runFold l.to f)
   {-# INLINE fmap #-}
 
+{-
 instance Apply (ReifiedFold s) where
   Fold mf <.> Fold ma = Fold $ folding $ \s -> toListOf mf s <.> toListOf ma s
   {-# INLINE (<.>) #-}
@@ -369,6 +365,7 @@ instance Apply (ReifiedFold s) where
   {-# INLINE (<.) #-}
   Fold mf .> Fold ma = Fold $ folding $ \s -> toListOf mf s .> toListOf ma s
   {-# INLINE (.>) #-}
+-}
 
 instance Applicative (ReifiedFold s) where
   pure a = Fold $ folding $ \_ -> [a]
@@ -386,9 +383,11 @@ instance Alternative (ReifiedFold s) where
   Fold ma <|> Fold mb = Fold $ folding (\s -> toListOf ma s ++ toListOf mb s)
   {-# INLINE (<|>) #-}
 
+{-
 instance Bind (ReifiedFold s) where
   Fold ma >>- f = Fold $ folding $ \s -> toListOf ma s >>- \a -> toListOf (runFold (f a)) s
   {-# INLINE (>>-) #-}
+-}
 
 instance Monad (ReifiedFold s) where
   return = pure
@@ -408,16 +407,7 @@ instance MonadReader s (ReifiedFold s) where
   local f m = Fold (to f . runFold m)
   {-# INLINE local #-}
 
-instance Semigroup (ReifiedFold s a) where
-  (<>) = (<|>)
-  {-# INLINE (<>) #-}
-
-instance Monoid (ReifiedFold s a) where
-  mempty = Fold ignored
-  {-# INLINE mempty #-}
-  mappend = (<|>)
-  {-# INLINE mappend #-}
-
+{-
 instance Alt (ReifiedFold s) where
   (<!>) = (<|>)
   {-# INLINE (<!>) #-}
@@ -435,17 +425,6 @@ newtype ReifiedIndexedFold i s a = IndexedFold { runIndexedFold :: IndexedFold i
 instance Semigroup (ReifiedIndexedFold i s a) where
   (<>) = (<!>)
   {-# INLINE (<>) #-}
-
-instance Monoid (ReifiedIndexedFold i s a) where
-  mempty = IndexedFold ignored
-  {-# INLINE mempty #-}
-  mappend = (<!>)
-  {-# INLINE mappend #-}
-
-instance Alt (ReifiedIndexedFold i s) where
-  IndexedFold ma <!> IndexedFold mb = IndexedFold $
-    ifolding $ \s -> itoListOf ma s ++ itoListOf mb s
-  {-# INLINE (<!>) #-}
 
 instance Plus (ReifiedIndexedFold i s) where
   zero = IndexedFold ignored
@@ -479,6 +458,7 @@ instance Strong (ReifiedIndexedFold i) where
   second' l = IndexedFold $ \f (c,s) ->
     phantom $ runIndexedFold l (dimap ((,) c) phantom f) s
   {-# INLINE second' #-}
+-}
 
 
 ------------------------------------------------------------------------------
@@ -493,6 +473,7 @@ newtype ReifiedSetter s t a b = Setter { runSetter :: Setter s t a b }
 -- @
 type ReifiedSetter' s a = ReifiedSetter s s a a
 
+{-
 ------------------------------------------------------------------------------
 -- IndexedSetter
 ------------------------------------------------------------------------------
@@ -505,6 +486,7 @@ newtype ReifiedIndexedSetter i s t a b =
 -- type 'ReifiedIndexedSetter'' i = 'Simple' ('ReifiedIndexedSetter' i)
 -- @
 type ReifiedIndexedSetter' i s a = ReifiedIndexedSetter i s s a a
+-}
 
 ------------------------------------------------------------------------------
 -- Iso

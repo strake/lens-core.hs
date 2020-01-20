@@ -23,14 +23,15 @@ import Data.Bifoldable
 import Data.Bifunctor
 import Data.Bitraversable
 import Data.Foldable
-import Data.Functor.Contravariant
-import Data.Semigroup.Foldable
-import Data.Semigroup.Traversable
+import Data.Foldable1
+import Data.Functor.Contravariant (gmap, phantom)
+import qualified Data.Functor.Contravariant as Contravar
+--import Data.Semigroup.Traversable
 import Data.Traversable
 import Prelude
 
--- | The 'mempty' equivalent for a 'Contravariant' 'Applicative' 'Functor'.
-noEffect :: (Contravariant f, Applicative f) => f a
+-- | The 'mempty' equivalent for a 'Contravar.Functor' 'Applicative' 'Functor'.
+noEffect :: (Contravar.Functor f, Applicative f) => f a
 noEffect = phantom $ pure ()
 {-# INLINE noEffect #-}
 
@@ -43,9 +44,9 @@ instance Functor f => Functor (AlongsideLeft f b) where
   fmap f = AlongsideLeft . fmap (first f) . getAlongsideLeft
   {-# INLINE fmap #-}
 
-instance Contravariant f => Contravariant (AlongsideLeft f b) where
-  contramap f = AlongsideLeft . contramap (first f) . getAlongsideLeft
-  {-# INLINE contramap #-}
+instance Contravar.Functor f => Contravar.Functor (AlongsideLeft f b) where
+  gmap f = AlongsideLeft . gmap (first f) . getAlongsideLeft
+  {-# INLINE gmap #-}
 
 instance Foldable f => Foldable (AlongsideLeft f b) where
   foldMap f = foldMap (f . fst) . getAlongsideLeft
@@ -59,9 +60,11 @@ instance Foldable1 f => Foldable1 (AlongsideLeft f b) where
   foldMap1 f = foldMap1 (f . fst) . getAlongsideLeft
   {-# INLINE foldMap1 #-}
 
+{-
 instance Traversable1 f => Traversable1 (AlongsideLeft f b) where
   traverse1 f (AlongsideLeft as) = AlongsideLeft <$> traverse1 (\(a,b) -> flip (,) b <$> f a) as
   {-# INLINE traverse1 #-}
+-}
 
 instance Functor f => Bifunctor (AlongsideLeft f) where
   bimap f g = AlongsideLeft . fmap (bimap g f) . getAlongsideLeft
@@ -84,9 +87,9 @@ instance Functor f => Functor (AlongsideRight f a) where
   fmap f (AlongsideRight x) = AlongsideRight (fmap (second f) x)
   {-# INLINE fmap #-}
 
-instance Contravariant f => Contravariant (AlongsideRight f a) where
-  contramap f (AlongsideRight x) = AlongsideRight (contramap (second f) x)
-  {-# INLINE contramap #-}
+instance Contravar.Functor f => Contravar.Functor (AlongsideRight f a) where
+  gmap f (AlongsideRight x) = AlongsideRight (gmap (second f) x)
+  {-# INLINE gmap #-}
 
 instance Foldable f => Foldable (AlongsideRight f a) where
   foldMap f = foldMap (f . snd) . getAlongsideRight
@@ -100,9 +103,11 @@ instance Foldable1 f => Foldable1 (AlongsideRight f a) where
   foldMap1 f = foldMap1 (f . snd) . getAlongsideRight
   {-# INLINE foldMap1 #-}
 
+{-
 instance Traversable1 f => Traversable1 (AlongsideRight f a) where
   traverse1 f (AlongsideRight as) = AlongsideRight <$> traverse1 (\(a,b) -> (,) a <$> f b) as
   {-# INLINE traverse1 #-}
+-}
 
 instance Functor f => Bifunctor (AlongsideRight f) where
   bimap f g = AlongsideRight . fmap (bimap f g) . getAlongsideRight

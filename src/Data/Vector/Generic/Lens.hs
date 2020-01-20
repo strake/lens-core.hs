@@ -32,9 +32,9 @@ module Data.Vector.Generic.Lens
   -- * Lenses
   , sliced
   -- * Traversal of individual indices
-  , ordinals
+--  , ordinals
   , vectorIx
-  , vectorTraverse
+--  , vectorTraverse
   ) where
 
 import Control.Applicative
@@ -43,7 +43,7 @@ import Control.Lens.Lens
 import Control.Lens.Getter
 import Control.Lens.Fold
 import Control.Lens.Iso
-import Control.Lens.Indexed
+--import Control.Lens.Indexed
 import Control.Lens.Setter
 import Control.Lens.Traversal
 import Control.Lens.Internal.List (ordinalNub)
@@ -51,6 +51,7 @@ import Data.Monoid
 import Data.Vector.Generic as V hiding (zip, filter, indexed)
 import Data.Vector.Generic.New (New)
 import Prelude hiding ((++), length, null, head, tail, init, last, map, reverse)
+import Util ((<₪>))
 
 #if MIN_VERSION_vector(0,11,0)
 import Data.Vector.Fusion.Bundle (Bundle)
@@ -79,7 +80,7 @@ sliced :: Vector v a
        => Int -- ^ @i@ starting index
        -> Int -- ^ @n@ length
        -> Lens' (v a) (v a)
-sliced i n f v = f (slice i n v) <&> \ v0 -> v // zip [i..i+n-1] (V.toList v0)
+sliced i n f v = f (slice i n v) <₪> \ v0 -> v // zip [i..i+n-1] (V.toList v0)
 {-# INLINE sliced #-}
 
 -- | Similar to 'toListOf', but returning a 'Vector'.
@@ -135,6 +136,7 @@ forced :: Vector v a => Iso' (v a) (v a)
 forced = involuted force
 {-# INLINE forced #-}
 
+{-
 -- | This 'Traversal' will ignore any duplicates in the supplied list
 -- of indices.
 --
@@ -143,14 +145,16 @@ forced = involuted force
 ordinals :: Vector v a => [Int] -> IndexedTraversal' Int (v a) a
 ordinals is f v = fmap (v //) $ traverse (\i -> (,) i <$> indexed f i (v ! i)) $ ordinalNub (length v) is
 {-# INLINE ordinals #-}
+-}
 
 -- | Like 'ix' but polymorphic in the vector type.
 vectorIx :: V.Vector v a => Int -> Traversal' (v a) a
 vectorIx i f v
-  | 0 <= i && i < V.length v = f (v V.! i) <&> \a -> v V.// [(i, a)]
+  | 0 <= i && i < V.length v = f (v V.! i) <₪> \a -> v V.// [(i, a)]
   | otherwise                = pure v
 {-# INLINE vectorIx #-}
 
+{-
 -- | Indexed vector traversal for a generic vector.
 vectorTraverse :: (V.Vector v a, V.Vector w b) => IndexedTraversal Int (v a) (w b) a b
 vectorTraverse f v = V.fromListN (V.length v) <$> traversed f (V.toList v)
@@ -162,6 +166,7 @@ vectorTraverse f v = V.fromListN (V.length v) <$> traversed f (V.toList v)
 "vectorTraverse -> foldr"  vectorTraverse  = foldring V.foldr   :: V.Vector v a => Getting (Endo r) (v a) a;
 "vectorTraverse -> ifoldr" vectorTraverse  = ifoldring V.ifoldr :: V.Vector v a => IndexedGetting Int (Endo r) (v a) a;
  #-}
+-}
 
 -- | Different vector implementations are isomorphic to each other.
 converted :: (Vector v a, Vector w a, Vector v b, Vector w b) => Iso (v a) (v b) (w a) (w b)

@@ -26,31 +26,13 @@ module Control.Lens.Internal.Coerce
   , (#..)
   ) where
 
-import Data.Profunctor.Unsafe
-
-#ifdef USE_COERCE
-
 import Data.Coerce
+import Data.Profunctor
 
 coerce' :: forall a b. Coercible a b => b -> a
 coerce' = coerce (id :: a -> a)
 {-# INLINE coerce' #-}
 
 (#..) :: (Profunctor p, Coercible c b) => (b -> c) -> p a b -> p a c
-(#..) = (#.)
+(#..) = rmap
 {-# INLINE (#..) #-}
-
-#else
-
-import Unsafe.Coerce
-
-coerce, coerce' :: a -> b
-coerce  = unsafeCoerce
-coerce' = unsafeCoerce
-{-# INLINE coerce #-}
-{-# INLINE coerce' #-}
-
-(#..) :: Profunctor p => (b -> c) -> p a b -> p a c
-(#..) = (#.)
-{-# INLINE (#..) #-}
-#endif

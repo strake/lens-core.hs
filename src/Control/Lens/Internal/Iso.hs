@@ -1,7 +1,4 @@
 {-# LANGUAGE CPP #-}
-#ifdef TRUSTWORTHY
-{-# LANGUAGE Trustworthy #-}
-#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Lens.Internal.Iso
@@ -18,15 +15,15 @@ module Control.Lens.Internal.Iso
   ) where
 
 import Data.Profunctor
-#ifndef SAFE
-import Data.Profunctor.Unsafe
-import Control.Lens.Internal.Coerce
-#endif
+{-
 import Data.ByteString       as StrictB
 import Data.ByteString.Lazy  as LazyB
+-}
 import Data.List.NonEmpty    as NonEmpty
+{-
 import Data.Text             as StrictT
 import Data.Text.Lazy        as LazyT
+-}
 import Data.Vector           as Vector
 import Data.Vector.Primitive as Prim
 import Data.Vector.Storable  as Storable
@@ -52,12 +49,6 @@ instance Profunctor (Exchange a b) where
   {-# INLINE lmap #-}
   rmap f (Exchange sa bt) = Exchange sa (f . bt)
   {-# INLINE rmap #-}
-#ifndef SAFE
-  ( #. ) _ = coerce'
-  {-# INLINE ( #. ) #-}
-  ( .# ) p _ = coerce p
-  {-# INLINE ( .# ) #-}
-#endif
 
 ------------------------------------------------------------------------------
 -- Reversible
@@ -73,6 +64,7 @@ instance Reversing [a] where
 instance Reversing (NonEmpty.NonEmpty a) where
   reversing = NonEmpty.reverse
 
+{-
 instance Reversing StrictB.ByteString where
   reversing = StrictB.reverse
 
@@ -84,6 +76,7 @@ instance Reversing StrictT.Text where
 
 instance Reversing LazyT.Text where
   reversing = LazyT.reverse
+-}
 
 instance Reversing (Vector.Vector a) where
   reversing = Vector.reverse

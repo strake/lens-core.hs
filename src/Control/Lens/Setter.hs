@@ -35,15 +35,15 @@ module Control.Lens.Setter
   (
   -- * Setters
     Setter, Setter'
-  , IndexedSetter, IndexedSetter'
+--  , IndexedSetter, IndexedSetter'
   , ASetter, ASetter'
-  , AnIndexedSetter, AnIndexedSetter'
+--  , AnIndexedSetter, AnIndexedSetter'
   , Setting, Setting'
   -- * Building Setters
-  , sets, setting
+  , sets -- , setting
   , cloneSetter
-  , cloneIndexPreservingSetter
-  , cloneIndexedSetter
+--  , cloneIndexPreservingSetter
+--  , cloneIndexedSetter
   -- * Common Setters
   , mapped, lifted
   , contramapped
@@ -60,41 +60,42 @@ module Control.Lens.Setter
   , (<~)
   -- * Writer Combinators
   , scribe
-  , passing, ipassing
-  , censoring, icensoring
+  , passing -- , ipassing
+  , censoring -- , icensoring
   -- * Reader Combinators
-  , locally, ilocally
+  , locally -- , ilocally
   -- * Simplified State Setting
   , set'
+{-
   -- * Indexed Setters
   , imapOf, iover, iset, imodifying
   , isets
   , (%@~), (.@~), (%@=), (.@=)
+-}
   -- * Arrow operators
   , assignA
   -- * Exported for legible error messages
   , Settable
   , Identity(..)
-  -- * Deprecated
-  , mapOf
   ) where
 
 import Control.Applicative
 import Control.Arrow
 import Control.Comonad
-import Control.Lens.Internal.Indexed
+--import Control.Lens.Internal.Indexed
 import Control.Lens.Internal.Setter
 import Control.Lens.Type
 import Control.Monad (liftM)
 import Control.Monad.Reader.Class as Reader
 import Control.Monad.State.Class  as State
 import Control.Monad.Writer.Class as Writer
-import Data.Functor.Contravariant
+import Data.Functor.Contravariant (gmap)
+import qualified Data.Functor.Contravariant as Contravar
 import Data.Functor.Identity
 import Data.Monoid
-import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
+import Data.Profunctor (Profunctor (..), Lift (..))
+--import Data.Profunctor.Rep
+--import Data.Profunctor.Sieve
 import Data.Profunctor.Unsafe
 import Prelude
 
@@ -117,8 +118,8 @@ import Prelude
 -- >>> let setter :: Expr -> Expr -> Expr; setter = fun "setter"
 -- >>> :set -XNoOverloadedStrings
 
-infixr 4 %@~, .@~, .~, +~, *~, -~, //~, ^~, ^^~, **~, &&~, <>~, ||~, %~, <.~, ?~, <?~
-infix  4 %@=, .@=, .=, +=, *=, -=, //=, ^=, ^^=, **=, &&=, <>=, ||=, %=, <.=, ?=, <?=
+infixr 4 {- %@~, .@~, -} .~, +~, *~, -~, //~, ^~, ^^~, **~, &&~, <>~, ||~, %~, <.~, ?~, <?~
+infix  4 {- %@=, .@=, -} .=, +=, *=, -=, //=, ^=, ^^=, **=, &&=, <>=, ||=, %=, <.=, ?=, <?=
 infixr 2 <~
 
 ------------------------------------------------------------------------------
@@ -140,6 +141,7 @@ type ASetter s t a b = (a -> Identity b) -> s -> Identity t
 -- @
 type ASetter' s a = ASetter s s a a
 
+{-
 -- | Running an 'IndexedSetter' instantiates it to a concrete type.
 --
 -- When consuming a setter directly to perform a mapping, you can use this type, but most
@@ -150,6 +152,7 @@ type AnIndexedSetter i s t a b = Indexed i a (Identity b) -> s -> Identity t
 -- type 'AnIndexedSetter'' i = 'Simple' ('AnIndexedSetter' i)
 -- @
 type AnIndexedSetter' i s a = AnIndexedSetter i s s a a
+-}
 
 -- | This is a convenient alias when defining highly polymorphic code that takes both
 -- 'ASetter' and 'AnIndexedSetter' as appropriate. If a function takes this it is
@@ -218,10 +221,10 @@ lifted :: Monad m => Setter (m a) (m b) a b
 lifted = sets liftM
 {-# INLINE lifted #-}
 
--- | This 'Setter' can be used to map over all of the inputs to a 'Contravariant'.
+-- | This 'Setter' can be used to map over all of the inputs to a 'Contravar.Functor'.
 --
 -- @
--- 'contramap' ≡ 'over' 'contramapped'
+-- 'gmap' ≡ 'over' 'contramapped'
 -- @
 --
 -- >>> getPredicate (over contramapped (*2) (Predicate even)) 5
@@ -233,8 +236,8 @@ lifted = sets liftM
 -- >>> Prelude.map ($ 1) $ over (mapped . _Unwrapping' Op . contramapped) (*12) [(*2),(+1),(^3)]
 -- [24,13,1728]
 --
-contramapped :: Contravariant f => Setter (f b) (f a) a b
-contramapped = sets contramap
+contramapped :: Contravar.Functor f => Setter (f b) (f a) a b
+contramapped = sets gmap
 {-# INLINE contramapped #-}
 
 -- | This 'Setter' can be used to map over the input of a 'Profunctor'.
@@ -263,7 +266,8 @@ argument :: Profunctor p => Setter (p b r) (p a r) a b
 argument = sets lmap
 {-# INLINE argument #-}
 
--- | Build an index-preserving 'Setter' from a map-like function.
+{-
+-- | Build a 'Setter' from a map-like function.
 --
 -- Your supplied function @f@ is required to satisfy:
 --
@@ -285,9 +289,10 @@ argument = sets lmap
 -- @
 -- 'setting' :: ((a -> b) -> s -> t) -> 'Setter' s t a b
 -- @
-setting :: ((a -> b) -> s -> t) -> IndexPreservingSetter s t a b
+setting :: ((a -> b) -> s -> t) -> Setter s t a b
 setting l pafb = cotabulate $ \ws -> pure $ l (\a -> untainted (cosieve pafb (a <$ ws))) (extract ws)
 {-# INLINE setting #-}
+-}
 
 -- | Build a 'Setter', 'IndexedSetter' or 'IndexPreservingSetter' depending on your choice of 'Profunctor'.
 --
@@ -303,6 +308,7 @@ cloneSetter :: ASetter s t a b -> Setter s t a b
 cloneSetter l afb = taintedDot $ runIdentity #. l (Identity #. untaintedDot afb)
 {-# INLINE cloneSetter #-}
 
+{-
 -- | Build an 'IndexPreservingSetter' from any 'Setter'.
 cloneIndexPreservingSetter :: ASetter s t a b -> IndexPreservingSetter s t a b
 cloneIndexPreservingSetter l pafb = cotabulate $ \ws ->
@@ -313,6 +319,7 @@ cloneIndexPreservingSetter l pafb = cotabulate $ \ws ->
 cloneIndexedSetter :: AnIndexedSetter i s t a b -> IndexedSetter i s t a b
 cloneIndexedSetter l pafb = taintedDot (runIdentity #. l (Indexed $ \i -> Identity #. untaintedDot (indexed pafb i)))
 {-# INLINE cloneIndexedSetter #-}
+-}
 
 -----------------------------------------------------------------------------
 -- Using Setters
@@ -1099,6 +1106,7 @@ passing l m = pass $ do
   return (a, over l uv)
 {-# INLINE passing #-}
 
+{-
 -- | This is a generalization of 'pass' that allows you to modify just a
 -- portion of the resulting 'MonadWriter' with access to the index of an
 -- 'IndexedSetter'.
@@ -1107,6 +1115,7 @@ ipassing l m = pass $ do
   (a, uv) <- m
   return (a, iover l uv)
 {-# INLINE ipassing #-}
+-}
 
 -- | This is a generalization of 'censor' that allows you to 'censor' just a
 -- portion of the resulting 'MonadWriter'.
@@ -1114,12 +1123,14 @@ censoring :: MonadWriter w m => Setter w w u v -> (u -> v) -> m a -> m a
 censoring l uv = censor (over l uv)
 {-# INLINE censoring #-}
 
+{-
 -- | This is a generalization of 'censor' that allows you to 'censor' just a
 -- portion of the resulting 'MonadWriter', with access to the index of an
 -- 'IndexedSetter'.
 icensoring :: MonadWriter w m => IndexedSetter i w w u v -> (i -> u -> v) -> m a -> m a
 icensoring l uv = censor (iover l uv)
 {-# INLINE icensoring #-}
+-}
 
 -----------------------------------------------------------------------------
 -- Reader Operations
@@ -1149,6 +1160,7 @@ locally :: MonadReader s m => ASetter s s a b -> (a -> b) -> m r -> m r
 locally l f = Reader.local (over l f)
 {-# INLINE locally #-}
 
+{-
 -- | This is a generalization of 'locally' that allows one to make indexed
 -- 'local' changes to a 'Reader' environment associated with the target of a
 -- 'Setter', 'Lens', or 'Traversal'.
@@ -1313,6 +1325,7 @@ imodifying l f = State.modify (iover l f)
 (.@=) :: MonadState s m => AnIndexedSetter i s s a b -> (i -> b) -> m ()
 l .@= f = State.modify (l .@~ f)
 {-# INLINE (.@=) #-}
+-}
 
 ------------------------------------------------------------------------------
 -- Arrows
@@ -1348,31 +1361,3 @@ l .@= f = State.modify (l .@~ f)
 assignA :: Arrow p => ASetter s t a b -> p s b -> p s t
 assignA l p = arr (flip $ set l) &&& p >>> arr (uncurry id)
 {-# INLINE assignA #-}
-
-------------------------------------------------------------------------------
--- Deprecated
-------------------------------------------------------------------------------
-
--- | 'mapOf' is a deprecated alias for 'over'.
-mapOf :: ASetter s t a b -> (a -> b) -> s -> t
-mapOf = over
-{-# INLINE mapOf #-}
-{-# DEPRECATED mapOf "Use `over`" #-}
-
--- | Map with index. (Deprecated alias for 'iover').
---
--- When you do not need access to the index, then 'mapOf' is more liberal in what it can accept.
---
--- @
--- 'mapOf' l ≡ 'imapOf' l '.' 'const'
--- @
---
--- @
--- 'imapOf' :: 'IndexedSetter' i s t a b    -> (i -> a -> b) -> s -> t
--- 'imapOf' :: 'IndexedLens' i s t a b      -> (i -> a -> b) -> s -> t
--- 'imapOf' :: 'IndexedTraversal' i s t a b -> (i -> a -> b) -> s -> t
--- @
-imapOf :: AnIndexedSetter i s t a b -> (i -> a -> b) -> s -> t
-imapOf = iover
-{-# INLINE imapOf #-}
-{-# DEPRECATED imapOf "Use `iover`" #-}

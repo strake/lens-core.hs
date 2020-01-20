@@ -23,17 +23,16 @@ module Control.Monad.Error.Lens
   -- * Handlers
   , catches
   , Handler(..)
-  , Handleable(..)
+--  , Handleable(..)
   -- * Throwing
   , throwing, throwing_
   ) where
 
 import Control.Applicative
 import Control.Lens
-import Control.Lens.Internal.Exception
+--import Control.Lens.Internal.Exception
 import Control.Monad
 import Control.Monad.Error.Class
-import Data.Functor.Plus
 import qualified Data.Monoid as M
 
 #if !(MIN_VERSION_base(4,11,0))
@@ -180,10 +179,7 @@ instance Monad m => Functor (Handler e m) where
      return (f r)
   {-# INLINE fmap #-}
 
-instance Monad m => Semigroup (Handler e m a) where
-  (<>) = M.mappend
-  {-# INLINE (<>) #-}
-
+{-
 instance Monad m => Alt (Handler e m) where
   Handler ema amr <!> Handler emb bmr = Handler emab abmr where
     emab e = Left <$> ema e <|> Right <$> emb e
@@ -194,15 +190,10 @@ instance Monad m => Plus (Handler e m) where
   zero = Handler (const Nothing) undefined
   {-# INLINE zero #-}
 
-instance Monad m => M.Monoid (Handler e m a) where
-  mempty = zero
-  {-# INLINE mempty #-}
-  mappend = (<!>)
-  {-# INLINE mappend #-}
-
 instance Handleable e m (Handler e m) where
   handler = Handler . preview
   {-# INLINE handler #-}
+-}
 
 ------------------------------------------------------------------------------
 -- Throwing

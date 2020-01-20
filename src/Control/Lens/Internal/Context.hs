@@ -3,7 +3,6 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 #if __GLASGOW_HASKELL__ >= 707
 {-# LANGUAGE RoleAnnotations #-}
 #endif
@@ -21,8 +20,8 @@
 module Control.Lens.Internal.Context
   ( IndexedFunctor(..)
   , IndexedComonad(..)
-  , IndexedComonadStore(..)
-  , Sellable(..)
+--  , IndexedComonadStore(..)
+--  , Sellable(..)
   , Context(..), Context'
   , Pretext(..), Pretext'
   , PretextT(..), PretextT'
@@ -32,14 +31,14 @@ import Control.Applicative
 import Control.Arrow
 import Control.Category
 import Control.Comonad
-import Control.Comonad.Store.Class
-import Control.Lens.Internal.Indexed
+--import Control.Comonad.Store.Class
+--import Control.Lens.Internal.Indexed
 import Data.Functor.Compose
-import Data.Functor.Contravariant
+import qualified Data.Functor.Contravariant as Contravar
 import Data.Functor.Identity
 import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
+--import Data.Profunctor.Rep
+--import Data.Profunctor.Sieve
 import Data.Profunctor.Unsafe
 import Prelude hiding ((.),id)
 
@@ -83,6 +82,7 @@ class IndexedFunctor w => IndexedComonad w where
   iextend f = ifmap f . iduplicate
   {-# INLINE iextend #-}
 
+{-
 ------------------------------------------------------------------------------
 -- IndexedComonadStore
 ------------------------------------------------------------------------------
@@ -128,6 +128,7 @@ class IndexedComonad w => IndexedComonadStore w where
 -- from a singleton value.
 class Corepresentable p => Sellable p w | w -> p where
   sell :: p a (w a b b)
+-}
 
 ------------------------------------------------------------------------------
 -- Context
@@ -142,6 +143,7 @@ class Corepresentable p => Sellable p w | w -> p where
 --
 -- A 'Context' is like a 'Control.Lens.Lens.Lens' that has already been applied to a some structure.
 data Context a b t = Context (b -> t) a
+  deriving (Functor)
 -- type role Context representational representational representational
 
 instance IndexedFunctor Context where
@@ -156,6 +158,7 @@ instance IndexedComonad Context where
   iextend g  (Context f a) = Context (g . Context f) a
   {-# INLINE iextend #-}
 
+{-
 instance IndexedComonadStore Context where
   ipos (Context _ a) = a
   {-# INLINE ipos #-}
@@ -171,10 +174,6 @@ instance IndexedComonadStore Context where
   {-# INLINE iexperiment #-}
   context = id
   {-# INLINE context #-}
-
-instance Functor (Context a b) where
-  fmap f (Context g t) = Context (f . g) t
-  {-# INLINE fmap #-}
 
 instance a ~ b => Comonad (Context a b) where
   extract   (Context f a) = f a
@@ -201,6 +200,7 @@ instance a ~ b => ComonadStore a (Context a b) where
 instance Sellable (->) Context where
   sell = Context id
   {-# INLINE sell #-}
+-}
 
 -- | @type 'Context'' a s = 'Context' a a s@
 type Context' a = Context a a
@@ -213,6 +213,7 @@ type Context' a = Context a a
 -- impact on its performance, and which permits the use of an arbitrary 'Conjoined'
 -- 'Profunctor'
 newtype Pretext p a b t = Pretext { runPretext :: forall f. Functor f => p a (f b) -> f t }
+  deriving (Functor)
 -- type role Pretext representational nominal nominal nominal
 
 -- | @type 'Pretext'' p a s = 'Pretext' p a a s@
@@ -222,10 +223,7 @@ instance IndexedFunctor (Pretext p) where
   ifmap f (Pretext k) = Pretext (fmap f . k)
   {-# INLINE ifmap #-}
 
-instance Functor (Pretext p a b) where
-  fmap = ifmap
-  {-# INLINE fmap #-}
-
+{-
 instance Conjoined p => IndexedComonad (Pretext p) where
   iextract (Pretext m) = runIdentity $ m (arr Identity)
   {-# INLINE iextract #-}
@@ -271,6 +269,7 @@ instance (a ~ b, Conjoined p) => ComonadStore a (Pretext p a b) where
 instance Corepresentable p => Sellable p (Pretext p) where
   sell = cotabulate $ \ w -> Pretext (`cosieve` w)
   {-# INLINE sell #-}
+-}
 
 ------------------------------------------------------------------------------
 -- PretextT
@@ -306,6 +305,7 @@ instance Functor (PretextT p g a b) where
   fmap = ifmap
   {-# INLINE fmap #-}
 
+{-
 instance Conjoined p => IndexedComonad (PretextT p g) where
   iextract (PretextT m) = runIdentity $ m (arr Identity)
   {-# INLINE iextract #-}
@@ -313,10 +313,10 @@ instance Conjoined p => IndexedComonad (PretextT p g) where
   {-# INLINE iduplicate #-}
 
 instance (a ~ b, Conjoined p) => Comonad (PretextT p g a b) where
-  extract = iextract
-  {-# INLINE extract #-}
-  duplicate = iduplicate
-  {-# INLINE duplicate #-}
+  copure = iextract
+  {-# INLINE copure #-}
+  cut = iduplicate
+  {-# INLINE cut #-}
 
 instance Conjoined p => IndexedComonadStore (PretextT p g) where
   ipos (PretextT m) = getConst $ coarr m $ arr Const
@@ -352,10 +352,6 @@ instance Corepresentable p => Sellable p (PretextT p g) where
   sell = cotabulate $ \ w -> PretextT (`cosieve` w)
   {-# INLINE sell #-}
 
-instance (Profunctor p, Contravariant g) => Contravariant (PretextT p g a b) where
-  contramap _ = (<$) (error "contramap: PretextT")
-  {-# INLINE contramap #-}
-
 ------------------------------------------------------------------------------
 -- Utilities
 ------------------------------------------------------------------------------
@@ -365,3 +361,4 @@ instance (Profunctor p, Contravariant g) => Contravariant (PretextT p g a b) whe
 coarr :: (Representable q, Comonad (Rep q)) => q a b -> a -> b
 coarr qab = extract . sieve qab
 {-# INLINE coarr #-}
+-}

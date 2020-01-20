@@ -21,12 +21,12 @@
 --
 ----------------------------------------------------------------------------
 module Data.Set.Lens
-  ( setmapped
-  , setOf
+  ( {- setmapped
+  , -} setOf
   ) where
 
 import Control.Lens.Getter ( Getting, views )
-import Control.Lens.Setter ( setting )
+--import Control.Lens.Setter ( setting )
 import Control.Lens.Type
 import Data.Set as Set
 
@@ -35,6 +35,7 @@ import Data.Set as Set
 -- >>> :set -XNoOverloadedStrings
 -- >>> import Control.Lens
 
+{-
 -- | This 'Setter' can be used to change the type of a 'Set' by mapping
 -- the elements to new values.
 --
@@ -50,6 +51,7 @@ setmapped :: (Ord i, Ord j) => IndexPreservingSetter (Set i) (Set j) i j
 #endif
 setmapped = setting Set.map
 {-# INLINE setmapped #-}
+-}
 
 -- | Construct a set from a 'Getter', 'Control.Lens.Fold.Fold', 'Control.Lens.Traversal.Traversal', 'Control.Lens.Lens.Lens' or 'Control.Lens.Iso.Iso'.
 --

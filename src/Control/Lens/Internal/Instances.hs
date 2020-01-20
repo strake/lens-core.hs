@@ -13,4 +13,3 @@
 module Control.Lens.Internal.Instances () where
 
 import Data.Orphans ()
-import Data.Traversable.Instances ()

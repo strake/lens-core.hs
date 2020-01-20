@@ -12,7 +12,7 @@
 ----------------------------------------------------------------------------
 module Data.Sequence.Lens
   ( viewL, viewR
-  , sliced, slicedTo, slicedFrom
+--  , sliced, slicedTo, slicedFrom
   , seqOf
   ) where
 
@@ -72,6 +72,7 @@ viewR = iso viewr $ \xs -> case xs of
   as Seq.:> a -> as Seq.|> a
 {-# INLINE viewR #-}
 
+{-
 -- | Traverse the first @n@ elements of a 'Seq'
 --
 -- >>> fromList [a,b,c,d,e] ^.. slicedTo 2
@@ -115,8 +116,9 @@ slicedFrom n f m = case Seq.splitAt n m of
 sliced :: Int -> Int -> IndexedTraversal' Int (Seq a) a
 sliced i j f s = case Seq.splitAt i s of
   (l,mr) -> case Seq.splitAt (j-i) mr of
-     (m, r) -> itraverse (indexed f . (+i)) m <&> \n -> l >< n >< r
+     (m, r) -> itraverse (indexed f . (+i)) m <₪> \n -> l >< n >< r
 {-# INLINE sliced #-}
+-}
 
 -- | Construct a 'Seq' from a 'Getter', 'Control.Lens.Fold.Fold', 'Control.Lens.Traversal.Traversal', 'Control.Lens.Lens.Lens' or 'Control.Lens.Iso.Iso'.
 --

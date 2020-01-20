@@ -48,34 +48,35 @@ module Control.Lens.Fold
   (
   -- * Folds
     Fold
-  , IndexedFold
+--  , IndexedFold
 
   -- * Getting Started
   , (^..)
   , (^?)
   , (^?!)
-  , pre, ipre
-  , preview, previews, ipreview, ipreviews
-  , preuse, preuses, ipreuse, ipreuses
+  , pre -- , ipre
+  , preview, previews -- , ipreview, ipreviews
+  , preuse, preuses -- , ipreuse, ipreuses
 
   , has, hasn't
 
   -- ** Building Folds
-  , folding, ifolding
-  , foldring, ifoldring
-  , folded
-  , folded64
+  , folding -- , ifolding
+  , foldring -- , ifoldring
+--  , folded
+--  , folded64
   , unfolded
   , iterated
   , filtered
-  , filteredBy
+--  , filteredBy
   , backwards
   , repeated
   , replicated
   , cycled
+{-
   , takingWhile
   , droppingWhile
-  , worded, lined
+-}
 
   -- ** Folding
   , foldMapOf, foldOf
@@ -99,10 +100,10 @@ module Control.Lens.Fold
   , findMOf
   , foldrOf', foldlOf'
   , foldr1Of, foldl1Of
-  , foldr1Of', foldl1Of'
   , foldrMOf, foldlMOf
   , lookupOf
 
+{-
   -- * Indexed Folds
   , (^@..)
   , (^@?)
@@ -136,6 +137,7 @@ module Control.Lens.Fold
   , ifiltered
   , itakingWhile
   , idroppingWhile
+-}
 
   -- * Internal types
   , Leftmost
@@ -143,11 +145,13 @@ module Control.Lens.Fold
   , Traversed
   , Sequenced
 
+{-
   -- * Fold with Reified Monoid
   , foldBy
   , foldByOf
   , foldMapBy
   , foldMapByOf
+-}
   ) where
 
 import Control.Applicative as Applicative
@@ -156,27 +160,27 @@ import Control.Comonad
 import Control.Lens.Getter
 import Control.Lens.Internal.Fold
 import Control.Lens.Internal.Getter
-import Control.Lens.Internal.Indexed
+--import Control.Lens.Internal.Indexed
 import Control.Lens.Internal.Magma
 import Control.Lens.Type
 import Control.Monad as Monad
-import Control.Monad.Reader
-import Control.Monad.State
-import Data.CallStack
+import Control.Monad.Reader hiding (lift)
+import Control.Monad.State hiding (lift)
+--import Data.CallStack
 import Data.Foldable
-import Data.Functor.Apply hiding ((<.))
 import Data.Functor.Compose
-import Data.Functor.Contravariant
+import Data.Functor.Contravariant (gmap, phantom)
+import qualified Data.Functor.Contravariant as Contravar
 import Data.Int (Int64)
 import Data.List (intercalate)
 import Data.Maybe
 import Data.Monoid
 import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
+--import Data.Profunctor.Rep
+--import Data.Profunctor.Sieve
 import Data.Profunctor.Unsafe
 #if MIN_VERSION_reflection(2,1,0)
-import Data.Reflection
+--import Data.Reflection
 #endif
 import Data.Traversable
 import Prelude hiding (foldr)
@@ -208,7 +212,7 @@ import Data.List.NonEmpty (NonEmpty(..))
 {-# ANN module "HLint: ignore Use fmap" #-}
 #endif
 
-infixl 8 ^.., ^?, ^?!, ^@.., ^@?, ^@?!
+infixl 8 ^.., ^?, ^?! {- , ^@.., ^@?, ^@?! -}
 
 --------------------------
 -- Folds
@@ -224,20 +228,23 @@ folding :: Foldable f => (s -> f a) -> Fold s a
 folding sfa agb = phantom . traverse_ agb . sfa
 {-# INLINE folding #-}
 
-ifolding :: (Foldable f, Indexable i p, Contravariant g, Applicative g) => (s -> f (i, a)) -> Over p g s t a b
+{-
+ifolding :: (Foldable f, Indexable i p, Contravar.Functor g, Applicative g) => (s -> f (i, a)) -> Over p g s t a b
 ifolding sfa f = phantom . traverse_ (phantom . uncurry (indexed f)) . sfa
 {-# INLINE ifolding #-}
+-}
 
 -- | Obtain a 'Fold' by lifting 'foldr' like function.
 --
 -- >>> [1,2,3,4]^..foldring foldr
 -- [1,2,3,4]
-foldring :: (Contravariant f, Applicative f) => ((a -> f a -> f a) -> f a -> s -> f a) -> LensLike f s t a b
+foldring :: (Contravar.Functor f, Applicative f) => ((a -> f a -> f a) -> f a -> s -> f a) -> LensLike f s t a b
 foldring fr f = phantom . fr (\a fa -> f a *> fa) noEffect
 {-# INLINE foldring #-}
 
+{-
 -- | Obtain 'FoldWithIndex' by lifting 'ifoldr' like function.
-ifoldring :: (Indexable i p, Contravariant f, Applicative f) => ((i -> a -> f a -> f a) -> f a -> s -> f a) -> Over p f s t a b
+ifoldring :: (Indexable i p, Contravar.Functor f, Applicative f) => ((i -> a -> f a -> f a) -> f a -> s -> f a) -> Over p f s t a b
 ifoldring ifr f = phantom . ifr (\i a fa -> indexed f i a *> fa) noEffect
 {-# INLINE ifoldring #-}
 
@@ -265,8 +272,9 @@ folded64 = conjoined (foldring foldr) (ifoldring ifoldr64)
 {-# INLINE folded64 #-}
 
 ifoldr64 :: Foldable f => (Int64 -> a -> b -> b) -> b -> f a -> b
-ifoldr64 f z xs = foldr (\ x g i -> i `seq` f i x (g (i+1))) (const z) xs 0
+ifoldr64 f z xs = foldr (\ x g i -> i `seq` f i x (g (i+1))) (const z) xs 
 {-# INLINE ifoldr64 #-}
+-}
 
 -- | Form a 'Fold1' by repeating the input forever.
 --
@@ -280,8 +288,8 @@ ifoldr64 f z xs = foldr (\ x g i -> i `seq` f i x (g (i+1))) (const z) xs 0
 -- @
 -- 'repeated' :: 'Fold1' a a
 -- @
-repeated :: Apply f => LensLike' f a a
-repeated f a = as where as = f a .> as
+repeated :: Applicative f => LensLike' f a a
+repeated f a = as where as = f a *> as
 {-# INLINE repeated #-}
 
 -- | A 'Fold' that replicates its input @n@ times.
@@ -307,8 +315,8 @@ replicated n0 f a = go n0 where
 -- @
 -- 'cycled' :: 'Fold1' s a -> 'Fold1' s a
 -- @
-cycled :: Apply f => LensLike f s t a b -> LensLike f s t a b
-cycled l f a = as where as = l f a .> as
+cycled :: Applicative f => LensLike f s t a b -> LensLike f s t a b
+cycled l f a = as where as = l f a *> as
 {-# INLINE cycled #-}
 
 -- | Build a 'Fold' that unfolds its values from a seed.
@@ -335,9 +343,9 @@ unfolded f g b0 = go b0 where
 -- @
 -- 'iterated' :: (a -> a) -> 'Fold1' a a
 -- @
-iterated :: Apply f => (a -> a) -> LensLike' f a a
+iterated :: Applicative f => (a -> a) -> LensLike' f a a
 iterated f g a0 = go a0 where
-  go a = g a .> go (f a)
+  go a = g a *> go (f a)
 {-# INLINE iterated #-}
 
 -- | Obtain a 'Fold' that can be composed with to filter another 'Lens', 'Iso', 'Getter', 'Fold' (or 'Traversal').
@@ -358,10 +366,11 @@ iterated f g a0 = go a0 where
 -- [2,4,6,8,10]
 --
 -- This will preserve an index if it is present.
-filtered :: (Choice p, Applicative f) => (a -> Bool) -> Optic' p f a a
-filtered p = dimap (\x -> if p x then Right x else Left x) (either pure id) . right'
+filtered :: (∀ a . Lift (Either a) p, Applicative f) => (a -> Bool) -> Optic' p f a a
+filtered p = dimap (\x -> if p x then Right x else Left x) (either pure id) . lift
 {-# INLINE filtered #-}
 
+{-
 -- | Obtain a potentially empty 'IndexedTraversal' by taking the first element from another,
 -- potentially empty `Fold` and using it as an index.
 --
@@ -481,44 +490,7 @@ droppingWhile p l f = (flip evalState True .# getCompose) `rmap` l g where
       b' = b && p a
     in (if b' then pure a else cosieve f wa, b')
 {-# INLINE droppingWhile #-}
-
--- | A 'Fold' over the individual 'words' of a 'String'.
---
--- @
--- 'worded' :: 'Fold' 'String' 'String'
--- 'worded' :: 'Traversal'' 'String' 'String'
--- @
---
--- @
--- 'worded' :: 'IndexedFold' 'Int' 'String' 'String'
--- 'worded' :: 'IndexedTraversal'' 'Int' 'String' 'String'
--- @
---
--- Note: This function type-checks as a 'Traversal' but it doesn't satisfy the laws. It's only valid to use it
--- when you don't insert any whitespace characters while traversing, and if your original 'String' contains only
--- isolated space characters (and no other characters that count as space, such as non-breaking spaces).
-worded :: Applicative f => IndexedLensLike' Int f String String
-worded f = fmap unwords . conjoined traverse (indexing traverse) f . words
-{-# INLINE worded #-}
-
--- | A 'Fold' over the individual 'lines' of a 'String'.
---
--- @
--- 'lined' :: 'Fold' 'String' 'String'
--- 'lined' :: 'Traversal'' 'String' 'String'
--- @
---
--- @
--- 'lined' :: 'IndexedFold' 'Int' 'String' 'String'
--- 'lined' :: 'IndexedTraversal'' 'Int' 'String' 'String'
--- @
---
--- Note: This function type-checks as a 'Traversal' but it doesn't satisfy the laws. It's only valid to use it
--- when you don't insert any newline characters while traversing, and if your original 'String' contains only
--- isolated newline characters.
-lined :: Applicative f => IndexedLensLike' Int f String String
-lined f = fmap (intercalate "\n") . conjoined traverse (indexing traverse) f . lines
-{-# INLINE lined #-}
+-}
 
 --------------------------
 -- Fold/Getter combinators
@@ -624,7 +596,7 @@ foldrOf l f z = flip appEndo z . foldMapOf l (Endo #. f)
 -- 'foldlOf' :: 'Prism'' s a     -> (r -> a -> r) -> r -> s -> r
 -- @
 foldlOf :: Getting (Dual (Endo r)) s a -> (r -> a -> r) -> r -> s -> r
-foldlOf l f z = (flip appEndo z .# getDual) `rmap` foldMapOf l (Dual #. Endo #. flip f)
+foldlOf l f z = (flip appEndo z . getDual) `rmap` foldMapOf l (Dual #. Endo #. flip f)
 {-# INLINE foldlOf #-}
 
 -- | Extract a list of the targets of a 'Fold'. See also ('^..').
@@ -1306,8 +1278,8 @@ s ^? l = getFirst (foldMapOf l (First #. Just) s)
 -- ('^?!') :: s -> 'Iso'' s a       -> a
 -- ('^?!') :: s -> 'Traversal'' s a -> a
 -- @
-(^?!) :: HasCallStack => s -> Getting (Endo a) s a -> a
-s ^?! l = foldrOf l const (error "(^?!): empty Fold") s
+(^?!) :: s -> Getting (Endo1 a) s a -> a
+s ^?! l = foldr1Of l pure s
 {-# INLINE (^?!) #-}
 
 -- | Retrieve the 'First' entry of a 'Fold' or 'Traversal' or retrieve 'Just' the result
@@ -1748,13 +1720,14 @@ lookupOf l k = foldrOf l (\(k',v) next -> if k == k' then Just v else next) Noth
 -- 'foldr1Of' :: 'Lens'' s a      -> (a -> a -> a) -> s -> a
 -- 'foldr1Of' :: 'Traversal'' s a -> (a -> a -> a) -> s -> a
 -- @
-foldr1Of :: HasCallStack => Getting (Endo (Maybe a)) s a -> (a -> a -> a) -> s -> a
-foldr1Of l f xs = fromMaybe (error "foldr1Of: empty structure")
-                            (foldrOf l mf Nothing xs) where
-  mf x my = Just $ case my of
-    Nothing -> x
-    Just y -> f x y
+foldr1Of :: Getting (Endo1 a) s a -> (a -> a -> a) -> s -> a
+foldr1Of l f = flip unEndo1 Nothing . foldMapOf l (Endo1 . (maybe <*> f))
 {-# INLINE foldr1Of #-}
+
+newtype Endo1 a = Endo1 { unEndo1 :: Maybe a -> a }
+
+instance Semigroup (Endo1 a) where
+    Endo1 f <> Endo1 g = Endo1 (f . Just . g)
 
 -- | A variant of 'foldlOf' that has no base case and thus may only be applied to lenses and structures such
 -- that the 'Lens' views at least one element of the structure.
@@ -1774,11 +1747,8 @@ foldr1Of l f xs = fromMaybe (error "foldr1Of: empty structure")
 -- 'foldl1Of' :: 'Lens'' s a      -> (a -> a -> a) -> s -> a
 -- 'foldl1Of' :: 'Traversal'' s a -> (a -> a -> a) -> s -> a
 -- @
-foldl1Of :: HasCallStack => Getting (Dual (Endo (Maybe a))) s a -> (a -> a -> a) -> s -> a
-foldl1Of l f xs = fromMaybe (error "foldl1Of: empty structure") (foldlOf l mf Nothing xs) where
-  mf mx y = Just $ case mx of
-    Nothing -> y
-    Just x  -> f x y
+foldl1Of :: Getting (Dual (Endo1 a)) s a -> (a -> a -> a) -> s -> a
+foldl1Of l f = flip (unEndo1 . getDual) Nothing . foldMapOf l (Dual . Endo1 . (maybe <*> f))
 {-# INLINE foldl1Of #-}
 
 -- | Strictly fold right over the elements of a structure.
@@ -1816,48 +1786,6 @@ foldlOf' :: Getting (Endo (Endo r)) s a -> (r -> a -> r) -> r -> s -> r
 foldlOf' l f z0 xs = foldrOf l f' (Endo id) xs `appEndo` z0
   where f' x (Endo k) = Endo $ \z -> k $! f z x
 {-# INLINE foldlOf' #-}
-
--- | A variant of 'foldrOf'' that has no base case and thus may only be applied
--- to folds and structures such that the fold views at least one element of the
--- structure.
---
--- @
--- 'foldr1Of' l f ≡ 'Prelude.foldr1' f '.' 'toListOf' l
--- @
---
--- @
--- 'foldr1Of'' :: 'Getter' s a     -> (a -> a -> a) -> s -> a
--- 'foldr1Of'' :: 'Fold' s a       -> (a -> a -> a) -> s -> a
--- 'foldr1Of'' :: 'Iso'' s a       -> (a -> a -> a) -> s -> a
--- 'foldr1Of'' :: 'Lens'' s a      -> (a -> a -> a) -> s -> a
--- 'foldr1Of'' :: 'Traversal'' s a -> (a -> a -> a) -> s -> a
--- @
-foldr1Of' :: HasCallStack => Getting (Dual (Endo (Endo (Maybe a)))) s a -> (a -> a -> a) -> s -> a
-foldr1Of' l f xs = fromMaybe (error "foldr1Of': empty structure") (foldrOf' l mf Nothing xs) where
-  mf x Nothing = Just $! x
-  mf x (Just y) = Just $! f x y
-{-# INLINE foldr1Of' #-}
-
--- | A variant of 'foldlOf'' that has no base case and thus may only be applied
--- to folds and structures such that the fold views at least one element of
--- the structure.
---
--- @
--- 'foldl1Of'' l f ≡ 'Data.List.foldl1'' f '.' 'toListOf' l
--- @
---
--- @
--- 'foldl1Of'' :: 'Getter' s a     -> (a -> a -> a) -> s -> a
--- 'foldl1Of'' :: 'Fold' s a       -> (a -> a -> a) -> s -> a
--- 'foldl1Of'' :: 'Iso'' s a       -> (a -> a -> a) -> s -> a
--- 'foldl1Of'' :: 'Lens'' s a      -> (a -> a -> a) -> s -> a
--- 'foldl1Of'' :: 'Traversal'' s a -> (a -> a -> a) -> s -> a
--- @
-foldl1Of' :: HasCallStack => Getting (Endo (Endo (Maybe a))) s a -> (a -> a -> a) -> s -> a
-foldl1Of' l f xs = fromMaybe (error "foldl1Of': empty structure") (foldlOf' l mf Nothing xs) where
-  mf Nothing y = Just $! y
-  mf (Just x) y = Just $! f x y
-{-# INLINE foldl1Of' #-}
 
 -- | Monadic fold over the elements of a structure, associating to the right,
 -- i.e. from right to left.
@@ -1956,10 +1884,11 @@ hasn't l = getAll #. foldMapOf l (\_ -> All False)
 -- 'pre' :: 'Iso'' s a       -> 'IndexPreservingGetter' s ('Maybe' a)
 -- 'pre' :: 'Prism'' s a     -> 'IndexPreservingGetter' s ('Maybe' a)
 -- @
-pre :: Getting (First a) s a -> IndexPreservingGetter s (Maybe a)
+pre :: Getting (First a) s a -> Getter s (Maybe a)
 pre l = dimap (getFirst . getConst #. l (Const #. First #. Just)) phantom
 {-# INLINE pre #-}
 
+{-
 -- | This converts an 'IndexedFold' to an 'IndexPreservingGetter' that returns the first index
 -- and element, if they exist, as a 'Maybe'.
 --
@@ -1972,6 +1901,7 @@ pre l = dimap (getFirst . getConst #. l (Const #. First #. Just)) phantom
 ipre :: IndexedGetting i (First (i, a)) s a -> IndexPreservingGetter s (Maybe (i, a))
 ipre l = dimap (getFirst . getConst #. l (Indexed $ \i a -> Const (First (Just (i, a))))) phantom
 {-# INLINE ipre #-}
+-}
 
 ------------------------------------------------------------------------------
 -- Preview
@@ -2026,6 +1956,7 @@ preview :: MonadReader s m => Getting (First a) s a -> m (Maybe a)
 preview l = asks (getFirst #. foldMapOf l (First #. Just))
 {-# INLINE preview #-}
 
+{-
 -- | Retrieve the first index and value targeted by a 'Fold' or 'Traversal' (or 'Just' the result
 -- from a 'Getter' or 'Lens'). See also ('^@?').
 --
@@ -2055,6 +1986,7 @@ preview l = asks (getFirst #. foldMapOf l (First #. Just))
 ipreview :: MonadReader s m => IndexedGetting i (First (i, a)) s a -> m (Maybe (i, a))
 ipreview l = asks (getFirst #. ifoldMapOf l (\i a -> First (Just (i, a))))
 {-# INLINE ipreview #-}
+-}
 
 -- | Retrieve a function of the first value targeted by a 'Fold' or
 -- 'Traversal' (or 'Just' the result from a 'Getter' or 'Lens').
@@ -2088,6 +2020,7 @@ previews :: MonadReader s m => Getting (First r) s a -> (a -> r) -> m (Maybe r)
 previews l f = asks (getFirst . foldMapOf l (First #. Just . f))
 {-# INLINE previews #-}
 
+{-
 -- | Retrieve a function of the first index and value targeted by an 'IndexedFold' or
 -- 'IndexedTraversal' (or 'Just' the result from an 'IndexedGetter' or 'IndexedLens').
 -- See also ('^@?').
@@ -2118,6 +2051,7 @@ previews l f = asks (getFirst . foldMapOf l (First #. Just . f))
 ipreviews :: MonadReader s m => IndexedGetting i (First r) s a -> (i -> a -> r) -> m (Maybe r)
 ipreviews l f = asks (getFirst . ifoldMapOf l (\i -> First #. Just . f i))
 {-# INLINE ipreviews #-}
+-}
 
 ------------------------------------------------------------------------------
 -- Preuse
@@ -2141,6 +2075,7 @@ preuse :: MonadState s m => Getting (First a) s a -> m (Maybe a)
 preuse l = gets (preview l)
 {-# INLINE preuse #-}
 
+{-
 -- | Retrieve the first index and value targeted by an 'IndexedFold' or 'IndexedTraversal' (or 'Just' the index
 -- and result from an 'IndexedGetter' or 'IndexedLens') into the current state.
 --
@@ -2157,6 +2092,7 @@ preuse l = gets (preview l)
 ipreuse :: MonadState s m => IndexedGetting i (First (i, a)) s a -> m (Maybe (i, a))
 ipreuse l = gets (ipreview l)
 {-# INLINE ipreuse #-}
+-}
 
 -- | Retrieve a function of the first value targeted by a 'Fold' or
 -- 'Traversal' (or 'Just' the result from a 'Getter' or 'Lens') into the current state.
@@ -2176,6 +2112,7 @@ preuses :: MonadState s m => Getting (First r) s a -> (a -> r) -> m (Maybe r)
 preuses l f = gets (previews l f)
 {-# INLINE preuses #-}
 
+{-
 -- | Retrieve a function of the first index and value targeted by an 'IndexedFold' or
 -- 'IndexedTraversal' (or a function of 'Just' the index and result from an 'IndexedGetter'
 -- or 'IndexedLens') into the current state.
@@ -2193,6 +2130,7 @@ preuses l f = gets (previews l f)
 ipreuses :: MonadState s m => IndexedGetting i (First r) s a -> (i -> a -> r) -> m (Maybe r)
 ipreuses l f = gets (ipreviews l f)
 {-# INLINE ipreuses #-}
+-}
 
 ------------------------------------------------------------------------------
 -- Profunctors
@@ -2211,6 +2149,7 @@ backwards :: (Profunctor p, Profunctor q) => Optical p q (Backwards f) s t a b -
 backwards l f = forwards #. l (Backwards #. f)
 {-# INLINE backwards #-}
 
+{-
 ------------------------------------------------------------------------------
 -- Indexed Folds
 ------------------------------------------------------------------------------
@@ -2693,7 +2632,7 @@ ifiltered p f = Indexed $ \i a -> if p i a then indexed f i a else pure a
 -- Note: Applying 'itakingWhile' to an 'IndexedLens' or 'IndexedTraversal' will still allow you to use it as a
 -- pseudo-'IndexedTraversal', but if you change the value of any target to one where the predicate returns
 -- 'False', then you will break the 'Traversal' laws and 'Traversal' fusion will no longer be sound.
-itakingWhile :: (Indexable i p, Profunctor q, Contravariant f, Applicative f)
+itakingWhile :: (Indexable i p, Profunctor q, Contravar.Functor f, Applicative f)
          => (i -> a -> Bool)
          -> Optical' (Indexed i) q (Const (Endo (f s))) s a
          -> Optical' p q f s a
@@ -2723,6 +2662,7 @@ idroppingWhile p l f = (flip evalState True .# getCompose) `rmap` l g where
       b' = b && p i a
     in (if b' then pure a else indexed f i a, b')
 {-# INLINE idroppingWhile #-}
+-}
 
 ------------------------------------------------------------------------------
 -- Misc.
@@ -2732,6 +2672,7 @@ skip :: a -> ()
 skip _ = ()
 {-# INLINE skip #-}
 
+{-
 ------------------------------------------------------------------------------
 -- Folds with Reified Monoid
 ------------------------------------------------------------------------------
@@ -2777,3 +2718,4 @@ foldByOf l f z = reifyMonoid f z (foldMapOf l ReflectedMonoid)
 -- 10
 foldMapByOf :: Fold s a -> (r -> r -> r) -> r -> (a -> r) -> s -> r
 foldMapByOf l f z g = reifyMonoid f z (foldMapOf l (ReflectedMonoid #. g))
+-}

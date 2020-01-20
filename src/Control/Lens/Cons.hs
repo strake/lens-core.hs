@@ -51,13 +51,17 @@ import Control.Lens.Review
 import Control.Lens.Tuple
 import Control.Lens.Type
 import Control.Lens.Internal.Coerce
+{-
 import qualified Data.ByteString      as StrictB
 import qualified Data.ByteString.Lazy as LazyB
+-}
 import           Data.Monoid
 import qualified Data.Sequence as Seq
 import           Data.Sequence hiding ((<|), (|>), (:<), (:>))
+{-
 import qualified Data.Text      as StrictT
 import qualified Data.Text.Lazy as LazyT
+-}
 import           Data.Vector (Vector)
 import qualified Data.Vector as Vector
 import           Data.Vector.Storable (Storable)
@@ -138,6 +142,7 @@ instance Cons (Seq a) (Seq b) a b where
     EmptyL  -> Left mempty
   {-# INLINE _Cons #-}
 
+{-
 instance Cons StrictB.ByteString StrictB.ByteString Word8 Word8 where
   _Cons = prism' (uncurry StrictB.cons) StrictB.uncons
   {-# INLINE _Cons #-}
@@ -153,6 +158,7 @@ instance Cons StrictT.Text StrictT.Text Char Char where
 instance Cons LazyT.Text LazyT.Text Char Char where
   _Cons = prism' (uncurry LazyT.cons) LazyT.uncons
   {-# INLINE _Cons #-}
+-}
 
 instance Cons (Vector a) (Vector b) a b where
   _Cons = prism (uncurry Vector.cons) $ \v ->
@@ -396,6 +402,7 @@ instance (Unbox a, Unbox b) => Snoc (Unbox.Vector a) (Unbox.Vector b) a b where
     else Right (Unbox.unsafeInit v, Unbox.unsafeLast v)
   {-# INLINE _Snoc #-}
 
+{-
 instance Snoc StrictB.ByteString StrictB.ByteString Word8 Word8 where
   _Snoc = prism (uncurry StrictB.snoc) $ \v -> if StrictB.null v
     then Left StrictB.empty
@@ -419,6 +426,7 @@ instance Snoc LazyT.Text LazyT.Text Char Char where
     then Left LazyT.empty
     else Right (LazyT.init v, LazyT.last v)
   {-# INLINE _Snoc #-}
+-}
 
 -- | A 'Traversal' reading and replacing all but the a last element of a /non-empty/ container.
 --

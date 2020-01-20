@@ -12,11 +12,11 @@
 ----------------------------------------------------------------------------
 module Control.Lens.Extras
   ( is
-  , module Data.Data.Lens
+--  , module Data.Data.Lens
   ) where
 
 import Control.Lens
-import Data.Data.Lens
+--import Data.Data.Lens
 
 -- $setup
 -- >>> import Control.Lens
