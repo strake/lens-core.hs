@@ -103,9 +103,9 @@ module Control.Lens.Lens
   , (<<||=), (<<&&=), (<<<>=)
 --  , (<<~)
 
-{-
   -- * Cloning Lenses
   , cloneLens
+{-
   , cloneIndexPreservingLens
   , cloneIndexedLens
 
@@ -501,6 +501,7 @@ alongside l1 l2 f (a1, a2)
 locus :: IndexedComonadStore p => Lens (p a c s) (p b c s) a b
 locus f w = (`iseek` w) <$> f (ipos w)
 {-# INLINE locus #-}
+-}
 
 -------------------------------------------------------------------------------
 -- Cloning Lenses
@@ -516,8 +517,11 @@ locus f w = (`iseek` w) <$> f (ipos w)
 -- ("hello",2,"you")
 cloneLens :: ALens s t a b -> Lens s t a b
 cloneLens l afb s = runPretext (l sell s) afb
+  where
+    sell = \ a -> Pretext ($ a)
 {-# INLINE cloneLens #-}
 
+{-
 -- | Clone a 'Lens' as an 'IndexedPreservingLens' that just passes through whatever
 -- index is on any 'IndexedLens', 'IndexedFold', 'IndexedGetter' or  'IndexedTraversal' it is composed with.
 cloneIndexPreservingLens :: ALens s t a b -> IndexPreservingLens s t a b
