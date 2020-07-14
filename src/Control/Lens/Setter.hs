@@ -762,7 +762,7 @@ l &&~ n = over l (&& n)
 -- 'assign' :: 'MonadState' s m => 'Traversal'' s a -> a -> m ()
 -- 'assign' :: 'MonadState' s m => 'Setter'' s a    -> a -> m ()
 -- @
-assign :: MonadState s m => ASetter s s a b -> b -> m ()
+assign :: MonadState m => ASetter (StateType m) (StateType m) a b -> b -> m ()
 assign l b = State.modify (set l b)
 {-# INLINE assign #-}
 
@@ -786,7 +786,7 @@ assign l b = State.modify (set l b)
 -- @
 --
 -- /It puts the state in the monad or it gets the hose again./
-(.=) :: MonadState s m => ASetter s s a b -> b -> m ()
+(.=) :: MonadState m => ASetter (StateType m) (StateType m) a b -> b -> m ()
 l .= b = State.modify (l .~ b)
 {-# INLINE (.=) #-}
 
@@ -808,12 +808,12 @@ l .= b = State.modify (l .~ b)
 -- @
 -- ('%=') :: 'MonadState' s m => 'ASetter' s s a b -> (a -> b) -> m ()
 -- @
-(%=) :: MonadState s m => ASetter s s a b -> (a -> b) -> m ()
+(%=) :: MonadState m => ASetter (StateType m) (StateType m) a b -> (a -> b) -> m ()
 l %= f = State.modify (l %~ f)
 {-# INLINE (%=) #-}
 
 -- | This is an alias for ('%=').
-modifying :: MonadState s m => ASetter s s a b -> (a -> b) -> m ()
+modifying :: MonadState m => ASetter (StateType m) (StateType m) a b -> (a -> b) -> m ()
 modifying l f = State.modify (over l f)
 {-# INLINE modifying #-}
 
@@ -832,7 +832,7 @@ modifying l f = State.modify (over l f)
 -- ('?=') :: 'MonadState' s m => 'Traversal'' s ('Maybe' a) -> a -> m ()
 -- ('?=') :: 'MonadState' s m => 'Setter'' s ('Maybe' a)    -> a -> m ()
 -- @
-(?=) :: MonadState s m => ASetter s s a (Maybe b) -> b -> m ()
+(?=) :: MonadState m => ASetter (StateType m) (StateType m) a (Maybe b) -> b -> m ()
 l ?= b = State.modify (l ?~ b)
 {-# INLINE (?=) #-}
 
@@ -859,7 +859,7 @@ l ?= b = State.modify (l ?~ b)
 -- ('+=') :: ('MonadState' s m, 'Num' a) => 'Lens'' s a      -> a -> m ()
 -- ('+=') :: ('MonadState' s m, 'Num' a) => 'Traversal'' s a -> a -> m ()
 -- @
-(+=) :: (MonadState s m, Num a) => ASetter' s a -> a -> m ()
+(+=) :: (MonadState m, Num a) => ASetter' (StateType m) a -> a -> m ()
 l += b = State.modify (l +~ b)
 {-# INLINE (+=) #-}
 
@@ -874,7 +874,7 @@ l += b = State.modify (l +~ b)
 -- ('-=') :: ('MonadState' s m, 'Num' a) => 'Lens'' s a      -> a -> m ()
 -- ('-=') :: ('MonadState' s m, 'Num' a) => 'Traversal'' s a -> a -> m ()
 -- @
-(-=) :: (MonadState s m, Num a) => ASetter' s a -> a -> m ()
+(-=) :: (MonadState m, Num a) => ASetter' (StateType m) a -> a -> m ()
 l -= b = State.modify (l -~ b)
 {-# INLINE (-=) #-}
 
@@ -889,7 +889,7 @@ l -= b = State.modify (l -~ b)
 -- ('*=') :: ('MonadState' s m, 'Num' a) => 'Lens'' s a      -> a -> m ()
 -- ('*=') :: ('MonadState' s m, 'Num' a) => 'Traversal'' s a -> a -> m ()
 -- @
-(*=) :: (MonadState s m, Num a) => ASetter' s a -> a -> m ()
+(*=) :: (MonadState m, Num a) => ASetter' (StateType m) a -> a -> m ()
 l *= b = State.modify (l *~ b)
 {-# INLINE (*=) #-}
 
@@ -904,7 +904,7 @@ l *= b = State.modify (l *~ b)
 -- ('//=') :: ('MonadState' s m, 'Fractional' a) => 'Lens'' s a      -> a -> m ()
 -- ('//=') :: ('MonadState' s m, 'Fractional' a) => 'Traversal'' s a -> a -> m ()
 -- @
-(//=) :: (MonadState s m, Fractional a) => ASetter' s a -> a -> m ()
+(//=) :: (MonadState m, Fractional a) => ASetter' (StateType m) a -> a -> m ()
 l //= a = State.modify (l //~ a)
 {-# INLINE (//=) #-}
 
@@ -916,7 +916,7 @@ l //= a = State.modify (l //~ a)
 -- ('^=') ::  ('MonadState' s m, 'Num' a, 'Integral' e) => 'Lens'' s a      -> e -> m ()
 -- ('^=') ::  ('MonadState' s m, 'Num' a, 'Integral' e) => 'Traversal'' s a -> e -> m ()
 -- @
-(^=) :: (MonadState s m, Num a, Integral e) => ASetter' s a -> e -> m ()
+(^=) :: (MonadState m, Num a, Integral e) => ASetter' (StateType m) a -> e -> m ()
 l ^= e = State.modify (l ^~ e)
 {-# INLINE (^=) #-}
 
@@ -928,7 +928,7 @@ l ^= e = State.modify (l ^~ e)
 -- ('^^=') ::  ('MonadState' s m, 'Fractional' a, 'Integral' e) => 'Lens'' s a      -> e -> m ()
 -- ('^^=') ::  ('MonadState' s m, 'Fractional' a, 'Integral' e) => 'Traversal'' s a -> e -> m ()
 -- @
-(^^=) :: (MonadState s m, Fractional a, Integral e) => ASetter' s a -> e -> m ()
+(^^=) :: (MonadState m, Fractional a, Integral e) => ASetter' (StateType m) a -> e -> m ()
 l ^^= e = State.modify (l ^^~ e)
 {-# INLINE (^^=) #-}
 
@@ -943,7 +943,7 @@ l ^^= e = State.modify (l ^^~ e)
 -- ('**=') ::  ('MonadState' s m, 'Floating' a) => 'Lens'' s a      -> a -> m ()
 -- ('**=') ::  ('MonadState' s m, 'Floating' a) => 'Traversal'' s a -> a -> m ()
 -- @
-(**=) :: (MonadState s m, Floating a) => ASetter' s a -> a -> m ()
+(**=) :: (MonadState m, Floating a) => ASetter' (StateType m) a -> a -> m ()
 l **= a = State.modify (l **~ a)
 {-# INLINE (**=) #-}
 
@@ -958,7 +958,7 @@ l **= a = State.modify (l **~ a)
 -- ('&&=') :: 'MonadState' s m => 'Lens'' s 'Bool'      -> 'Bool' -> m ()
 -- ('&&=') :: 'MonadState' s m => 'Traversal'' s 'Bool' -> 'Bool' -> m ()
 -- @
-(&&=):: MonadState s m => ASetter' s Bool -> Bool -> m ()
+(&&=):: MonadState m => ASetter' (StateType m) Bool -> Bool -> m ()
 l &&= b = State.modify (l &&~ b)
 {-# INLINE (&&=) #-}
 
@@ -973,7 +973,7 @@ l &&= b = State.modify (l &&~ b)
 -- ('||=') :: 'MonadState' s m => 'Lens'' s 'Bool'      -> 'Bool' -> m ()
 -- ('||=') :: 'MonadState' s m => 'Traversal'' s 'Bool' -> 'Bool' -> m ()
 -- @
-(||=) :: MonadState s m => ASetter' s Bool -> Bool -> m ()
+(||=) :: MonadState m => ASetter' (StateType m) Bool -> Bool -> m ()
 l ||= b = State.modify (l ||~ b)
 {-# INLINE (||=) #-}
 
@@ -1002,7 +1002,7 @@ l ||= b = State.modify (l ||~ b)
 -- @
 --
 -- will store the result in a 'Lens', 'Setter', or 'Traversal'.
-(<~) :: MonadState s m => ASetter s s a b -> m b -> m ()
+(<~) :: MonadState m => ASetter (StateType m) (StateType m) a b -> m b -> m ()
 l <~ mb = mb >>= (l .=)
 {-# INLINE (<~) #-}
 
@@ -1022,7 +1022,7 @@ l <~ mb = mb >>= (l .=)
 -- ('<.=') :: 'MonadState' s m => 'Lens' s s a b      -> b -> m b
 -- ('<.=') :: 'MonadState' s m => 'Traversal' s s a b -> b -> m b
 -- @
-(<.=) :: MonadState s m => ASetter s s a b -> b -> m b
+(<.=) :: MonadState m => ASetter (StateType m) (StateType m) a b -> b -> m b
 l <.= b = do
   l .= b
   return b
@@ -1044,7 +1044,7 @@ l <.= b = do
 -- ('<?=') :: 'MonadState' s m => 'Lens' s s a ('Maybe' b)      -> b -> m b
 -- ('<?=') :: 'MonadState' s m => 'Traversal' s s a ('Maybe' b) -> b -> m b
 -- @
-(<?=) :: MonadState s m => ASetter s s a (Maybe b) -> b -> m b
+(<?=) :: MonadState m => ASetter (StateType m) (StateType m) a (Maybe b) -> b -> m b
 l <?= b = do
   l ?= b
   return b
@@ -1085,7 +1085,7 @@ l <>~ n = over l (<> n)
 -- ('<>=') :: ('MonadState' s m, 'Semigroup' a) => 'Lens'' s a -> a -> m ()
 -- ('<>=') :: ('MonadState' s m, 'Semigroup' a) => 'Traversal'' s a -> a -> m ()
 -- @
-(<>=) :: (MonadState s m, Semigroup a) => ASetter' s a -> a -> m ()
+(<>=) :: (MonadState m, Semigroup a) => ASetter' (StateType m) a -> a -> m ()
 l <>= a = State.modify (l <>~ a)
 {-# INLINE (<>=) #-}
 
@@ -1094,13 +1094,13 @@ l <>= a = State.modify (l <>~ a)
 -----------------------------------------------------------------------------
 
 -- | Write to a fragment of a larger 'Writer' format.
-scribe :: (MonadWriter t m, Monoid s) => ASetter s t a b -> b -> m ()
+scribe :: (MonadWriter m, Monoid s) => ASetter s (WritType m) a b -> b -> m ()
 scribe l b = tell (set l b mempty)
 {-# INLINE scribe #-}
 
 -- | This is a generalization of 'pass' that allows you to modify just a
 -- portion of the resulting 'MonadWriter'.
-passing :: MonadWriter w m => Setter w w u v -> m (a, u -> v) -> m a
+passing :: MonadWriter m => Setter (WritType m) (WritType m) u v -> m (a, u -> v) -> m a
 passing l m = pass $ do
   (a, uv) <- m
   return (a, over l uv)
@@ -1110,7 +1110,7 @@ passing l m = pass $ do
 -- | This is a generalization of 'pass' that allows you to modify just a
 -- portion of the resulting 'MonadWriter' with access to the index of an
 -- 'IndexedSetter'.
-ipassing :: MonadWriter w m => IndexedSetter i w w u v -> m (a, i -> u -> v) -> m a
+ipassing :: MonadWriter m => IndexedSetter i (WritType m) (WritType m) u v -> m (a, i -> u -> v) -> m a
 ipassing l m = pass $ do
   (a, uv) <- m
   return (a, iover l uv)
@@ -1119,7 +1119,7 @@ ipassing l m = pass $ do
 
 -- | This is a generalization of 'censor' that allows you to 'censor' just a
 -- portion of the resulting 'MonadWriter'.
-censoring :: MonadWriter w m => Setter w w u v -> (u -> v) -> m a -> m a
+censoring :: MonadWriter m => Setter (WritType m) (WritType m) u v -> (u -> v) -> m a -> m a
 censoring l uv = censor (over l uv)
 {-# INLINE censoring #-}
 
@@ -1127,7 +1127,7 @@ censoring l uv = censor (over l uv)
 -- | This is a generalization of 'censor' that allows you to 'censor' just a
 -- portion of the resulting 'MonadWriter', with access to the index of an
 -- 'IndexedSetter'.
-icensoring :: MonadWriter w m => IndexedSetter i w w u v -> (i -> u -> v) -> m a -> m a
+icensoring :: MonadWriter m => IndexedSetter i (WritType m) (WritType m) u v -> (i -> u -> v) -> m a -> m a
 icensoring l uv = censor (iover l uv)
 {-# INLINE icensoring #-}
 -}
@@ -1156,7 +1156,7 @@ icensoring l uv = censor (iover l uv)
 -- locally :: MonadReader s m => 'Traversal' s s a b -> (a -> b) -> m r -> m r
 -- locally :: MonadReader s m => 'Setter' s s a b    -> (a -> b) -> m r -> m r
 -- @
-locally :: MonadReader s m => ASetter s s a b -> (a -> b) -> m r -> m r
+locally :: MonadReader m => ASetter (EnvType m) (EnvType m) a b -> (a -> b) -> m r -> m r
 locally l f = Reader.local (over l f)
 {-# INLINE locally #-}
 

@@ -259,7 +259,7 @@ type Accessing p m s a = p a (Const m a) -> s -> Const m s
 -- 'view' :: 'MonadReader' s m             => 'Lens'' s a      -> m a
 -- 'view' :: ('MonadReader' s m, 'Data.Monoid.Monoid' a) => 'Control.Lens.Traversal.Traversal'' s a -> m a
 -- @
-view :: MonadReader s m => Getting a s a -> m a
+view :: MonadReader m => Getting a (EnvType m) a -> m a
 view l = Reader.asks (getConst #. l Const)
 {-# INLINE view #-}
 
@@ -301,7 +301,7 @@ view l = Reader.asks (getConst #. l Const)
 -- @
 -- 'views' :: 'MonadReader' s m => 'Getting' r s a -> (a -> r) -> m r
 -- @
-views :: MonadReader s m => LensLike' (Const r) s a -> (a -> r) -> m r
+views :: MonadReader m => LensLike' (Const r) (EnvType m) a -> (a -> r) -> m r
 views l f = Reader.asks (getConst #. l (Const #. f))
 {-# INLINE views #-}
 
@@ -357,7 +357,7 @@ s ^. l = getConst (l Const s)
 -- 'use' :: 'MonadState' s m             => 'Lens'' s a      -> m a
 -- 'use' :: ('MonadState' s m, 'Data.Monoid.Monoid' r) => 'Control.Lens.Traversal.Traversal'' s r -> m r
 -- @
-use :: MonadState s m => Getting a s a -> m a
+use :: MonadState m => Getting a (StateType m) a -> m a
 use l = State.gets (view l)
 {-# INLINE use #-}
 
@@ -380,7 +380,7 @@ use l = State.gets (view l)
 -- @
 -- 'uses' :: 'MonadState' s m => 'Getting' r s t a b -> (a -> r) -> m r
 -- @
-uses :: MonadState s m => LensLike' (Const r) s a -> (a -> r) -> m r
+uses :: MonadState m => LensLike' (Const r) (StateType m) a -> (a -> r) -> m r
 uses l f = State.gets (views l f)
 {-# INLINE uses #-}
 
@@ -397,7 +397,7 @@ uses l f = State.gets (views l f)
 -- 'listening' :: ('MonadWriter' w m, 'Monoid' u) => 'Traversal'' w u -> m a -> m (a, u)
 -- 'listening' :: ('MonadWriter' w m, 'Monoid' u) => 'Prism'' w u     -> m a -> m (a, u)
 -- @
-listening :: MonadWriter w m => Getting u w u -> m a -> m (a, u)
+listening :: MonadWriter m => Getting u (WritType m) u -> m a -> m (a, u)
 listening l m = do
   (a, w) <- listen m
   return (a, view l w)
@@ -415,7 +415,7 @@ listening l m = do
 -- 'ilistening' :: ('MonadWriter' w m, 'Monoid' u) => 'IndexedFold' i w u       -> m a -> m (a, (i, u))
 -- 'ilistening' :: ('MonadWriter' w m, 'Monoid' u) => 'IndexedTraversal'' i w u -> m a -> m (a, (i, u))
 -- @
-ilistening :: MonadWriter w m => IndexedGetting i (i, u) w u -> m a -> m (a, (i, u))
+ilistening :: MonadWriter m => IndexedGetting i (i, u) (WritType m) u -> m a -> m (a, (i, u))
 ilistening l m = do
   (a, w) <- listen m
   return (a, iview l w)
@@ -435,7 +435,7 @@ ilistening l m = do
 -- 'listenings' :: ('MonadWriter' w m, 'Monoid' v) => 'Traversal'' w u -> (u -> v) -> m a -> m (a, v)
 -- 'listenings' :: ('MonadWriter' w m, 'Monoid' v) => 'Prism'' w u     -> (u -> v) -> m a -> m (a, v)
 -- @
-listenings :: MonadWriter w m => Getting v w u -> (u -> v) -> m a -> m (a, v)
+listenings :: MonadWriter m => Getting v (WritType m) u -> (u -> v) -> m a -> m (a, v)
 listenings l uv m = do
   (a, w) <- listen m
   return (a, views l uv w)

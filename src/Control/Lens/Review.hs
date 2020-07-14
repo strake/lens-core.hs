@@ -137,7 +137,7 @@ re p = to (runIdentity . unTagged . p . Tagged . Identity)
 -- 'review' :: 'MonadReader' a m => 'Iso'' s a   -> m s
 -- 'review' :: 'MonadReader' a m => 'Prism'' s a -> m s
 -- @
-review :: MonadReader b m => AReview t b -> m t
+review :: MonadReader m => AReview t (EnvType m) -> m t
 review p = asks (runIdentity . unTagged . p . Tagged . Identity)
 {-# INLINE review #-}
 
@@ -197,7 +197,7 @@ review p = asks (runIdentity . unTagged . p . Tagged . Identity)
 -- 'reviews' :: 'MonadReader' a m => 'Iso'' s a   -> (s -> r) -> m r
 -- 'reviews' :: 'MonadReader' a m => 'Prism'' s a -> (s -> r) -> m r
 -- @
-reviews :: MonadReader b m => AReview t b -> (t -> r) -> m r
+reviews :: MonadReader m => AReview t (EnvType m) -> (t -> r) -> m r
 reviews p tr = asks (tr . runIdentity . unTagged . p . Tagged . Identity)
 {-# INLINE reviews #-}
 
@@ -218,7 +218,7 @@ reviews p tr = asks (tr . runIdentity . unTagged . p . Tagged . Identity)
 -- 'reuse' :: 'MonadState' a m => 'Prism'' s a -> m s
 -- 'reuse' :: 'MonadState' a m => 'Iso'' s a   -> m s
 -- @
-reuse :: MonadState b m => AReview t b -> m t
+reuse :: MonadState m => AReview t (StateType m) -> m t
 reuse p = gets (runIdentity . unTagged . p . Tagged . Identity)
 {-# INLINE reuse #-}
 
@@ -237,6 +237,6 @@ reuse p = gets (runIdentity . unTagged . p . Tagged . Identity)
 -- 'reuses' :: 'MonadState' a m => 'Prism'' s a -> (s -> r) -> m r
 -- 'reuses' :: 'MonadState' a m => 'Iso'' s a   -> (s -> r) -> m r
 -- @
-reuses :: MonadState b m => AReview t b -> (t -> r) -> m r
+reuses :: MonadState m => AReview t (StateType m) -> (t -> r) -> m r
 reuses p tr = gets (tr . runIdentity . unTagged . p . Tagged . Identity)
 {-# INLINE reuses #-}

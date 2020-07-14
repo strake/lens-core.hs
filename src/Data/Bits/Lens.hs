@@ -84,7 +84,7 @@ l .&.~ n = over l (.&. n)
 -- ('.&.=') :: ('MonadState' s m, 'Bits' a) => 'Lens'' s a      -> a -> m ()
 -- ('.&.=') :: ('MonadState' s m, 'Bits' a) => 'Traversal'' s a -> a -> m ()
 -- @
-(.&.=):: (MonadState s m, Bits a) => ASetter' s a -> a -> m ()
+(.&.=):: (MonadState m, Bits a) => ASetter' (StateType m) a -> a -> m ()
 l .&.= a = modify (l .&.~ a)
 {-# INLINE (.&.=) #-}
 
@@ -99,7 +99,7 @@ l .&.= a = modify (l .&.~ a)
 -- ('.|.=') :: ('MonadState' s m, 'Bits' a) => 'Lens'' s a      -> a -> m ()
 -- ('.|.=') :: ('MonadState' s m, 'Bits' a) => 'Traversal'' s a -> a -> m ()
 -- @
-(.|.=) :: (MonadState s m, Bits a) => ASetter' s a -> a -> m ()
+(.|.=) :: (MonadState m, Bits a) => ASetter' (StateType m) a -> a -> m ()
 l .|.= a = modify (l .|.~ a)
 {-# INLINE (.|.=) #-}
 
@@ -143,7 +143,7 @@ l <.&.~ n = l <%~ (.&. n)
 -- ('<.&.=') :: ('MonadState' s m, 'Bits' a)           => 'Lens'' s a      -> a -> m a
 -- ('<.&.=') :: ('MonadState' s m, 'Bits' a, 'Data.Monoid.Monoid' a) => 'Traversal'' s a -> a -> m a
 -- @
-(<.&.=):: (MonadState s m, Bits a) => LensLike' ((,)a) s a -> a -> m a
+(<.&.=):: (MonadState m, Bits a) => LensLike' ((,)a) (StateType m) a -> a -> m a
 l <.&.= b = l <%= (.&. b)
 {-# INLINE (<.&.=) #-}
 
@@ -157,7 +157,7 @@ l <.&.= b = l <%= (.&. b)
 -- ('<.|.=') :: ('MonadState' s m, 'Bits' a)           => 'Lens'' s a      -> a -> m a
 -- ('<.|.=') :: ('MonadState' s m, 'Bits' a, 'Data.Monoid.Monoid' a) => 'Traversal'' s a -> a -> m a
 -- @
-(<.|.=) :: (MonadState s m, Bits a) => LensLike' ((,)a) s a -> a -> m a
+(<.|.=) :: (MonadState m, Bits a) => LensLike' ((,)a) (StateType m) a -> a -> m a
 l <.|.= b = l <%= (.|. b)
 {-# INLINE (<.|.=) #-}
 
@@ -208,7 +208,7 @@ l <<.|.~ b = l $ \a -> (a, a .|. b)
 -- ('<<.&.=') :: ('MonadState' s m, 'Bits' a)           => 'Lens'' s a      -> a -> m a
 -- ('<<.&.=') :: ('MonadState' s m, 'Bits' a, 'Data.Monoid.Monoid' a) => 'Traversal'' s a -> a -> m a
 -- @
-(<<.&.=) :: (MonadState s m, Bits a) => LensLike' ((,) a) s a -> a -> m a
+(<<.&.=) :: (MonadState m, Bits a) => LensLike' ((,) a) (StateType m) a -> a -> m a
 l <<.&.= b = l %%= \a -> (a, a .&. b)
 {-# INLINE (<<.&.=) #-}
 
@@ -225,7 +225,7 @@ l <<.&.= b = l %%= \a -> (a, a .&. b)
 -- ('<<.|.=') :: ('MonadState' s m, 'Bits' a)           => 'Lens'' s a      -> a -> m a
 -- ('<<.|.=') :: ('MonadState' s m, 'Bits' a, 'Data.Monoid.Monoid' a) => 'Traversal'' s a -> a -> m a
 -- @
-(<<.|.=) :: (MonadState s m, Bits a) => LensLike' ((,) a) s a -> a -> m a
+(<<.|.=) :: (MonadState m, Bits a) => LensLike' ((,) a) (StateType m) a -> a -> m a
 l <<.|.= b = l %%= \a -> (a, a .|. b)
 {-# INLINE (<<.|.=) #-}
 

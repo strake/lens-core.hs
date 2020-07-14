@@ -57,7 +57,7 @@ import Data.Semigroup (Semigroup(..))
 -- 'catching' :: 'MonadError' e m => 'Getter' e a     -> m r -> (a -> m r) -> m r
 -- 'catching' :: 'MonadError' e m => 'Fold' e a       -> m r -> (a -> m r) -> m r
 -- @
-catching :: MonadError e m => Getting (M.First a) e a -> m r -> (a -> m r) -> m r
+catching :: MonadError m => Getting (M.First a) (ErrorType m) a -> m r -> (a -> m r) -> m r
 catching l = catchJust (preview l)
 {-# INLINE catching #-}
 
@@ -74,7 +74,7 @@ catching l = catchJust (preview l)
 -- 'catching_' :: 'MonadError' e m => 'Getter' e a     -> m r -> m r -> m r
 -- 'catching_' :: 'MonadError' e m => 'Fold' e a       -> m r -> m r -> m r
 -- @
-catching_ :: MonadError e m => Getting (M.First a) e a -> m r -> m r -> m r
+catching_ :: MonadError m => Getting (M.First a) (ErrorType m) a -> m r -> m r -> m r
 catching_ l a b = catchJust (preview l) a (const b)
 {-# INLINE catching_ #-}
 
@@ -93,7 +93,7 @@ catching_ l a b = catchJust (preview l) a (const b)
 -- 'handling' :: 'MonadError' e m => 'Fold' e a       -> (a -> m r) -> m r -> m r
 -- 'handling' :: 'MonadError' e m => 'Getter' e a     -> (a -> m r) -> m r -> m r
 -- @
-handling :: MonadError e m => Getting (M.First a) e a -> (a -> m r) -> m r -> m r
+handling :: MonadError m => Getting (M.First a) (ErrorType m) a -> (a -> m r) -> m r -> m r
 handling l = flip (catching l)
 {-# INLINE handling #-}
 
@@ -108,7 +108,7 @@ handling l = flip (catching l)
 -- 'handling_' :: 'MonadError' e m => 'Getter' e a     -> m r -> m r -> m r
 -- 'handling_' :: 'MonadError' e m => 'Fold' e a       -> m r -> m r -> m r
 -- @
-handling_ :: MonadError e m => Getting (M.First a) e a -> m r -> m r -> m r
+handling_ :: MonadError m => Getting (M.First a) (ErrorType m) a -> m r -> m r -> m r
 handling_ l = flip (catching_ l)
 {-# INLINE handling_ #-}
 
@@ -127,7 +127,7 @@ handling_ l = flip (catching_ l)
 -- 'trying' :: 'MonadError' e m => 'Getter' e a     -> m r -> m ('Either' a r)
 -- 'trying' :: 'MonadError' e m => 'Fold' e a       -> m r -> m ('Either' a r)
 -- @
-trying :: MonadError e m => Getting (M.First a) e a -> m r -> m (Either a r)
+trying :: MonadError m => Getting (M.First a) (ErrorType m) a -> m r -> m (Either a r)
 trying l m = catching l (liftM Right m) (return . Left)
 
 ------------------------------------------------------------------------------
@@ -161,7 +161,7 @@ trying l m = catching l (liftM Right m) (return . Left)
 --                  , 'handler' _Bar handleBar
 --                  ]
 -- @
-catches :: MonadError e m => m a -> [Handler e m a] -> m a
+catches :: MonadError m => m a -> [Handler (ErrorType m) m a] -> m a
 catches m hs = catchError m go where
   go e = foldr tryHandler (throwError e) hs where
     tryHandler (Handler ema amr) res = maybe res amr (ema e)
@@ -207,7 +207,7 @@ instance Handleable e m (Handler e m) where
 -- 'throwing' :: 'MonadError' e m => 'Prism'' e t -> t -> a
 -- 'throwing' :: 'MonadError' e m => 'Iso'' e t   -> t -> a
 -- @
-throwing :: MonadError e m => AReview e t -> t -> m x
+throwing :: MonadError m => AReview (ErrorType m) t -> t -> m x
 throwing l = reviews l throwError
 {-# INLINE throwing #-}
 
@@ -216,7 +216,7 @@ throwing l = reviews l throwError
 ------------------------------------------------------------------------------
 
 -- | Helper function to provide conditional catch behavior.
-catchJust :: MonadError e m => (e -> Maybe t) -> m a -> (t -> m a) -> m a
+catchJust :: MonadError m => (ErrorType m -> Maybe t) -> m a -> (t -> m a) -> m a
 catchJust f m k = catchError m $ \ e -> case f e of
   Nothing -> throwError e
   Just x  -> k x
@@ -230,6 +230,6 @@ catchJust f m k = catchError m $ \ e -> case f e of
 -- makePrisms ''MyError
 -- 'throwing_' _Foo :: 'MonadError' MyError m => m a
 -- @
-throwing_ :: MonadError e m => AReview e () -> m x
+throwing_ :: MonadError m => AReview (ErrorType m) () -> m x
 throwing_ l = throwing l ()
 {-# INLINE throwing_ #-}

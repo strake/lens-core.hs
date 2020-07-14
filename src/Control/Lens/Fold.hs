@@ -1956,7 +1956,7 @@ ipre l = dimap (getFirst . getConst #. l (Indexed $ \i a -> Const (First (Just (
 -- 'preview' :: 'MonadReader' s m => 'Traversal'' s a -> m ('Maybe' a)
 -- 
 -- @
-preview :: MonadReader s m => Getting (First a) s a -> m (Maybe a)
+preview :: MonadReader m => Getting (First a) (EnvType m) a -> m (Maybe a)
 preview l = asks (getFirst #. foldMapOf l (First #. Just))
 {-# INLINE preview #-}
 
@@ -1987,7 +1987,7 @@ preview l = asks (getFirst #. foldMapOf l (First #. Just))
 -- 'ipreview' :: 'MonadReader' s m => 'IndexedLens'' s a      -> m ('Maybe' (i, a))
 -- 'ipreview' :: 'MonadReader' s m => 'IndexedTraversal'' s a -> m ('Maybe' (i, a))
 -- @
-ipreview :: MonadReader s m => IndexedGetting i (First (i, a)) s a -> m (Maybe (i, a))
+ipreview :: MonadReader m => IndexedGetting i (First (i, a)) (EnvType m) a -> m (Maybe (i, a))
 ipreview l = asks (getFirst #. ifoldMapOf l (\i a -> First (Just (i, a))))
 {-# INLINE ipreview #-}
 -}
@@ -2020,7 +2020,7 @@ ipreview l = asks (getFirst #. ifoldMapOf l (\i a -> First (Just (i, a))))
 -- 'previews' :: 'MonadReader' s m => 'Iso'' s a       -> (a -> r) -> m ('Maybe' r)
 -- 'previews' :: 'MonadReader' s m => 'Traversal'' s a -> (a -> r) -> m ('Maybe' r)
 -- @
-previews :: MonadReader s m => Getting (First r) s a -> (a -> r) -> m (Maybe r)
+previews :: MonadReader m => Getting (First r) (EnvType m) a -> (a -> r) -> m (Maybe r)
 previews l f = asks (getFirst . foldMapOf l (First #. Just . f))
 {-# INLINE previews #-}
 
@@ -2052,7 +2052,7 @@ previews l f = asks (getFirst . foldMapOf l (First #. Just . f))
 -- 'ipreviews' :: 'MonadReader' s m => 'IndexedLens'' i s a      -> (i -> a -> r) -> m ('Maybe' r)
 -- 'ipreviews' :: 'MonadReader' s m => 'IndexedTraversal'' i s a -> (i -> a -> r) -> m ('Maybe' r)
 -- @
-ipreviews :: MonadReader s m => IndexedGetting i (First r) s a -> (i -> a -> r) -> m (Maybe r)
+ipreviews :: MonadReader m => IndexedGetting i (First r) (EnvType m) a -> (i -> a -> r) -> m (Maybe r)
 ipreviews l f = asks (getFirst . ifoldMapOf l (\i -> First #. Just . f i))
 {-# INLINE ipreviews #-}
 -}
@@ -2075,7 +2075,7 @@ ipreviews l f = asks (getFirst . ifoldMapOf l (\i -> First #. Just . f i))
 -- 'preuse' :: 'MonadState' s m => 'Iso'' s a       -> m ('Maybe' a)
 -- 'preuse' :: 'MonadState' s m => 'Traversal'' s a -> m ('Maybe' a)
 -- @
-preuse :: MonadState s m => Getting (First a) s a -> m (Maybe a)
+preuse :: MonadState m => Getting (First a) (StateType m) a -> m (Maybe a)
 preuse l = gets (preview l)
 {-# INLINE preuse #-}
 
@@ -2093,7 +2093,7 @@ preuse l = gets (preview l)
 -- 'ipreuse' :: 'MonadState' s m => 'IndexedLens'' i s a      -> m ('Maybe' (i, a))
 -- 'ipreuse' :: 'MonadState' s m => 'IndexedTraversal'' i s a -> m ('Maybe' (i, a))
 -- @
-ipreuse :: MonadState s m => IndexedGetting i (First (i, a)) s a -> m (Maybe (i, a))
+ipreuse :: MonadState m => IndexedGetting i (First (i, a)) (StateType m) a -> m (Maybe (i, a))
 ipreuse l = gets (ipreview l)
 {-# INLINE ipreuse #-}
 -}
@@ -2112,7 +2112,7 @@ ipreuse l = gets (ipreview l)
 -- 'preuses' :: 'MonadState' s m => 'Iso'' s a       -> (a -> r) -> m ('Maybe' r)
 -- 'preuses' :: 'MonadState' s m => 'Traversal'' s a -> (a -> r) -> m ('Maybe' r)
 -- @
-preuses :: MonadState s m => Getting (First r) s a -> (a -> r) -> m (Maybe r)
+preuses :: MonadState m => Getting (First r) (StateType m) a -> (a -> r) -> m (Maybe r)
 preuses l f = gets (previews l f)
 {-# INLINE preuses #-}
 
@@ -2131,7 +2131,7 @@ preuses l f = gets (previews l f)
 -- 'ipreuses' :: 'MonadState' s m => 'IndexedLens'' i s a      -> (i -> a -> r) -> m ('Maybe' r)
 -- 'ipreuses' :: 'MonadState' s m => 'IndexedTraversal'' i s a -> (i -> a -> r) -> m ('Maybe' r)
 -- @
-ipreuses :: MonadState s m => IndexedGetting i (First r) s a -> (i -> a -> r) -> m (Maybe r)
+ipreuses :: MonadState m => IndexedGetting i (First r) (StateType m) a -> (i -> a -> r) -> m (Maybe r)
 ipreuses l f = gets (ipreviews l f)
 {-# INLINE ipreuses #-}
 -}

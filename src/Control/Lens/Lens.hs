@@ -10,10 +10,6 @@
 {-# LANGUAGE TypeInType #-}
 #endif
 
-#ifndef MIN_VERSION_mtl
-#define MIN_VERSION_mtl(x,y,z) 1
-#endif
-
 #if __GLASGOW_HASKELL__ >= 800
 {-# OPTIONS_GHC -Wno-trustworthy-safe #-}
 #endif
@@ -340,15 +336,8 @@ s &~ l = execState l s
 -- ('%%=') :: 'MonadState' s m             => 'Lens' s s a b      -> (a -> (r, b)) -> m r
 -- ('%%=') :: ('MonadState' s m, 'Monoid' r) => 'Control.Lens.Traversal.Traversal' s s a b -> (a -> (r, b)) -> m r
 -- @
-(%%=) :: MonadState s m => Over p ((,) r) s s a b -> p a (r, b) -> m r
-#if MIN_VERSION_mtl(2,1,1)
+(%%=) :: MonadState m => Over p ((,) r) (StateType m) (StateType m) a b -> p a (r, b) -> m r
 l %%= f = State.state (l f)
-#else
-l %%= f = do
-  (r, s) <- State.gets (l f)
-  State.put s
-  return r
-#endif
 {-# INLINE (%%=) #-}
 
 -------------------------------------------------------------------------------
@@ -879,7 +868,7 @@ l <<<>~ b = l $ \a -> (a, a <> b)
 -- Setting and Remembering State
 -------------------------------------------------------------------------------
 
-stating :: MonadState s m => LensLike ((,) z) s s a b -> (a -> (z, b)) -> m z
+stating :: MonadState m => LensLike ((,) z) (StateType m) (StateType m) a b -> (a -> (z, b)) -> m z
 stating l = state . l
 
 -- | Modify the target of a 'Lens' into your 'Monad''s state by a user supplied
@@ -895,7 +884,7 @@ stating l = state . l
 -- ('<%=') :: 'MonadState' s m             => 'Control.Lens.Iso.Iso'' s a       -> (a -> a) -> m a
 -- ('<%=') :: ('MonadState' s m, 'Monoid' a) => 'Control.Lens.Traversal.Traversal'' s a -> (a -> a) -> m a
 -- @
-(<%=) :: MonadState s m => LensLike ((,)b) s s a b -> (a -> b) -> m b
+(<%=) :: MonadState m => LensLike ((,)b) (StateType m) (StateType m) a b -> (a -> b) -> m b
 l <%= f = l %%= (\b -> (b, b)) . f
 {-# INLINE (<%=) #-}
 
@@ -910,7 +899,7 @@ l <%= f = l %%= (\b -> (b, b)) . f
 -- ('<+=') :: ('MonadState' s m, 'Num' a) => 'Lens'' s a -> a -> m a
 -- ('<+=') :: ('MonadState' s m, 'Num' a) => 'Control.Lens.Iso.Iso'' s a -> a -> m a
 -- @
-(<+=) :: (MonadState s m, Num a) => LensLike' ((,)a) s a -> a -> m a
+(<+=) :: (MonadState m, Num a) => LensLike' ((,)a) (StateType m) a -> a -> m a
 l <+= a = l <%= (+ a)
 {-# INLINE (<+=) #-}
 
@@ -924,7 +913,7 @@ l <+= a = l <%= (+ a)
 -- ('<-=') :: ('MonadState' s m, 'Num' a) => 'Lens'' s a -> a -> m a
 -- ('<-=') :: ('MonadState' s m, 'Num' a) => 'Control.Lens.Iso.Iso'' s a -> a -> m a
 -- @
-(<-=) :: (MonadState s m, Num a) => LensLike' ((,)a) s a -> a -> m a
+(<-=) :: (MonadState m, Num a) => LensLike' ((,)a) (StateType m) a -> a -> m a
 l <-= a = l <%= subtract a
 {-# INLINE (<-=) #-}
 
@@ -938,7 +927,7 @@ l <-= a = l <%= subtract a
 -- ('<*=') :: ('MonadState' s m, 'Num' a) => 'Lens'' s a -> a -> m a
 -- ('<*=') :: ('MonadState' s m, 'Num' a) => 'Control.Lens.Iso.Iso'' s a -> a -> m a
 -- @
-(<*=) :: (MonadState s m, Num a) => LensLike' ((,)a) s a -> a -> m a
+(<*=) :: (MonadState m, Num a) => LensLike' ((,)a) (StateType m) a -> a -> m a
 l <*= a = l <%= (* a)
 {-# INLINE (<*=) #-}
 
@@ -951,7 +940,7 @@ l <*= a = l <%= (* a)
 -- ('<//=') :: ('MonadState' s m, 'Fractional' a) => 'Lens'' s a -> a -> m a
 -- ('<//=') :: ('MonadState' s m, 'Fractional' a) => 'Control.Lens.Iso.Iso'' s a -> a -> m a
 -- @
-(<//=) :: (MonadState s m, Fractional a) => LensLike' ((,)a) s a -> a -> m a
+(<//=) :: (MonadState m, Fractional a) => LensLike' ((,)a) (StateType m) a -> a -> m a
 l <//= a = l <%= (/ a)
 {-# INLINE (<//=) #-}
 
@@ -964,7 +953,7 @@ l <//= a = l <%= (/ a)
 -- ('<^=') :: ('MonadState' s m, 'Num' a, 'Integral' e) => 'Lens'' s a -> e -> m a
 -- ('<^=') :: ('MonadState' s m, 'Num' a, 'Integral' e) => 'Control.Lens.Iso.Iso'' s a -> e -> m a
 -- @
-(<^=) :: (MonadState s m, Num a, Integral e) => LensLike' ((,)a) s a -> e -> m a
+(<^=) :: (MonadState m, Num a, Integral e) => LensLike' ((,)a) (StateType m) a -> e -> m a
 l <^= e = l <%= (^ e)
 {-# INLINE (<^=) #-}
 
@@ -977,7 +966,7 @@ l <^= e = l <%= (^ e)
 -- ('<^^=') :: ('MonadState' s m, 'Fractional' b, 'Integral' e) => 'Lens'' s a -> e -> m a
 -- ('<^^=') :: ('MonadState' s m, 'Fractional' b, 'Integral' e) => 'Control.Lens.Iso.Iso'' s a  -> e -> m a
 -- @
-(<^^=) :: (MonadState s m, Fractional a, Integral e) => LensLike' ((,)a) s a -> e -> m a
+(<^^=) :: (MonadState m, Fractional a, Integral e) => LensLike' ((,)a) (StateType m) a -> e -> m a
 l <^^= e = l <%= (^^ e)
 {-# INLINE (<^^=) #-}
 
@@ -990,7 +979,7 @@ l <^^= e = l <%= (^^ e)
 -- ('<**=') :: ('MonadState' s m, 'Floating' a) => 'Lens'' s a -> a -> m a
 -- ('<**=') :: ('MonadState' s m, 'Floating' a) => 'Control.Lens.Iso.Iso'' s a -> a -> m a
 -- @
-(<**=) :: (MonadState s m, Floating a) => LensLike' ((,)a) s a -> a -> m a
+(<**=) :: (MonadState m, Floating a) => LensLike' ((,)a) (StateType m) a -> a -> m a
 l <**= a = l <%= (** a)
 {-# INLINE (<**=) #-}
 
@@ -1003,7 +992,7 @@ l <**= a = l <%= (** a)
 -- ('<||=') :: 'MonadState' s m => 'Lens'' s 'Bool' -> 'Bool' -> m 'Bool'
 -- ('<||=') :: 'MonadState' s m => 'Control.Lens.Iso.Iso'' s 'Bool'  -> 'Bool' -> m 'Bool'
 -- @
-(<||=) :: MonadState s m => LensLike' ((,)Bool) s Bool -> Bool -> m Bool
+(<||=) :: MonadState m => LensLike' ((,)Bool) (StateType m) Bool -> Bool -> m Bool
 l <||= b = l <%= (|| b)
 {-# INLINE (<||=) #-}
 
@@ -1016,7 +1005,7 @@ l <||= b = l <%= (|| b)
 -- ('<&&=') :: 'MonadState' s m => 'Lens'' s 'Bool' -> 'Bool' -> m 'Bool'
 -- ('<&&=') :: 'MonadState' s m => 'Control.Lens.Iso.Iso'' s 'Bool'  -> 'Bool' -> m 'Bool'
 -- @
-(<&&=) :: MonadState s m => LensLike' ((,)Bool) s Bool -> Bool -> m Bool
+(<&&=) :: MonadState m => LensLike' ((,)Bool) (StateType m) Bool -> Bool -> m Bool
 l <&&= b = l <%= (&& b)
 {-# INLINE (<&&=) #-}
 
@@ -1035,7 +1024,7 @@ l <&&= b = l <%= (&& b)
 -- @
 --
 -- @('<<%=') :: 'MonadState' s m => 'LensLike' ((,)a) s s a b -> (a -> b) -> m a@
-(<<%=) :: (∀ a . Lift ((,) a) p, MonadState s m) => Over p ((,)a) s s a b -> p a b -> m a
+(<<%=) :: (∀ a . Lift ((,) a) p, MonadState m) => Over p ((,)a) (StateType m) (StateType m) a b -> p a b -> m a
 l <<%= f = l %%= lmap (\a -> (a,a)) (lift f)
 {-# INLINE (<<%=) #-}
 
@@ -1052,7 +1041,7 @@ l <<%= f = l %%= lmap (\a -> (a,a)) (lift f)
 -- ('<<.=') :: 'MonadState' s m             => 'Control.Lens.Iso.Iso'' s a       -> a -> m a
 -- ('<<.=') :: ('MonadState' s m, 'Monoid' a) => 'Control.Lens.Traversal.Traversal'' s a -> a -> m a
 -- @
-(<<.=) :: MonadState s m => LensLike ((,)a) s s a b -> b -> m a
+(<<.=) :: MonadState m => LensLike ((,)a) (StateType m) (StateType m) a b -> b -> m a
 l <<.= b = l %%= \a -> (a,b)
 {-# INLINE (<<.=) #-}
 
@@ -1069,7 +1058,7 @@ l <<.= b = l %%= \a -> (a,b)
 -- ('<<?=') :: 'MonadState' s m             => 'Control.Lens.Iso.Iso' s t a (Maybe b)       -> b -> m a
 -- ('<<?=') :: ('MonadState' s m, 'Monoid' a) => 'Control.Lens.Traversal.Traversal' s t a (Maybe b) -> b -> m a
 -- @
-(<<?=) :: MonadState s m => LensLike ((,)a) s s a (Maybe b) -> b -> m a
+(<<?=) :: MonadState m => LensLike ((,)a) (StateType m) (StateType m) a (Maybe b) -> b -> m a
 l <<?= b = l <<.= Just b
 {-# INLINE (<<?=) #-}
 
@@ -1082,7 +1071,7 @@ l <<?= b = l <<.= Just b
 -- ('<<+=') :: ('MonadState' s m, 'Num' a) => 'Lens'' s a -> a -> m a
 -- ('<<+=') :: ('MonadState' s m, 'Num' a) => 'Iso'' s a -> a -> m a
 -- @
-(<<+=) :: (MonadState s m, Num a) => LensLike' ((,) a) s a -> a -> m a
+(<<+=) :: (MonadState m, Num a) => LensLike' ((,) a) (StateType m) a -> a -> m a
 l <<+= n = l %%= \a -> (a, a + n)
 {-# INLINE (<<+=) #-}
 
@@ -1095,7 +1084,7 @@ l <<+= n = l %%= \a -> (a, a + n)
 -- ('<<-=') :: ('MonadState' s m, 'Num' a) => 'Lens'' s a -> a -> m a
 -- ('<<-=') :: ('MonadState' s m, 'Num' a) => 'Iso'' s a -> a -> m a
 -- @
-(<<-=) :: (MonadState s m, Num a) => LensLike' ((,) a) s a -> a -> m a
+(<<-=) :: (MonadState m, Num a) => LensLike' ((,) a) (StateType m) a -> a -> m a
 l <<-= n = l %%= \a -> (a, a - n)
 {-# INLINE (<<-=) #-}
 
@@ -1108,7 +1097,7 @@ l <<-= n = l %%= \a -> (a, a - n)
 -- ('<<*=') :: ('MonadState' s m, 'Num' a) => 'Lens'' s a -> a -> m a
 -- ('<<*=') :: ('MonadState' s m, 'Num' a) => 'Iso'' s a -> a -> m a
 -- @
-(<<*=) :: (MonadState s m, Num a) => LensLike' ((,) a) s a -> a -> m a
+(<<*=) :: (MonadState m, Num a) => LensLike' ((,) a) (StateType m) a -> a -> m a
 l <<*= n = l %%= \a -> (a, a * n)
 {-# INLINE (<<*=) #-}
 
@@ -1121,7 +1110,7 @@ l <<*= n = l %%= \a -> (a, a * n)
 -- ('<<//=') :: ('MonadState' s m, 'Fractional' a) => 'Lens'' s a -> a -> m a
 -- ('<<//=') :: ('MonadState' s m, 'Fractional' a) => 'Iso'' s a -> a -> m a
 -- @
-(<<//=) :: (MonadState s m, Fractional a) => LensLike' ((,) a) s a -> a -> m a
+(<<//=) :: (MonadState m, Fractional a) => LensLike' ((,) a) (StateType m) a -> a -> m a
 l <<//= n = l %%= \a -> (a, a / n)
 {-# INLINE (<<//=) #-}
 
@@ -1134,7 +1123,7 @@ l <<//= n = l %%= \a -> (a, a / n)
 -- ('<<^=') :: ('MonadState' s m, 'Num' a, 'Integral' e) => 'Lens'' s a -> e -> m a
 -- ('<<^=') :: ('MonadState' s m, 'Num' a, 'Integral' e) => 'Iso'' s a -> a -> m a
 -- @
-(<<^=) :: (MonadState s m, Num a, Integral e) => LensLike' ((,) a) s a -> e -> m a
+(<<^=) :: (MonadState m, Num a, Integral e) => LensLike' ((,) a) (StateType m) a -> e -> m a
 l <<^= n = l %%= \a -> (a, a ^ n)
 {-# INLINE (<<^=) #-}
 
@@ -1147,7 +1136,7 @@ l <<^= n = l %%= \a -> (a, a ^ n)
 -- ('<<^^=') :: ('MonadState' s m, 'Fractional' a, 'Integral' e) => 'Lens'' s a -> e -> m a
 -- ('<<^^=') :: ('MonadState' s m, 'Fractional' a, 'Integral' e) => 'Iso'' s a -> e -> m a
 -- @
-(<<^^=) :: (MonadState s m, Fractional a, Integral e) => LensLike' ((,) a) s a -> e -> m a
+(<<^^=) :: (MonadState m, Fractional a, Integral e) => LensLike' ((,) a) (StateType m) a -> e -> m a
 l <<^^= n = l %%= \a -> (a, a ^^ n)
 {-# INLINE (<<^^=) #-}
 
@@ -1160,7 +1149,7 @@ l <<^^= n = l %%= \a -> (a, a ^^ n)
 -- ('<<**=') :: ('MonadState' s m, 'Floating' a) => 'Lens'' s a -> a -> m a
 -- ('<<**=') :: ('MonadState' s m, 'Floating' a) => 'Iso'' s a -> a -> m a
 -- @
-(<<**=) :: (MonadState s m, Floating a) => LensLike' ((,) a) s a -> a -> m a
+(<<**=) :: (MonadState m, Floating a) => LensLike' ((,) a) (StateType m) a -> a -> m a
 l <<**= n = l %%= \a -> (a, a ** n)
 {-# INLINE (<<**=) #-}
 
@@ -1173,7 +1162,7 @@ l <<**= n = l %%= \a -> (a, a ** n)
 -- ('<<||=') :: 'MonadState' s m => 'Lens'' s 'Bool' -> 'Bool' -> m 'Bool'
 -- ('<<||=') :: 'MonadState' s m => 'Iso'' s 'Bool' -> 'Bool' -> m 'Bool'
 -- @
-(<<||=) :: MonadState s m => LensLike' ((,) Bool) s Bool -> Bool -> m Bool
+(<<||=) :: MonadState m => LensLike' ((,) Bool) (StateType m) Bool -> Bool -> m Bool
 l <<||= b = l %%= \a -> (a, a || b)
 {-# INLINE (<<||=) #-}
 
@@ -1186,7 +1175,7 @@ l <<||= b = l %%= \a -> (a, a || b)
 -- ('<<&&=') :: 'MonadState' s m => 'Lens'' s 'Bool' -> 'Bool' -> m 'Bool'
 -- ('<<&&=') :: 'MonadState' s m => 'Iso'' s 'Bool' -> 'Bool' -> m 'Bool'
 -- @
-(<<&&=) :: MonadState s m => LensLike' ((,) Bool) s Bool -> Bool -> m Bool
+(<<&&=) :: MonadState m => LensLike' ((,) Bool) (StateType m) Bool -> Bool -> m Bool
 l <<&&= b = l %%= \a -> (a, a && b)
 {-# INLINE (<<&&=) #-}
 
@@ -1199,7 +1188,7 @@ l <<&&= b = l %%= \a -> (a, a && b)
 -- ('<<<>=') :: ('MonadState' s m, 'Semigroup' r) => 'Lens'' s r -> r -> m r
 -- ('<<<>=') :: ('MonadState' s m, 'Semigroup' r) => 'Iso'' s r -> r -> m r
 -- @
-(<<<>=) :: (MonadState s m, Semigroup r) => LensLike' ((,) r) s r -> r -> m r
+(<<<>=) :: (MonadState m, Semigroup r) => LensLike' ((,) r) (StateType m) r -> r -> m r
 l <<<>= b = l %%= \a -> (a, a <> b)
 {-# INLINE (<<<>=) #-}
 
@@ -1213,7 +1202,7 @@ l <<<>= b = l %%= \a -> (a, a <> b)
 --
 -- NB: This is limited to taking an actual 'Lens' than admitting a 'Control.Lens.Traversal.Traversal' because
 -- there are potential loss of state issues otherwise.
-(<<~) :: MonadState s m => ALens s s a b -> m b -> m b
+(<<~) :: MonadState m => ALens (StateType m) (StateType m) a b -> m b -> m b
 l <<~ mb = do
   b <- mb
   modify $ \s -> ipeek b (l sell s)
@@ -1233,7 +1222,7 @@ l <<>~ m = l <%~ (<> m)
 -- your 'Monad''s state and return the result.
 --
 -- When you do not need the result of the operation, ('Control.Lens.Setter.<>=') is more flexible.
-(<<>=) :: (MonadState s m, Semigroup r) => LensLike' ((,)r) s r -> r -> m r
+(<<>=) :: (MonadState m, Semigroup r) => LensLike' ((,)r) (StateType m) r -> r -> m r
 l <<>= r = l <%= (<> r)
 {-# INLINE (<<>=) #-}
 
@@ -1333,14 +1322,7 @@ l <<%@~ f = l $ Indexed $ \i a -> second' (f i) (a,a)
 -- ('%%@=') :: ('MonadState' s m, 'Monoid' r) => 'Control.Lens.Traversal.IndexedTraversal' i s s a b -> (i -> a -> (r, b)) -> s -> m r
 -- @
 (%%@=) :: MonadState s m => Over (Indexed i) ((,) r) s s a b -> (i -> a -> (r, b)) -> m r
-#if MIN_VERSION_mtl(2,1,0)
 l %%@= f = State.state (l %%@~ f)
-#else
-l %%@= f = do
-  (r, s) <- State.gets (l %%@~ f)
-  State.put s
-  return r
-#endif
 {-# INLINE (%%@=) #-}
 
 -- | Adjust the target of an 'IndexedLens' returning the intermediate result, or
@@ -1364,14 +1346,7 @@ l <%@= f = l %%@= \ i a -> let b = f i a in (b, b)
 -- ('<<%@=') :: ('MonadState' s m, 'Monoid' b) => 'Control.Lens.Traversal.IndexedTraversal' i s s a b -> (i -> a -> b) -> m a
 -- @
 (<<%@=) :: MonadState s m => Over (Indexed i) ((,) a) s s a b -> (i -> a -> b) -> m a
-#if MIN_VERSION_mtl(2,1,0)
 l <<%@= f = State.state (l (Indexed $ \ i a -> (a, f i a)))
-#else
-l <<%@= f = do
-  (r, s) <- State.gets (l (Indexed $ \ i a -> (a, f i a)))
-  State.put s
-  return r
-#endif
 {-# INLINE (<<%@=) #-}
 -}
 
@@ -1445,15 +1420,7 @@ l <#%= f = l #%%= \a -> let b = f a in (b, b)
 
 -- | A version of ('%%=') that works on 'ALens'.
 ( #%%= ) :: MonadState s m => ALens s s a b -> (a -> (r, b)) -> m r
-#if MIN_VERSION_mtl(2,1,1)
 l #%%= f = State.state $ \s -> runPretext (l sell s) f
-#else
-l #%%= f = do
-  p <- State.gets (l sell)
-  let (r, t) = runPretext p f
-  State.put t
-  return r
-#endif
 {-# INLINE ( #%%= ) #-}
 
 -- | A version of ('Control.Lens.Setter.<.~') that works on 'ALens'.

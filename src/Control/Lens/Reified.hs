@@ -164,7 +164,8 @@ instance Monad (ReifiedGetter s) where
   Getter ma >>= f = Getter $ to $ \s -> view (runGetter (f (view ma s))) s
   {-# INLINE (>>=) #-}
 
-instance MonadReader s (ReifiedGetter s) where
+instance MonadReader (ReifiedGetter s) where
+  type EnvType (ReifiedGetter s) = s
   ask = Getter id
   {-# INLINE ask #-}
   local f m = Getter (to f . runGetter m)
@@ -401,7 +402,8 @@ instance MonadPlus (ReifiedFold s) where
   mplus = (<|>)
   {-# INLINE mplus #-}
 
-instance MonadReader s (ReifiedFold s) where
+instance MonadReader (ReifiedFold s) where
+  type EnvType (ReifiedFold s) = s
   ask = Fold id
   {-# INLINE ask #-}
   local f m = Fold (to f . runFold m)

@@ -7,10 +7,6 @@
 {-# LANGUAGE RankNTypes #-}
 {-# OPTIONS_GHC -fno-warn-warnings-deprecations #-}
 
-#ifndef MIN_VERSION_mtl
-#define MIN_VERSION_mtl(x,y,z) 1
-#endif
-
 #if __GLASGOW_HASKELL__ < 708
 {-# LANGUAGE Trustworthy #-}
 #endif
@@ -89,7 +85,6 @@ type instance Zoomed (Strict.WriterT w m) = FocusingPlus w (Zoomed m)
 type instance Zoomed (Lazy.WriterT w m) = FocusingPlus w (Zoomed m)
 type instance Zoomed (ListT m) = FocusingOn [] (Zoomed m)
 type instance Zoomed (MaybeT m) = FocusingMay (Zoomed m)
-type instance Zoomed (ErrorT e m) = FocusingErr e (Zoomed m)
 type instance Zoomed (ExceptT e m) = FocusingErr e (Zoomed m)
 --type instance Zoomed (FreeT f m) = FocusingFree f m (Zoomed m)
 
@@ -112,7 +107,7 @@ type instance Magnified (IdentityT m) = Magnified m
 -- | This class allows us to use 'zoom' in, changing the 'State' supplied by
 -- many different 'Control.Monad.Monad' transformers, potentially quite
 -- deep in a 'Monad' transformer stack.
-class (MonadState s m, MonadState t n) => Zoom m n s t | m -> s, n -> t, m t -> n, n s -> m where
+class (MonadState m, MonadState n) => Zoom m n where
   -- | Run a monadic action in a larger 'State' than it was defined in,
   -- using a 'Lens'' or 'Control.Lens.Traversal.Traversal''.
   --
@@ -145,57 +140,47 @@ class (MonadState s m, MonadState t n) => Zoom m n s t | m -> s, n -> t, m t -> 
   -- 'zoom' :: ('Monad' m, 'Monoid' c) => 'Control.Lens.Traversal.Traversal'' s t -> 'StateT' t m c -> 'StateT' s m c
   -- 'zoom' :: ('Monad' m, 'Monoid' w)             => 'Lens'' s t      -> 'RWST' r w t m c -> 'RWST' r w s m c
   -- 'zoom' :: ('Monad' m, 'Monoid' w, 'Monoid' c) => 'Control.Lens.Traversal.Traversal'' s t -> 'RWST' r w t m c -> 'RWST' r w s m c
-  -- 'zoom' :: ('Monad' m, 'Monoid' w, 'Error' e)  => 'Lens'' s t      -> 'ErrorT' e ('RWST' r w t m) c -> 'ErrorT' e ('RWST' r w s m) c
-  -- 'zoom' :: ('Monad' m, 'Monoid' w, 'Monoid' c, 'Error' e) => 'Control.Lens.Traversal.Traversal'' s t -> 'ErrorT' e ('RWST' r w t m) c -> 'ErrorT' e ('RWST' r w s m) c
   -- ...
   -- @
-  zoom :: LensLike' (Zoomed m c) t s -> m c -> n c
+  zoom :: LensLike' (Zoomed m c) (StateType n) (StateType m) -> m c -> n c
 
-instance Monad z => Zoom (Strict.StateT s z) (Strict.StateT t z) s t where
+instance Monad z => Zoom (Strict.StateT s z) (Strict.StateT t z) where
   zoom l (Strict.StateT m) = Strict.StateT $ unfocusing #. l (Focusing #. m)
   {-# INLINE zoom #-}
 
-instance Monad z => Zoom (Lazy.StateT s z) (Lazy.StateT t z) s t where
+instance Monad z => Zoom (Lazy.StateT s z) (Lazy.StateT t z) where
   zoom l (Lazy.StateT m) = Lazy.StateT $ unfocusing #. l (Focusing #. m)
   {-# INLINE zoom #-}
 
-instance Zoom m n s t => Zoom (ReaderT e m) (ReaderT e n) s t where
+instance Zoom m n => Zoom (ReaderT e m) (ReaderT e n) where
   zoom l (ReaderT m) = ReaderT (zoom l . m)
   {-# INLINE zoom #-}
 
-instance Zoom m n s t => Zoom (IdentityT m) (IdentityT n) s t where
+instance Zoom m n => Zoom (IdentityT m) (IdentityT n) where
   zoom l (IdentityT m) = IdentityT (zoom l m)
   {-# INLINE zoom #-}
 
-instance (Monoid w, Monad z) => Zoom (Strict.RWST r w s z) (Strict.RWST r w t z) s t where
+instance (Monoid w, Monad z) => Zoom (Strict.RWST r w s z) (Strict.RWST r w t z) where
   zoom l (Strict.RWST m) = Strict.RWST $ \r -> unfocusingWith #. l (FocusingWith #. m r)
   {-# INLINE zoom #-}
 
-instance (Monoid w, Monad z) => Zoom (Lazy.RWST r w s z) (Lazy.RWST r w t z) s t where
+instance (Monoid w, Monad z) => Zoom (Lazy.RWST r w s z) (Lazy.RWST r w t z) where
   zoom l (Lazy.RWST m) = Lazy.RWST $ \r -> unfocusingWith #. l (FocusingWith #. m r)
   {-# INLINE zoom #-}
 
-instance (Monoid w, Zoom m n s t) => Zoom (Strict.WriterT w m) (Strict.WriterT w n) s t where
+instance (Monoid w, Zoom m n) => Zoom (Strict.WriterT w m) (Strict.WriterT w n) where
   zoom l = Strict.WriterT . zoom (\afb -> unfocusingPlus #.. l (FocusingPlus #.. afb)) . Strict.runWriterT
   {-# INLINE zoom #-}
 
-instance (Monoid w, Zoom m n s t) => Zoom (Lazy.WriterT w m) (Lazy.WriterT w n) s t where
+instance (Monoid w, Zoom m n) => Zoom (Lazy.WriterT w m) (Lazy.WriterT w n) where
   zoom l = Lazy.WriterT . zoom (\afb -> unfocusingPlus #.. l (FocusingPlus #.. afb)) . Lazy.runWriterT
   {-# INLINE zoom #-}
 
-instance Zoom m n s t => Zoom (ListT m) (ListT n) s t where
-  zoom l = ListT . zoom (\afb -> unfocusingOn . l (FocusingOn . afb)) . runListT
-  {-# INLINE zoom #-}
-
-instance Zoom m n s t => Zoom (MaybeT m) (MaybeT n) s t where
+instance Zoom m n => Zoom (MaybeT m) (MaybeT n) where
   zoom l = MaybeT . liftM getMay . zoom (\afb -> unfocusingMay #.. l (FocusingMay #.. afb)) . liftM May . runMaybeT
   {-# INLINE zoom #-}
 
-instance (Error e, Zoom m n s t) => Zoom (ErrorT e m) (ErrorT e n) s t where
-  zoom l = ErrorT . liftM getErr . zoom (\afb -> unfocusingErr #.. l (FocusingErr #.. afb)) . liftM Err . runErrorT
-  {-# INLINE zoom #-}
-
-instance Zoom m n s t => Zoom (ExceptT e m) (ExceptT e n) s t where
+instance Zoom m n => Zoom (ExceptT e m) (ExceptT e n) where
   zoom l = ExceptT . liftM getErr . zoom (\afb -> unfocusingErr #.. l (FocusingErr #.. afb)) . liftM Err . runExceptT
   {-# INLINE zoom #-}
 
@@ -214,7 +199,7 @@ instance (Functor f, Zoom m n s t) => Zoom (FreeT f m) (FreeT f n) s t where
 -- many different 'Monad' transformers. Unlike 'zoom' this can change the environment of a deeply nested 'Monad' transformer.
 --
 -- Also, unlike 'zoom', this can be used with any valid 'Getter', but cannot be used with a 'Traversal' or 'Fold'.
-class (Magnified m ~ Magnified n, MonadReader b m, MonadReader a n) => Magnify m n b a | m -> b, n -> a, m a -> n, n b -> m where
+class (Magnified m ~ Magnified n, MonadReader m, MonadReader n) => Magnify m n where
   -- | Run a monadic action in a larger environment than it was defined in, using a 'Getter'.
   --
   -- This acts like 'Control.Monad.Reader.Class.local', but can in many cases change the type of the environment as well.
@@ -252,29 +237,29 @@ class (Magnified m ~ Magnified n, MonadReader b m, MonadReader a n) => Magnify m
   -- ...
   -- @
   magnify :: ((Functor (Magnified m c), Contravar.Functor (Magnified m c))
-                => LensLike' (Magnified m c) a b)
+                => LensLike' (Magnified m c) (EnvType n) (EnvType m))
           -> m c -> n c
 
 
-instance Monad m => Magnify (ReaderT b m) (ReaderT a m) b a where
+instance Monad m => Magnify (ReaderT b m) (ReaderT a m) where
   magnify l (ReaderT m) = ReaderT $ getEffect #. l (Effect #. m)
   {-# INLINE magnify #-}
 
 -- | @
 -- 'magnify' = 'views'
 -- @
-instance Magnify ((->) b) ((->) a) b a where
+instance Magnify ((->) b) ((->) a) where
   magnify l = views l
   {-# INLINE magnify #-}
 
-instance (Monad m, Monoid w) => Magnify (Strict.RWST b w s m) (Strict.RWST a w s m) b a where
+instance (Monad m, Monoid w) => Magnify (Strict.RWST b w s m) (Strict.RWST a w s m) where
   magnify l (Strict.RWST m) = Strict.RWST $ getEffectRWS #. l (EffectRWS #. m)
   {-# INLINE magnify #-}
 
-instance (Monad m, Monoid w) => Magnify (Lazy.RWST b w s m) (Lazy.RWST a w s m) b a where
+instance (Monad m, Monoid w) => Magnify (Lazy.RWST b w s m) (Lazy.RWST a w s m) where
   magnify l (Lazy.RWST m) = Lazy.RWST $ getEffectRWS #. l (EffectRWS #. m)
   {-# INLINE magnify #-}
 
-instance Magnify m n b a => Magnify (IdentityT m) (IdentityT n) b a where
+instance Magnify m n => Magnify (IdentityT m) (IdentityT n) where
   magnify l (IdentityT m) = IdentityT (magnify l m)
   {-# INLINE magnify #-}
