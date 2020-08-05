@@ -63,7 +63,7 @@ module Control.Lens.Fold
   -- ** Building Folds
   , folding -- , ifolding
   , foldring -- , ifoldring
---  , folded
+  , folded
 --  , folded64
   , unfolded
   , iterated
@@ -249,6 +249,7 @@ foldring fr f = phantom . fr (\a fa -> f a *> fa) noEffect
 ifoldring :: (Indexable i p, Contravar.Functor f, Applicative f) => ((i -> a -> f a -> f a) -> f a -> s -> f a) -> Over p f s t a b
 ifoldring ifr f = phantom . ifr (\i a fa -> indexed f i a *> fa) noEffect
 {-# INLINE ifoldring #-}
+-}
 
 -- | Obtain a 'Fold' from any 'Foldable' indexed by ordinal position.
 --
@@ -260,10 +261,11 @@ ifoldring ifr f = phantom . ifr (\i a fa -> indexed f i a *> fa) noEffect
 --
 -- >>> [(1,2),(3,4)]^..folded.both
 -- [1,2,3,4]
-folded :: Foldable f => IndexedFold Int (f a) a
-folded = conjoined (foldring foldr) (ifoldring ifoldr)
+folded :: Foldable f => Fold (f a) a
+folded = foldring foldr
 {-# INLINE folded #-}
 
+{-
 ifoldr :: Foldable f => (Int -> a -> b -> b) -> b -> f a -> b
 ifoldr f z xs = foldr (\ x g i -> i `seq` f i x (g (i+1))) (const z) xs 0
 {-# INLINE ifoldr #-}
