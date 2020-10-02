@@ -117,9 +117,13 @@ import qualified Data.Set as Set
 import Data.Set (Set)
 import Data.Set.Lens
 import Data.Traversable hiding (mapM)
-import Language.Haskell.TH
 import Language.Haskell.TH.Datatype
+import Language.Haskell.TH.Datatype.TyVarBndr as D
 import Language.Haskell.TH.Lens
+import Language.Haskell.TH.Lib
+#if MIN_VERSION_template_haskell(2,15,0)
+import Language.Haskell.TH.Ppr (pprint)
+#endif
 import Language.Haskell.TH.Syntax hiding (lift)
 
 #ifdef HLINT
@@ -533,7 +537,7 @@ makeDataDecl dec = case deNewtype dec of
                     -> Just DataDecl
     { dataContext = ctx
     , tyConName = Nothing
-    , dataParameters = map PlainTV vars
+    , dataParameters = map D.plainTV vars
     , fullType = \tys -> apps (ConT familyName) $
         substType (Map.fromList $ zip vars tys) args
     , constructors = cons
@@ -561,7 +565,7 @@ data DataDecl = DataDecl
   { dataContext :: Cxt -- ^ Datatype context.
   , tyConName :: Maybe Name
     -- ^ Type constructor name, or Nothing for a data family instance.
-  , dataParameters :: [TyVarBndr] -- ^ List of type parameters
+  , dataParameters :: [TyVarBndrUnit] -- ^ List of type parameters
   , fullType :: [Type] -> Type
     -- ^ Create a concrete record type given a substitution to
     -- 'detaParameters'.
@@ -871,7 +875,7 @@ emit decs = tell $ Endo (decs++)
 -- | Traverse each data, newtype, data instance or newtype instance
 -- declaration.
 traverseDataAndNewtype :: (Applicative f) => (Dec -> f Dec) -> [Dec] -> f [Dec]
-traverseDataAndNewtype f decs = traverse go decs
+traverseDataAndNewtype f = traverse go
   where
     go dec = case dec of
       DataD{} -> f dec

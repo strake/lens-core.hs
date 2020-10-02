@@ -42,6 +42,7 @@ import Data.Set.Lens
 import Data.Traversable
 import Language.Haskell.TH
 import qualified Language.Haskell.TH.Datatype as D
+import qualified Language.Haskell.TH.Datatype.TyVarBndr as D
 import Language.Haskell.TH.Lens
 import qualified Data.Map as Map
 import qualified Data.Set as Set
@@ -211,7 +212,7 @@ stabToType stab@(Stab cx ty s t a b) = ForallT vs cx $
     ReviewType                   -> ''Lens.Review  `conAppsT` [t,b]
 
   where
-  vs = map PlainTV
+  vs = map D.plainTVSpecified
      $ nub -- stable order
      $ toListOf typeVars cx
 
@@ -427,7 +428,7 @@ makeClassyPrismClass t className methodName cons =
      let methodType = appsT (conT ''Lens.Prism') [varT r,return t]
 #endif
      methodss <- traverse (mkMethod (VarT r)) cons'
-     classD (cxt[]) className (map PlainTV (r : vs)) (fds r)
+     classD (cxt[]) className (map D.plainTV (r : vs)) (fds r)
        ( sigD methodName methodType
        : map return (concat methodss)
        )
@@ -550,6 +551,6 @@ prismName' sameNameAsCon n =
 
 -- | Quantify all the free variables in a type.
 close :: Type -> TypeQ
-close t = forallT (map PlainTV (Set.toList vs)) (cxt[]) (return t)
+close t = forallT (map D.plainTVSpecified (Set.toList vs)) (cxt[]) (return t)
   where
   vs = setOf typeVars t
