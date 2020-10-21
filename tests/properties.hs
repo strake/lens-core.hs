@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
@@ -33,7 +34,6 @@ import Test.QuickCheck.Function
 import Test.Framework.TH
 import Test.Framework.Providers.QuickCheck2
 import Data.Char (isAlphaNum, isAscii, toUpper)
-import Data.Text.Strict.Lens
 import Data.Maybe
 import Data.List.Lens
 import Data.Functor.Compose
@@ -87,10 +87,6 @@ prop__Just                           = isPrism (_Just :: Prism' (Maybe Int) Int)
 
 -- Data.List.Lens
 prop_prefixed s                      = isPrism (prefixed s :: Prism' String String)
-
--- Data.Text.Lens
-prop_text s                          = s^.packed.from packed == s
---prop_text                           = isIso packed
 
 -- Numeric.Lens
 prop_base_show (n :: Integer) =
