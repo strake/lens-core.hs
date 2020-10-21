@@ -1,0 +1,311 @@
+name:          lens-core-template
+category:      Data, Lenses, Generics, TemplateHaskell
+version:       0.1.0.1
+license:       BSD2
+cabal-version: 1.18
+license-file:  LICENSE
+author:        Edward A. Kmett
+maintainer:    Edward A. Kmett <ekmett@gmail.com>
+stability:     provisional
+homepage:      http://github.com/strake/lens-core.hs
+bug-reports:   http://github.com/strake/lens-core.hs/issues
+copyright:     Copyright (C) 2012-2016 Edward A. Kmett
+build-type:    Custom
+-- build-tools:   cpphs
+tested-with:   GHC == 7.4.2
+             , GHC == 7.6.3
+             , GHC == 7.8.4
+             , GHC == 7.10.3
+             , GHC == 8.0.2
+             , GHC == 8.2.2
+             , GHC == 8.4.4
+             , GHC == 8.6.5
+             , GHC == 8.8.1
+synopsis:      Lenses, Folds and Traversals
+description:
+  This package comes \"Batteries Included\" with many useful lenses for the types
+  commonly used from the Haskell Platform, and with tools for automatically
+  generating lenses and isomorphisms for user-supplied data types.
+  .
+  The combinators in @Control.Lens@ provide a highly generic toolbox for composing
+  families of getters, folds, isomorphisms, traversals, setters and lenses and their
+  indexed variants.
+  .
+  An overview, with a large number of examples can be found in the <https://github.com/ekmett/lens#lens-lenses-folds-and-traversals README>.
+  .
+  An introductory video on the style of code used in this library by Simon Peyton Jones is available from <http://skillsmatter.com/podcast/scala/lenses-compositional-data-access-and-manipulation Skills Matter>.
+  .
+  A video on how to use lenses and how they are constructed is available on <http://youtu.be/cefnmjtAolY?hd=1 youtube>.
+  .
+  Slides for that second talk can be obtained from <http://comonad.com/haskell/Lenses-Folds-and-Traversals-NYC.pdf comonad.com>.
+  .
+  More information on the care and feeding of lenses, including a brief tutorial and motivation
+  for their types can be found on the <https://github.com/ekmett/lens/wiki lens wiki>.
+  .
+  A small game of @pong@ and other more complex examples that manage their state using lenses can be found in the <https://github.com/ekmett/lens/blob/master/examples/ example folder>.
+  .
+  /Lenses, Folds and Traversals/
+  .
+  With some signatures simplified, the core of the hierarchy of lens-like constructions looks like:
+  .
+  .
+  <<http://i.imgur.com/ALlbPRa.png>>
+  .
+  <images/Hierarchy.png (Local Copy)>
+  .
+  You can compose any two elements of the hierarchy above using @(.)@ from the @Prelude@, and you can
+  use any element of the hierarchy as any type it linked to above it.
+  .
+  The result is their lowest upper bound in the hierarchy (or an error if that bound doesn't exist).
+  .
+  For instance:
+  .
+  * You can use any 'Traversal' as a 'Fold' or as a 'Setter'.
+  .
+  * The composition of a 'Traversal' and a 'Getter' yields a 'Fold'.
+  .
+  /Minimizing Dependencies/
+  .
+  If you want to provide lenses and traversals for your own types in your own libraries, then you
+  can do so without incurring a dependency on this (or any other) lens package at all.
+  .
+  /e.g./ for a data type:
+  .
+  > data Foo a = Foo Int Int a
+  .
+  You can define lenses such as
+  .
+  > -- bar :: Lens' (Foo a) Int
+  > bar :: Functor f => (Int -> f Int) -> Foo a -> f (Foo a)
+  > bar f (Foo a b c) = fmap (\a' -> Foo a' b c) (f a)
+  .
+  > -- quux :: Lens (Foo a) (Foo b) a b
+  > quux :: Functor f => (a -> f b) -> Foo a -> f (Foo b)
+  > quux f (Foo a b c) = fmap (Foo a b) (f c)
+  .
+  without the need to use any type that isn't already defined in the @Prelude@.
+  .
+  And you can define a traversal of multiple fields with 'Control.Applicative.Applicative':
+  .
+  > -- traverseBarAndBaz :: Traversal' (Foo a) Int
+  > traverseBarAndBaz :: Applicative f => (Int -> f Int) -> Foo a -> f (Foo a)
+  > traverseBarAndBaz f (Foo a b c) = Foo <$> f a <*> f b <*> pure c
+  .
+  What is provided in this library is a number of stock lenses and traversals for
+  common haskell types, a wide array of combinators for working them, and more
+  exotic functionality, (/e.g./ getters, setters, indexed folds, isomorphisms).
+
+extra-source-files:
+  .gitignore
+  .hlint.yaml
+  Warning.hs
+  AUTHORS.markdown
+  CHANGELOG.markdown
+  README.markdown
+  SUPPORT.markdown
+
+source-repository head
+  type: git
+  location: https://github.com/strake/lens-core.hs.git
+
+custom-setup
+  setup-depends:
+    Cabal >= 1.10 && <3.1,
+    base  >= 4.5 && <5,
+    cabal-doctest >= 1 && <1.1,
+    filepath
+
+-- Enable benchmarking against Neil Mitchell's uniplate library for comparative performance analysis. Defaults to being turned off to avoid
+-- the extra dependency.
+--
+-- > cabal configure --enable-benchmarks -fbenchmark-uniplate && cabal build && cabal bench
+flag benchmark-uniplate
+  default: False
+  manual: True
+
+-- Generate inline pragmas when using template-haskell. This defaults to enabled, but you can
+--
+-- > cabal install lens -f-inlining
+--
+-- to shut it off to benchmark the relative performance impact, or as last ditch effort to address compile
+-- errors resulting from the myriad versions of template-haskell that all purport to be 2.8.
+flag inlining
+  manual: True
+  default: True
+
+-- Some 7.6.1-rc1 users report their TH still uses old style inline pragmas. This lets them turn on inlining.
+flag old-inline-pragmas
+  default: False
+  manual: True
+
+-- Make the test suites dump their template-haskell splices.
+flag dump-splices
+  default: False
+  manual: True
+
+-- You can disable the doctests test suite with -f-test-doctests
+flag test-doctests
+  default: True
+  manual: True
+
+-- You can disable the hunit test suite with -f-test-hunit
+flag test-hunit
+  default: True
+  manual: True
+
+-- Build the properties test if we're building tests
+flag test-properties
+  default: True
+  manual: True
+
+-- Disallow unsafeCoerce
+flag safe
+  default: False
+  manual: True
+
+-- Assert that we are trustworthy when we can
+flag trustworthy
+  default: False
+  manual: True
+
+-- Attempt a parallel build with GHC 7.8
+flag j
+  default: False
+  manual: True
+
+library
+  build-depends:
+    array                     >= 0.3.0.2  && < 0.6,
+    base                      >= 4.5      && < 5,
+    base-orphans              >= 0.5.2    && < 1,
+    call-stack                >= 0.1      && < 0.3,
+    containers                >= 0.4.0    && < 0.7,
+    dual                      >= 0.1.1    && < 0.2,
+    foldable1                 >= 0.1      && < 0.2,
+    ghc-prim,
+    hs-functors               >= 0.1.6    && < 0.2,
+    lens-core                 >= 0.1      && < 0.2,
+    mtl                       >= 2.0.1    && < 2.3,
+    tagged                    >= 0.4.4    && < 1,
+    template-haskell          >= 2.4      && < 2.16,
+    th-abstraction            >= 0.3      && < 0.4,
+    transformers              >= 0.2      && < 0.6,
+    util                      >= 0.1.17   && < 0.2,
+    vector                    >= 0.9      && < 0.13
+
+  exposed-modules:
+    Control.Lens.Internal.FieldTH
+    Control.Lens.Internal.PrismTH
+    Control.Lens.Internal.TH
+    Control.Lens.TH
+    Language.Haskell.TH.Lens
+
+  other-modules:
+    Data.Functor.Contravariant
+    Paths_lens_core_template
+
+  if flag(safe)
+    cpp-options: -DSAFE=1
+
+  if flag(trustworthy) && impl(ghc>=7.2)
+    other-extensions: Trustworthy
+    cpp-options: -DTRUSTWORTHY=1
+
+  if flag(old-inline-pragmas) && impl(ghc>=7.6.0.20120810)
+      cpp-options: -DOLD_INLINE_PRAGMAS=1
+
+  if flag(inlining)
+    cpp-options: -DINLINING
+
+  if impl(ghc<7.4)
+    ghc-options: -fno-spec-constr-count
+
+  if impl(ghc >= 8)
+    ghc-options: -Wno-missing-pattern-synonym-signatures
+
+  if flag(j) && impl(ghc>=7.8)
+    ghc-options: -j4
+
+  ghc-options: -Wall -fwarn-tabs -O2 -fdicts-cheap -funbox-strict-fields -fmax-simplifier-iterations=10
+
+  hs-source-dirs: src
+
+  include-dirs: include
+
+  default-language: Haskell2010
+  default-extensions:
+    UnicodeSyntax
+    LambdaCase
+    EmptyCase
+    QuantifiedConstraints
+    DeriveFunctor
+
+test-suite hunit
+  type: exitcode-stdio-1.0
+  main-is: hunit.hs
+  ghc-options: -w -threaded -rtsopts -with-rtsopts=-N
+  hs-source-dirs: tests
+  default-language: Haskell2010
+
+  if !flag(test-hunit)
+    buildable: False
+  else
+    build-depends:
+      base,
+      containers,
+      HUnit >= 1.2,
+      lens-core,
+      mtl,
+      test-framework       >= 0.6,
+      test-framework-hunit >= 0.2,
+      test-framework-th    >= 0.2
+
+-- Verify that Template Haskell expansion works
+test-suite templates
+  type: exitcode-stdio-1.0
+  main-is: templates.hs
+  other-modules: T799
+  ghc-options: -Wall -threaded
+  hs-source-dirs: tests
+  default-language: Haskell2010
+
+  if flag(dump-splices)
+    ghc-options: -ddump-splices
+
+  build-depends: base, lens-core, lens-core-template
+
+-- Verify the results of the examples
+test-suite doctests
+  type:              exitcode-stdio-1.0
+  main-is:           doctests.hs
+  ghc-options:       -Wall -threaded
+  hs-source-dirs:    tests
+  default-language:  Haskell2010
+  x-doctest-options: --fast
+
+  if flag(trustworthy) && impl(ghc>=7.2)
+    other-extensions: Trustworthy
+    cpp-options: -DTRUSTWORTHY=1
+
+  if !flag(test-doctests)
+    buildable: False
+  else
+    build-depends:
+      base,
+      bytestring,
+      containers,
+      directory      >= 1.0,
+      deepseq,
+      doctest        >= 0.11.4 && < 0.12 || >= 0.13 && < 0.17,
+      filepath,
+      generic-deriving,
+      lens-core,
+      lens-core-template,
+      mtl,
+      nats,
+      parallel,
+      semigroups     >= 0.9,
+      simple-reflect >= 0.3.1,
+      text,
+      unordered-containers,
+      vector
