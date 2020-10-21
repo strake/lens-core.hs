@@ -95,6 +95,7 @@ module Control.Lens.Lens
   , (<<||~), (<<&&~), (<<<>~)
 
   -- * Setting State with Passthrough
+  , stating
   , (<%=), (<+=), (<-=), (<*=), (<//=)
   , (<^=), (<^^=), (<**=)
   , (<||=), (<&&=), (<<>=)
@@ -144,7 +145,7 @@ import Control.Lens.Internal.Prelude
 import Control.Lens.Internal.Getter
 --import Control.Lens.Internal.Indexed
 import Control.Lens.Type
-import Control.Monad.State as State (MonadState (..), State, execState)
+import Control.Monad.State as State (MonadState (..), State, execState, state)
 --import Data.Functor.Apply
 import Data.Functor.Reverse
 --import Data.Functor.Yoneda
@@ -877,6 +878,9 @@ l <<<>~ b = l $ \a -> (a, a <> b)
 -------------------------------------------------------------------------------
 -- Setting and Remembering State
 -------------------------------------------------------------------------------
+
+stating :: MonadState s m => LensLike ((,) z) s s a b -> (a -> (z, b)) -> m z
+stating l = state . l
 
 -- | Modify the target of a 'Lens' into your 'Monad''s state by a user supplied
 -- function and return the result.
