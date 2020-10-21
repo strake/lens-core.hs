@@ -230,10 +230,8 @@ class Plated a where
   -- 'plate' will default to 'uniplate' and you can choose to not override
   -- it with your own definition.
   plate :: Traversal' a a
-{-
-  default plate :: Data a => Traversal' a a
-  plate = uniplate
--}
+  default plate :: (Generic a, GPlated a (Rep a)) => Traversal' a a
+  plate = gplate
 
 instance Plated [a] where
   plate f (x:xs) = (x:) <$> f xs
