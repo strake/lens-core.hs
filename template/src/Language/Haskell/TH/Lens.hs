@@ -2067,16 +2067,26 @@ _TupE :: Prism' Exp [Exp]
 _TupE
   = prism' reviewer remitter
   where
+#if MIN_VERSION_template_haskell(2,17,0)
+      reviewer = TupE . fmap Just
+      remitter (TupE x) = sequenceA x
+#else
       reviewer = TupE
       remitter (TupE x) = Just x
+#endif
       remitter _ = Nothing
 
 _UnboxedTupE :: Prism' Exp [Exp]
 _UnboxedTupE
   = prism' reviewer remitter
   where
+#if MIN_VERSION_template_haskell(2,17,0)
+      reviewer = UnboxedTupE . fmap Just
+      remitter (UnboxedTupE x) = sequenceA x
+#else
       reviewer = UnboxedTupE
       remitter (UnboxedTupE x) = Just x
+#endif
       remitter _ = Nothing
 
 #if MIN_VERSION_template_haskell(2,12,0)
