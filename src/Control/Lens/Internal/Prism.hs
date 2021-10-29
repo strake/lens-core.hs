@@ -41,7 +41,7 @@ instance Profunctor (Market a b) where
   {-# INLINE rmap #-}
 
 instance Lift (Either c) (Market a b) where
-  lift (Market bt seta) = Market (Right . bt) $ \cs -> case cs of
+  lift (Market bt seta) = Market (Right . bt) $ \ case
     Left c -> Left (Left c)
     Right s -> case seta s of
       Left t -> Left (Right t)

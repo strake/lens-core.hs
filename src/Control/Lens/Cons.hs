@@ -51,6 +51,7 @@ import Control.Lens.Review
 import Control.Lens.Tuple
 import Control.Lens.Type
 import Control.Lens.Internal.Coerce
+import Data.Bool (bool)
 {-
 import qualified Data.ByteString      as StrictB
 import qualified Data.ByteString.Lazy as LazyB
@@ -122,7 +123,7 @@ class Cons s t a b | s -> a, t -> b, s b -> t, t a -> s where
   _Cons :: Prism s t (a,s) (b,t)
 
 instance Cons [a] [b] a b where
-  _Cons = prism (uncurry (:)) $ \ aas -> case aas of
+  _Cons = prism (uncurry (:)) $ \ case
     (a:as) -> Right (a, as)
     []     -> Left  []
   {-# INLINE _Cons #-}
@@ -162,30 +163,22 @@ instance Cons LazyT.Text LazyT.Text Char Char where
 
 instance Cons (Vector a) (Vector b) a b where
   _Cons = prism (uncurry Vector.cons) $ \v ->
-    if Vector.null v
-    then Left Vector.empty
-    else Right (Vector.unsafeHead v, Vector.unsafeTail v)
+    bool (Right (Vector.unsafeHead v, Vector.unsafeTail v)) (Left Vector.empty) (Vector.null v)
   {-# INLINE _Cons #-}
 
 instance (Prim a, Prim b) => Cons (Prim.Vector a) (Prim.Vector b) a b where
   _Cons = prism (uncurry Prim.cons) $ \v ->
-    if Prim.null v
-    then Left Prim.empty
-    else Right (Prim.unsafeHead v, Prim.unsafeTail v)
+    bool (Right (Prim.unsafeHead v, Prim.unsafeTail v)) (Left Prim.empty) (Prim.null v)
   {-# INLINE _Cons #-}
 
 instance (Storable a, Storable b) => Cons (Storable.Vector a) (Storable.Vector b) a b where
   _Cons = prism (uncurry Storable.cons) $ \v ->
-    if Storable.null v
-    then Left Storable.empty
-    else Right (Storable.unsafeHead v, Storable.unsafeTail v)
+    bool (Right (Storable.unsafeHead v, Storable.unsafeTail v)) (Left Storable.empty) (Storable.null v)
   {-# INLINE _Cons #-}
 
 instance (Unbox a, Unbox b) => Cons (Unbox.Vector a) (Unbox.Vector b) a b where
   _Cons = prism (uncurry Unbox.cons) $ \v ->
-    if Unbox.null v
-    then Left Unbox.empty
-    else Right (Unbox.unsafeHead v, Unbox.unsafeTail v)
+    bool (Right (Unbox.unsafeHead v, Unbox.unsafeTail v)) (Left Unbox.empty) (Unbox.null v)
   {-# INLINE _Cons #-}
 
 -- | 'cons' an element onto a container.
@@ -358,9 +351,7 @@ class Snoc s t a b | s -> a, t -> b, s b -> t, t a -> s where
   _Snoc :: Prism s t (s,a) (t,b)
 
 instance Snoc [a] [b] a b where
-  _Snoc = prism (\(as,a) -> as Prelude.++ [a]) $ \aas -> if Prelude.null aas
-    then Left []
-    else Right (Prelude.init aas, Prelude.last aas)
+  _Snoc = prism (\(as,a) -> as Prelude.++ [a]) $ \aas -> bool (Right (Prelude.init aas, Prelude.last aas)) (Left []) (Prelude.null aas)
   {-# INLINE _Snoc #-}
 
 instance Snoc (ZipList a) (ZipList b) a b where
@@ -379,27 +370,19 @@ instance Snoc (Seq a) (Seq b) a b where
   {-# INLINE _Snoc #-}
 
 instance Snoc (Vector a) (Vector b) a b where
-  _Snoc = prism (uncurry Vector.snoc) $ \v -> if Vector.null v
-    then Left Vector.empty
-    else Right (Vector.unsafeInit v, Vector.unsafeLast v)
+  _Snoc = prism (uncurry Vector.snoc) $ \v -> bool (Right (Vector.unsafeInit v, Vector.unsafeLast v)) (Left Vector.empty) (Vector.null v)
   {-# INLINE _Snoc #-}
 
 instance (Prim a, Prim b) => Snoc (Prim.Vector a) (Prim.Vector b) a b where
-  _Snoc = prism (uncurry Prim.snoc) $ \v -> if Prim.null v
-    then Left Prim.empty
-    else Right (Prim.unsafeInit v, Prim.unsafeLast v)
+  _Snoc = prism (uncurry Prim.snoc) $ \v -> bool (Right (Prim.unsafeInit v, Prim.unsafeLast v)) (Left Prim.empty) (Prim.null v)
   {-# INLINE _Snoc #-}
 
 instance (Storable a, Storable b) => Snoc (Storable.Vector a) (Storable.Vector b) a b where
-  _Snoc = prism (uncurry Storable.snoc) $ \v -> if Storable.null v
-    then Left Storable.empty
-    else Right (Storable.unsafeInit v, Storable.unsafeLast v)
+  _Snoc = prism (uncurry Storable.snoc) $ \v -> bool (Right (Storable.unsafeInit v, Storable.unsafeLast v)) (Left Storable.empty) (Storable.null v)
   {-# INLINE _Snoc #-}
 
 instance (Unbox a, Unbox b) => Snoc (Unbox.Vector a) (Unbox.Vector b) a b where
-  _Snoc = prism (uncurry Unbox.snoc) $ \v -> if Unbox.null v
-    then Left Unbox.empty
-    else Right (Unbox.unsafeInit v, Unbox.unsafeLast v)
+  _Snoc = prism (uncurry Unbox.snoc) $ \v -> bool (Right (Unbox.unsafeInit v, Unbox.unsafeLast v)) (Left Unbox.empty) (Unbox.null v)
   {-# INLINE _Snoc #-}
 
 {-

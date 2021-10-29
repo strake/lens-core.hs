@@ -193,18 +193,14 @@ check lf f lr r
 
 instance Cons (Deque a) (Deque b) a b where
   _Cons = prism (\(x,BD lf f lr r) -> check (lf + 1) (x : f) lr r) $ \ (BD lf f lr r) ->
-    if lf + lr == 0
-    then Left empty
-    else Right $ case f of
-      []     -> (head r, empty)
-      (x:xs) -> (x, check (lf - 1) xs lr r)
+    bool (Right $ case f of
+       []     -> (head r, empty)
+       (x:xs) -> (x, check (lf - 1) xs lr r)) (Left empty) (lf + lr == 0)
   {-# INLINE _Cons #-}
 
 instance Snoc (Deque a) (Deque b) a b where
   _Snoc = prism (\(BD lf f lr r,x) -> check lf f (lr + 1) (x : r)) $ \ (BD lf f lr r) ->
-    if lf + lr == 0
-    then Left empty
-    else Right $ case r of
-      []     -> (empty, head f)
-      (x:xs) -> (check lf f (lr - 1) xs, x)
+    bool (Right $ case r of
+       []     -> (empty, head f)
+       (x:xs) -> (check lf f (lr - 1) xs, x)) (Left empty) (lf + lr == 0)
   {-# INLINE _Snoc #-}

@@ -156,7 +156,7 @@ module Control.Lens.Fold
 
 import Prelude ()
 
-import Control.Applicative (Alternative (..))
+import Control.Applicative (Alternative (..), liftA3)
 import Control.Applicative.Backwards
 import Control.Comonad
 import Control.Lens.Getter
@@ -169,6 +169,7 @@ import Control.Lens.Type
 import Control.Monad as Monad
 import Control.Monad.Reader hiding (lift)
 import Control.Monad.State hiding (lift)
+import Data.Bool (bool)
 --import Data.CallStack
 import Data.Foldable
 import Data.Functor.Compose
@@ -329,7 +330,7 @@ cycled l f a = as where as = l f a *> as
 -- 'Prelude.unfoldr' ≡ 'toListOf' '.' 'unfolded'
 -- @
 --
--- >>> 10^..unfolded (\b -> if b == 0 then Nothing else Just (b, b-1))
+-- >>> 10^..unfolded (\b -> bool (Just (b, b-1)) Nothing (b == 0))
 -- [10,9,8,7,6,5,4,3,2,1]
 unfolded :: (b -> Maybe (a, b)) -> Fold b a
 unfolded f g b0 = go b0 where
@@ -371,7 +372,7 @@ iterated f g a0 = go a0 where
 --
 -- This will preserve an index if it is present.
 filtered :: (∀ a . Lift (Either a) p, Applicative f) => (a -> Bool) -> Optic' p f a a
-filtered p = dimap (\x -> if p x then Right x else Left x) (either pure id) . lift
+filtered p = dimap (liftA3 bool Left Right p) (either pure id) . lift
 {-# INLINE filtered #-}
 
 {-
@@ -421,7 +422,7 @@ filteredBy p f val = case val ^? p of
 takingWhile :: (Conjoined p, Applicative f) => (a -> Bool) -> Over p (TakingWhile p f a a) s t a a -> Over p f s t a a
 takingWhile p l pafb = fmap runMagma . traverse (cosieve pafb) . runTakingWhile . l flag where
   flag = cotabulate $ \wa -> let a = extract wa; r = p a in TakingWhile r a $ \pr ->
-    if pr && r then Magma () wa else MagmaPure a
+    bool (MagmaPure a) (Magma () wa) (pr && r)
 {-# INLINE takingWhile #-}
 
 -- | Obtain a 'Fold' by dropping elements from another 'Fold', 'Lens', 'Iso', 'Getter' or 'Traversal' while a predicate holds.
@@ -492,7 +493,7 @@ droppingWhile p l f = (flip evalState True .# getCompose) `rmap` l g where
   g = cotabulate $ \wa -> Compose $ state $ \b -> let
       a = extract wa
       b' = b && p a
-    in (if b' then pure a else cosieve f wa, b')
+    in (bool (cosieve f wa) (pure a) b', b')
 {-# INLINE droppingWhile #-}
 -}
 
@@ -1586,7 +1587,7 @@ minimum1Of l = Semi.getMin . foldMapOf l Semi.Min
 maximumByOf :: Getting (Endo (Endo (Maybe a))) s a -> (a -> a -> Ordering) -> s -> Maybe a
 maximumByOf l cmp = foldlOf' l mf Nothing where
   mf Nothing y = Just $! y
-  mf (Just x) y = Just $! if cmp x y == GT then x else y
+  mf (Just x) y = Just $! bool y x (cmp x y == GT)
 {-# INLINE maximumByOf #-}
 
 -- | Obtain the minimum element (if any) targeted by a 'Fold', 'Traversal', 'Lens', 'Iso'
@@ -1611,7 +1612,7 @@ maximumByOf l cmp = foldlOf' l mf Nothing where
 minimumByOf :: Getting (Endo (Endo (Maybe a))) s a -> (a -> a -> Ordering) -> s -> Maybe a
 minimumByOf l cmp = foldlOf' l mf Nothing where
   mf Nothing y = Just $! y
-  mf (Just x) y = Just $! if cmp x y == GT then y else x
+  mf (Just x) y = Just $! bool x y (cmp x y == GT)
 {-# INLINE minimumByOf #-}
 
 -- | The 'findOf' function takes a 'Lens' (or 'Getter', 'Iso', 'Fold', or 'Traversal'),
@@ -1641,10 +1642,10 @@ minimumByOf l cmp = foldlOf' l mf Nothing where
 --
 -- @
 -- 'findOf' :: 'Getting' ('Endo' ('Maybe' a)) s a -> (a -> 'Bool') -> s -> 'Maybe' a
--- 'findOf' l p = 'foldrOf' l (\a y -> if p a then 'Just' a else y) 'Nothing'
+-- 'findOf' l p = 'foldrOf' l (\a y -> bool y ('Just' a) (p a)) 'Nothing'
 -- @
 findOf :: Getting (Endo (Maybe a)) s a -> (a -> Bool) -> s -> Maybe a
-findOf l f = foldrOf l (\a y -> if f a then Just a else y) Nothing
+findOf l f = foldrOf l (\a y -> bool y (Just a) (f a)) Nothing
 {-# INLINE findOf #-}
 
 -- | The 'findMOf' function takes a 'Lens' (or 'Getter', 'Iso', 'Fold', or 'Traversal'),
@@ -1681,10 +1682,10 @@ findOf l f = foldrOf l (\a y -> if f a then Just a else y) Nothing
 --
 -- @
 -- 'findMOf' :: Monad m => 'Getting' ('Endo' (m ('Maybe' a))) s a -> (a -> m 'Bool') -> s -> m ('Maybe' a)
--- 'findMOf' l p = 'foldrOf' l (\a y -> p a >>= \x -> if x then return ('Just' a) else y) $ return 'Nothing'
+-- 'findMOf' l p = 'foldrOf' l (\a y -> p a >>= \x -> bool y (pure ('Just' a)) x) $ return 'Nothing'
 -- @
 findMOf :: Monad m => Getting (Endo (m (Maybe a))) s a -> (a -> m Bool) -> s -> m (Maybe a)
-findMOf l f = foldrOf l (\a y -> f a >>= \r -> if r then return (Just a) else y) $ return Nothing
+findMOf l f = foldrOf l (\a y -> f a >>= bool y (pure (Just a))) $ return Nothing
 {-# INLINE findMOf #-}
 
 -- | The 'lookupOf' function takes a 'Fold' (or 'Getter', 'Traversal',
@@ -1702,7 +1703,7 @@ findMOf l f = foldrOf l (\a y -> f a >>= \r -> if r then return (Just a) else y)
 -- 'lookupOf' :: 'Eq' k => 'Fold' s (k,v) -> k -> s -> 'Maybe' v
 -- @
 lookupOf :: Eq k => Getting (Endo (Maybe v)) s (k,v) -> k -> s -> Maybe v
-lookupOf l k = foldrOf l (\(k',v) next -> if k == k' then Just v else next) Nothing
+lookupOf l k = foldrOf l (\(k',v) next -> bool next (Just v) (k == k')) Nothing
 {-# INLINE lookupOf #-}
 
 -- | A variant of 'foldrOf' that has no base case and thus may only be applied
@@ -2393,7 +2394,7 @@ iconcatMapOf = ifoldMapOf
 -- 'ifindOf' :: 'IndexedTraversal'' i s a -> (i -> a -> 'Bool') -> s -> 'Maybe' a
 -- @
 ifindOf :: IndexedGetting i (Endo (Maybe a)) s a -> (i -> a -> Bool) -> s -> Maybe a
-ifindOf l f = ifoldrOf l (\i a y -> if f i a then Just a else y) Nothing
+ifindOf l f = ifoldrOf l (\i a y -> bool y (Just a) (f i a)) Nothing
 {-# INLINE ifindOf #-}
 
 -- | The 'ifindMOf' function takes an 'IndexedFold' or 'IndexedTraversal', a monadic predicate that is also
@@ -2413,7 +2414,7 @@ ifindOf l f = ifoldrOf l (\i a y -> if f i a then Just a else y) Nothing
 -- 'ifindMOf' :: 'Monad' m => 'IndexedTraversal'' i s a -> (i -> a -> m 'Bool') -> s -> m ('Maybe' a)
 -- @
 ifindMOf :: Monad m => IndexedGetting i (Endo (m (Maybe a))) s a -> (i -> a -> m Bool) -> s -> m (Maybe a)
-ifindMOf l f = ifoldrOf l (\i a y -> f i a >>= \r -> if r then return (Just a) else y) $ return Nothing
+ifindMOf l f = ifoldrOf l (\i a y -> f i a >>= bool y (pure (Just a))) $ return Nothing
 {-# INLINE ifindMOf #-}
 
 -- | /Strictly/ fold right over the elements of a structure with an index.
@@ -2620,7 +2621,7 @@ findIndicesOf l p = toListOf (l . filtered p . asIndex)
 --
 -- Note: As with 'filtered', this is /not/ a legal 'IndexedTraversal', unless you are very careful not to invalidate the predicate on the target!
 ifiltered :: (Indexable i p, Applicative f) => (i -> a -> Bool) -> Optical' p (Indexed i) f a a
-ifiltered p f = Indexed $ \i a -> if p i a then indexed f i a else pure a
+ifiltered p f = Indexed $ \i -> liftA3 bool pure (indexed f i) (p i)
 {-# INLINE ifiltered #-}
 
 -- | Obtain an 'IndexedFold' by taking elements from another
@@ -2641,7 +2642,7 @@ itakingWhile :: (Indexable i p, Profunctor q, Contravar.Functor f, Applicative f
          -> Optical' (Indexed i) q (Const (Endo (f s))) s a
          -> Optical' p q f s a
 itakingWhile p l f = (flip appEndo noEffect .# getConst) `rmap` l g where
-  g = Indexed $ \i a -> Const . Endo $ if p i a then (indexed f i a *>) else const noEffect
+  g = Indexed $ \i a -> Const . Endo $ bool (pure noEffect) (indexed f i a *>) (p i a)
 {-# INLINE itakingWhile #-}
 
 -- | Obtain an 'IndexedFold' by dropping elements from another 'IndexedFold', 'IndexedLens', 'IndexedGetter' or 'IndexedTraversal' while a predicate holds.
@@ -2664,7 +2665,7 @@ idroppingWhile :: (Indexable i p, Profunctor q, Applicative f)
 idroppingWhile p l f = (flip evalState True .# getCompose) `rmap` l g where
   g = Indexed $ \ i a -> Compose $ state $ \b -> let
       b' = b && p i a
-    in (if b' then pure a else indexed f i a, b')
+    in (bool (indexed f i a) (pure a) b', b')
 {-# INLINE idroppingWhile #-}
 -}
 

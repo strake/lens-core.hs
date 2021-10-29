@@ -46,7 +46,7 @@ import Prelude
 -- >>> review viewL $ a Seq.:< fromList [b,c]
 -- fromList [a,b,c]
 viewL :: Iso (Seq a) (Seq b) (ViewL a) (ViewL b)
-viewL = iso viewl $ \ xs -> case xs of
+viewL = iso viewl $ \ case
   EmptyL ->  mempty
   a Seq.:< as -> a Seq.<| as
 {-# INLINE viewL #-}
@@ -67,7 +67,7 @@ viewL = iso viewl $ \ xs -> case xs of
 -- >>> review viewR $ fromList [a,b] Seq.:> c
 -- fromList [a,b,c]
 viewR :: Iso (Seq a) (Seq b) (ViewR a) (ViewR b)
-viewR = iso viewr $ \xs -> case xs of
+viewR = iso viewr $ \ case
   EmptyR  -> mempty
   as Seq.:> a -> as Seq.|> a
 {-# INLINE viewR #-}

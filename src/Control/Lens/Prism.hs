@@ -157,8 +157,7 @@ without :: APrism s t a b
 without k =
   withPrism k         $ \bt seta k' ->
   withPrism k'        $ \dv uevc    ->
-  prism (bimap bt dv) $ \su ->
-  case su of
+  prism (bimap bt dv) $ \ case
     Left s  -> bimap Left Left (seta s)
     Right u -> bimap Right Right (uevc u)
 {-# INLINE without #-}

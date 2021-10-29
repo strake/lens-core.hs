@@ -325,7 +325,7 @@ instance Lift ((,) a) ReifiedFold where
   {-# INLINE lift #-}
 
 instance Lift (Either a) ReifiedFold where
-  lift (Fold l) = Fold $ folding $ \ecs -> case ecs of
+  lift (Fold l) = Fold $ folding $ \ case
     Left c -> [Left c]
     Right s -> Right <$> toListOf l s
   {-# INLINE lift #-}

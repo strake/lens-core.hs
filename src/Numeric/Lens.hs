@@ -36,6 +36,7 @@ module Numeric.Lens
   ) where
 
 import Control.Lens
+import Data.Bool (bool)
 import Data.CallStack
 import Data.Char (chr, ord, isAsciiLower, isAsciiUpper, isDigit)
 import Data.Maybe (fromMaybe)
@@ -53,9 +54,7 @@ import Util ((<₪>))
 -- through unmodified when re-extracted.
 integral :: (Integral a, Integral b) => Prism Integer Integer a b
 integral = prism toInteger $ \ i -> let a = fromInteger i in
-  if toInteger a == i
-  then Right a
-  else Left i
+  bool (Left i) (Right a) (toInteger a == i)
 
 #if __GLASGOW_HASKELL__ >= 710
 pattern Integral a <- (preview integral -> Just a) where

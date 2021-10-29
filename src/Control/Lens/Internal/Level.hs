@@ -28,6 +28,7 @@ module Control.Lens.Internal.Level
 
 import Control.Applicative
 import Control.Category
+import Data.Bool (bool)
 import Data.Foldable
 import Data.Int
 import Data.Semigroup
@@ -89,7 +90,7 @@ instance Monoid (Deepening i a) where
 
 -- | Generate the leaf of a given 'Deepening' based on whether or not we're at the correct depth.
 deepening :: i -> a -> Deepening i a
-deepening i a = Deepening $ \n k -> k (if n == 0 then One i a else Zero) False
+deepening i a = Deepening $ \n k -> k (bool Zero (One i a) (n == 0)) False
 {-# INLINE deepening #-}
 
 ------------------------------------------------------------------------------
@@ -119,7 +120,7 @@ trimr x           = x
 
 {-
 instance Apply (Flows i b) where
-  Flows mf <.> Flows ma = Flows $ \ xss -> case xss of
+  Flows mf <.> Flows ma = Flows $ \ case
     []             -> mf [] (ma [])
     (_:xs)         -> mf (triml <$> xs) $ ma (trimr <$> xs)
   {-# INLINE (<.>) #-}
@@ -129,7 +130,7 @@ instance Apply (Flows i b) where
 instance Applicative (Flows i b) where
   pure a = Flows (const a)
   {-# INLINE pure #-}
-  Flows mf <*> Flows ma = Flows $ \ xss -> case xss of
+  Flows mf <*> Flows ma = Flows $ \ case
     []             -> mf [] (ma [])
     (_:xs)         -> mf (triml <$> xs) $ ma (trimr <$> xs)
   {-# INLINE (<*>) #-}
