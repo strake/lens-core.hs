@@ -133,11 +133,6 @@ flag inlining
   manual: True
   default: True
 
--- Some 7.6.1-rc1 users report their TH still uses old style inline pragmas. This lets them turn on inlining.
-flag old-inline-pragmas
-  default: False
-  manual: True
-
 -- Make the test suites dump their template-haskell splices.
 flag dump-splices
   default: False
@@ -165,11 +160,6 @@ flag safe
 
 -- Assert that we are trustworthy when we can
 flag trustworthy
-  default: False
-  manual: True
-
--- Attempt a parallel build with GHC 7.8
-flag j
   default: False
   manual: True
 
@@ -207,24 +197,14 @@ library
   if flag(safe)
     cpp-options: -DSAFE=1
 
-  if flag(trustworthy) && impl(ghc>=7.2)
+  if flag(trustworthy)
     other-extensions: Trustworthy
     cpp-options: -DTRUSTWORTHY=1
-
-  if flag(old-inline-pragmas) && impl(ghc>=7.6.0.20120810)
-      cpp-options: -DOLD_INLINE_PRAGMAS=1
 
   if flag(inlining)
     cpp-options: -DINLINING
 
-  if impl(ghc<7.4)
-    ghc-options: -fno-spec-constr-count
-
-  if impl(ghc >= 8)
-    ghc-options: -Wno-missing-pattern-synonym-signatures
-
-  if flag(j) && impl(ghc>=7.8)
-    ghc-options: -j4
+  ghc-options: -Wno-missing-pattern-synonym-signatures
 
   ghc-options: -Wall -fwarn-tabs -O2 -fdicts-cheap -funbox-strict-fields -fmax-simplifier-iterations=10
 
