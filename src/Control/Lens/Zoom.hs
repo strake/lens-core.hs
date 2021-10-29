@@ -188,20 +188,20 @@ instance Zoom m n s t => Zoom (ListT m) (ListT n) s t where
   {-# INLINE zoom #-}
 
 instance Zoom m n s t => Zoom (MaybeT m) (MaybeT n) s t where
-  zoom l = MaybeT . liftM getMay . zoom (\afb -> unfocusingMay #.. l (FocusingMay #.. afb)) . liftM May . runMaybeT
+  zoom l = MaybeT . fmap getMay . zoom (\afb -> unfocusingMay #.. l (FocusingMay #.. afb)) . fmap May . runMaybeT
   {-# INLINE zoom #-}
 
 instance (Error e, Zoom m n s t) => Zoom (ErrorT e m) (ErrorT e n) s t where
-  zoom l = ErrorT . liftM getErr . zoom (\afb -> unfocusingErr #.. l (FocusingErr #.. afb)) . liftM Err . runErrorT
+  zoom l = ErrorT . fmap getErr . zoom (\afb -> unfocusingErr #.. l (FocusingErr #.. afb)) . fmap Err . runErrorT
   {-# INLINE zoom #-}
 
 instance Zoom m n s t => Zoom (ExceptT e m) (ExceptT e n) s t where
-  zoom l = ExceptT . liftM getErr . zoom (\afb -> unfocusingErr #.. l (FocusingErr #.. afb)) . liftM Err . runExceptT
+  zoom l = ExceptT . fmap getErr . zoom (\afb -> unfocusingErr #.. l (FocusingErr #.. afb)) . fmap Err . runExceptT
   {-# INLINE zoom #-}
 
 {-
 instance (Functor f, Zoom m n s t) => Zoom (FreeT f m) (FreeT f n) s t where
-  zoom l = FreeT . liftM (fmap (zoom l) . getFreed) . zoom (\afb -> unfocusingFree #.. l (FocusingFree #.. afb)) . liftM Freed . runFreeT
+  zoom l = FreeT . fmap (fmap (zoom l) . getFreed) . zoom (\afb -> unfocusingFree #.. l (FocusingFree #.. afb)) . fmap Freed . runFreeT
 -}
 
 ------------------------------------------------------------------------------

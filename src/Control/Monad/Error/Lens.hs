@@ -129,7 +129,7 @@ handling_ l = flip (catching_ l)
 -- 'trying' :: 'MonadError' e m => 'Fold' e a       -> m r -> m ('Either' a r)
 -- @
 trying :: MonadError e m => Getting (M.First a) e a -> m r -> m (Either a r)
-trying l m = catching l (liftM Right m) (return . Left)
+trying l m = catching l (fmap Right m) (return . Left)
 
 ------------------------------------------------------------------------------
 -- Catches

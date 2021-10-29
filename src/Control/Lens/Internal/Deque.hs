@@ -152,12 +152,12 @@ instance MonadPlus Deque where
   {-# INLINE mplus #-}
 
 instance Foldable Deque where
-  foldMap h (BD _ f _ r) = foldMap h f `mappend` getDual (foldMap (Dual #. h) r)
+  foldMap h (BD _ f _ r) = foldMap h f <> getDual (foldMap (Dual #. h) r)
   {-# INLINE foldMap #-}
 
 {-
 instance FoldableWithIndex Int Deque where
-  ifoldMap h (BD lf f lr r) = ifoldMap h f `mappend` getDual (ifoldMap (\j -> Dual #. h (n - j)) r)
+  ifoldMap h (BD lf f lr r) = ifoldMap h f <> getDual (ifoldMap (\j -> Dual #. h (n - j)) r)
     where !n = lf + lr
   {-# INLINE ifoldMap #-}
 -}
@@ -182,10 +182,6 @@ instance Semigroup (Deque a) where
 instance Monoid (Deque a) where
   mempty = BD 0 [] 0 []
   {-# INLINE mempty #-}
-  mappend xs ys
-    | size xs < size ys = Foldable.foldr cons ys xs
-    | otherwise         = Foldable.foldl snoc xs ys
-  {-# INLINE mappend #-}
 
 -- | Check that a 'Deque' satisfies the balance invariants and rebalance if not.
 check :: Int -> [a] -> Int -> [a] -> Deque a

@@ -61,8 +61,6 @@ instance (Contravar.Functor f, Applicative f) => Semigroup (Folding f a) where
 instance (Contravar.Functor f, Applicative f) => Monoid (Folding f a) where
   mempty = Folding noEffect
   {-# INLINE mempty #-}
-  Folding fr `mappend` Folding fs = Folding (fr *> fs)
-  {-# INLINE mappend #-}
 
 ------------------------------------------------------------------------------
 -- Traversed
@@ -122,10 +120,6 @@ instance Ord a => Semigroup (Min a) where
 instance Ord a => Monoid (Min a) where
   mempty = NoMin
   {-# INLINE mempty #-}
-  mappend NoMin m = m
-  mappend m NoMin = m
-  mappend (Min a) (Min b) = Min (min a b)
-  {-# INLINE mappend #-}
 
 -- | Obtain the minimum.
 getMin :: Min a -> Maybe a
@@ -149,10 +143,6 @@ instance Ord a => Semigroup (Max a) where
 instance Ord a => Monoid (Max a) where
   mempty = NoMax
   {-# INLINE mempty #-}
-  mappend NoMax m = m
-  mappend m NoMax = m
-  mappend (Max a) (Max b) = Max (max a b)
-  {-# INLINE mappend #-}
 
 -- | Obtain the maximum.
 getMax :: Max a -> Maybe a
@@ -178,23 +168,22 @@ instance Semigroup (NonEmptyDList a) where
 data Leftmost a = LPure | LLeaf a | LStep (Leftmost a)
 
 instance Semigroup (Leftmost a) where
-  (<>) = mappend
-  {-# INLINE (<>) #-}
-
-instance Monoid (Leftmost a) where
-  mempty = LPure
-  {-# INLINE mempty #-}
-  mappend x y = LStep $ case x of
+  x <> y = LStep $ case x of
     LPure    -> y
     LLeaf _  -> x
     LStep x' -> case y of
       -- The last two cases make firstOf produce a Just as soon as any element
       -- is encountered, and possibly serve as a micro-optimisation; this
-      -- behaviour can be disabled by replacing them with _ -> mappend x y'.
+      -- behaviour can be disabled by replacing them with _ -> x <> y'.
       -- Note that this means that firstOf (backwards folded) [1..] is Just _|_.
       LPure    -> x'
       LLeaf a  -> LLeaf $ fromMaybe a (getLeftmost x')
-      LStep y' -> mappend x' y'
+      LStep y' -> x' <> y'
+  {-# INLINE (<>) #-}
+
+instance Monoid (Leftmost a) where
+  mempty = LPure
+  {-# INLINE mempty #-}
 
 -- | Extract the 'Leftmost' element. This will fairly eagerly determine that it can return 'Just'
 -- the moment it sees any element at all.
@@ -207,23 +196,22 @@ getLeftmost (LStep x) = getLeftmost x
 data Rightmost a = RPure | RLeaf a | RStep (Rightmost a)
 
 instance Semigroup (Rightmost a) where
-  (<>) = mappend
-  {-# INLINE (<>) #-}
-
-instance Monoid (Rightmost a) where
-  mempty = RPure
-  {-# INLINE mempty #-}
-  mappend x y = RStep $ case y of
+  x <> y = RStep $ case y of
     RPure    -> x
     RLeaf _  -> y
     RStep y' -> case x of
       -- The last two cases make lastOf produce a Just as soon as any element
       -- is encountered, and possibly serve as a micro-optimisation; this
-      -- behaviour can be disabled by replacing them with _ -> mappend x y'.
+      -- behaviour can be disabled by replacing them with _ -> x <> y'.
       -- Note that this means that lastOf folded [1..] is Just _|_.
       RPure    -> y'
       RLeaf a  -> RLeaf $ fromMaybe a (getRightmost y')
-      RStep x' -> mappend x' y'
+      RStep x' -> x' <> y'
+  {-# INLINE (<>) #-}
+
+instance Monoid (Rightmost a) where
+  mempty = RPure
+  {-# INLINE mempty #-}
 
 -- | Extract the 'Rightmost' element. This will fairly eagerly determine that it can return 'Just'
 -- the moment it sees any element at all.

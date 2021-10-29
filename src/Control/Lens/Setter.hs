@@ -87,7 +87,6 @@ import Control.Lens.Internal.Prelude
 --import Control.Lens.Internal.Indexed
 import Control.Lens.Internal.Setter
 import Control.Lens.Type
-import Control.Monad (liftM)
 import Control.Monad.Reader.Class as Reader
 import Control.Monad.State.Class  as State
 import Control.Monad.Writer.Class as Writer
@@ -207,7 +206,7 @@ mapped = sets fmap
 -- GHC 7.10.
 --
 -- @
--- 'liftM' ≡ 'over' 'lifted'
+-- 'fmap' ≡ 'over' 'lifted'
 -- @
 --
 -- >>> over lifted f [a,b,c]
@@ -216,9 +215,9 @@ mapped = sets fmap
 -- >>> set lifted b (Just a)
 -- Just b
 --
--- If you want an 'IndexPreservingSetter' use @'setting' 'liftM'@.
+-- If you want an 'IndexPreservingSetter' use @'setting' 'fmap'@.
 lifted :: Monad m => Setter (m a) (m b) a b
-lifted = sets liftM
+lifted = sets fmap
 {-# INLINE lifted #-}
 
 -- | This 'Setter' can be used to map over all of the inputs to a 'Contravar.Functor'.

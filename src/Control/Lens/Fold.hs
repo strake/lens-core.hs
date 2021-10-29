@@ -1010,7 +1010,7 @@ sequence1Of_ l = void . getTraversedF #. foldMapOf l TraversedF
 -- 'mapMOf_' :: 'Monad' m => 'Prism'' s a     -> (a -> m r) -> s -> m ()
 -- @
 mapMOf_ :: Monad m => Getting (Sequenced r m) s a -> (a -> m r) -> s -> m ()
-mapMOf_ l f = liftM skip . getSequenced #. foldMapOf l (Sequenced #. f)
+mapMOf_ l f = fmap skip . getSequenced #. foldMapOf l (Sequenced #. f)
 {-# INLINE mapMOf_ #-}
 
 -- | 'forMOf_' is 'mapMOf_' with two of its arguments flipped.
@@ -1054,7 +1054,7 @@ forMOf_ = flip . mapMOf_
 -- 'sequenceOf_' :: 'Monad' m => 'Prism'' s (m a)     -> s -> m ()
 -- @
 sequenceOf_ :: Monad m => Getting (Sequenced a m) s (m a) -> s -> m ()
-sequenceOf_ l = liftM skip . getSequenced #. foldMapOf l Sequenced
+sequenceOf_ l = fmap skip . getSequenced #. foldMapOf l Sequenced
 {-# INLINE sequenceOf_ #-}
 
 -- | The sum of a collection of actions, generalizing 'concatOf'.
@@ -2330,7 +2330,7 @@ iforOf_ = flip . itraverseOf_
 -- 'imapMOf_' :: 'Monad' m => 'IndexedTraversal'' i s a -> (i -> a -> m r) -> s -> m ()
 -- @
 imapMOf_ :: Monad m => IndexedGetting i (Sequenced r m) s a -> (i -> a -> m r) -> s -> m ()
-imapMOf_ l f = liftM skip . getSequenced #. getConst #. l (Const #. Sequenced #. Indexed f)
+imapMOf_ l f = fmap skip . getSequenced #. getConst #. l (Const #. Sequenced #. Indexed f)
 {-# INLINE imapMOf_ #-}
 
 -- | Run monadic actions for each target of an 'IndexedFold' or 'IndexedTraversal' with access to the index,

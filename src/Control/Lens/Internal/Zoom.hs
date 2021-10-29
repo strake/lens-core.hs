@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE MonadComprehensions #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE Trustworthy #-}
@@ -61,13 +62,10 @@ instance (Monad m, Semigroup s) => Apply (Focusing m s) where
   {-# INLINE (<.>) #-}
 -}
 
-instance (Monad m, Monoid s) => Applicative (Focusing m s) where
-  pure a = Focusing (return (mempty, a))
+instance (Applicative m, Monoid s) => Applicative (Focusing m s) where
+  pure = Focusing . pure . pure
   {-# INLINE pure #-}
-  Focusing mf <*> Focusing ma = Focusing $ do
-    (s, f) <- mf
-    (s', a) <- ma
-    return (mappend s s', f a)
+  Focusing mf <*> Focusing ma = Focusing (liftA2 (<*>) mf ma)
   {-# INLINE (<*>) #-}
 
 ------------------------------------------------------------------------------
@@ -87,13 +85,11 @@ instance (Monad m, Semigroup s, Semigroup w) => Apply (FocusingWith w m s) where
   {-# INLINE (<.>) #-}
 -}
 
-instance (Monad m, Monoid s, Monoid w) => Applicative (FocusingWith w m s) where
-  pure a = FocusingWith (return (mempty, a, mempty))
+instance (Applicative m, Monoid s, Monoid w) => Applicative (FocusingWith w m s) where
+  pure a = FocusingWith (pure (mempty, a, mempty))
   {-# INLINE pure #-}
-  FocusingWith mf <*> FocusingWith ma = FocusingWith $ do
-    (s, f, w) <- mf
-    (s', a, w') <- ma
-    return (mappend s s', f a, mappend w w')
+  FocusingWith mf <*> FocusingWith ma = FocusingWith $
+    (\ (s, f, w) (s', a, w') -> (s <> s', f a, w <> w')) <$> mf <*> ma
   {-# INLINE (<*>) #-}
 
 ------------------------------------------------------------------------------
@@ -153,10 +149,6 @@ instance Semigroup a => Semigroup (May a) where
 instance Monoid a => Monoid (May a) where
   mempty = May (Just mempty)
   {-# INLINE mempty #-}
-  May Nothing `mappend` _ = May Nothing
-  _ `mappend` May Nothing = May Nothing
-  May (Just a) `mappend` May (Just b) = May (Just (mappend a b))
-  {-# INLINE mappend #-}
 
 ------------------------------------------------------------------------------
 -- FocusingMay
@@ -195,10 +187,6 @@ instance Semigroup a => Semigroup (Err e a) where
 instance Monoid a => Monoid (Err e a) where
   mempty = Err (Right mempty)
   {-# INLINE mempty #-}
-  Err (Left e) `mappend` _ = Err (Left e)
-  _ `mappend` Err (Left e) = Err (Left e)
-  Err (Right a) `mappend` Err (Right b) = Err (Right (mappend a b))
-  {-# INLINE mappend #-}
 
 ------------------------------------------------------------------------------
 -- FocusingErr
@@ -232,17 +220,12 @@ newtype Freed f m a = Freed { getFreed :: FreeF f a (FreeT f m a) }
 
 instance (Applicative f, Semigroup a, Monad m) => Semigroup (Freed f m a) where
   Freed (Pure a) <> Freed (Pure b) = Freed $ Pure $ a <> b
-  Freed (Pure a) <> Freed (Free g) = Freed $ Free $ liftA2 (liftM2 (<>)) (pure $ return a) g
-  Freed (Free f) <> Freed (Pure b) = Freed $ Free $ liftA2 (liftM2 (<>)) f (pure $ return b)
-  Freed (Free f) <> Freed (Free g) = Freed $ Free $ liftA2 (liftM2 (<>)) f g
+  Freed (Pure a) <> Freed (Free g) = Freed $ Free $ liftA2 (liftA2 (<>)) (pure $ return a) g
+  Freed (Free f) <> Freed (Pure b) = Freed $ Free $ liftA2 (liftA2 (<>)) f (pure $ return b)
+  Freed (Free f) <> Freed (Free g) = Freed $ Free $ liftA2 (liftA2 (<>)) f g
 
 instance (Applicative f, Monoid a, Monad m) => Monoid (Freed f m a) where
   mempty = Freed $ Pure mempty
-
-  Freed (Pure a) `mappend` Freed (Pure b) = Freed $ Pure $ a `mappend` b
-  Freed (Pure a) `mappend` Freed (Free g) = Freed $ Free $ liftA2 (liftM2 mappend) (pure $ return a) g
-  Freed (Free f) `mappend` Freed (Pure b) = Freed $ Free $ liftA2 (liftM2 mappend) f (pure $ return b)
-  Freed (Free f) `mappend` Freed (Free g) = Freed $ Free $ liftA2 (liftM2 mappend) f g
 
 ------------------------------------------------------------------------------
 -- FocusingFree
@@ -279,15 +262,13 @@ instance Contravar.Functor (Effect m r) where
   gmap _ (Effect m) = Effect m
   {-# INLINE gmap #-}
 
-instance (Monad m, Semigroup r) => Semigroup (Effect m r a) where
-  Effect ma <> Effect mb = Effect (liftM2 (<>) ma mb)
+instance (Applicative m, Semigroup r) => Semigroup (Effect m r a) where
+  Effect ma <> Effect mb = Effect (liftA2 (<>) ma mb)
   {-# INLINE (<>) #-}
 
-instance (Monad m, Monoid r) => Monoid (Effect m r a) where
-  mempty = Effect (return mempty)
+instance (Applicative m, Monoid r) => Monoid (Effect m r a) where
+  mempty = Effect (pure mempty)
   {-# INLINE mempty #-}
-  Effect ma `mappend` Effect mb = Effect (liftM2 mappend ma mb)
-  {-# INLINE mappend #-}
 
 {-
 instance (Apply m, Semigroup r) => Apply (Effect m r) where
@@ -295,10 +276,10 @@ instance (Apply m, Semigroup r) => Apply (Effect m r) where
   {-# INLINE (<.>) #-}
 -}
 
-instance (Monad m, Monoid r) => Applicative (Effect m r) where
-  pure _ = Effect (return mempty)
+instance (Applicative m, Monoid r) => Applicative (Effect m r) where
+  pure _ = Effect (pure mempty)
   {-# INLINE pure #-}
-  Effect ma <*> Effect mb = Effect (liftM2 mappend ma mb)
+  Effect ma <*> Effect mb = Effect (liftA2 (<>) ma mb)
   {-# INLINE (<*>) #-}
 
 ------------------------------------------------------------------------------
@@ -318,7 +299,7 @@ instance (Semigroup s, Semigroup w, Bind m) => Apply (EffectRWS w st m s) where
 instance (Monoid s, Monoid w, Monad m) => Applicative (EffectRWS w st m s) where
   pure _ = EffectRWS $ \st -> return (mempty, st, mempty)
   {-# INLINE pure #-}
-  EffectRWS m <*> EffectRWS n = EffectRWS $ \st -> m st >>= \ (s,t,w) -> n t >>= \ (s',u,w') -> return (mappend s s', u, mappend w w')
+  EffectRWS m <*> EffectRWS n = EffectRWS $ \st -> [(s <> s', u, w <> w') | (s,t,w) <- m st, (s',u,w') <- n t]
   {-# INLINE (<*>) #-}
 
 instance Contravar.Functor (EffectRWS w st m s) where

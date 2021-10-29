@@ -647,14 +647,14 @@ instance Monoid m => Applicative (Holes t m) where
     let
      (pf, pv) = runHoles fs (xt . ($ qv))
      (qf, qv) = runHoles xs (xt . pv)
-    in (pf `mappend` qf, pv qv)
+    in (pf <> qf, pv qv)
 
 #if MIN_VERSION_base(4,10,0)
   liftA2 f xs ys = Holes $ \xt ->
     let
       (pf, pv) = runHoles xs (xt . flip f qv)
       (qf, qv) = runHoles ys (xt . f pv)
-    in (pf `mappend` qf, f pv qv)
+    in (pf <> qf, f pv qv)
 #endif
 
 
