@@ -48,7 +48,7 @@ import Prelude hiding (null)
 
 -- | A Banker's deque based on Chris Okasaki's \"Purely Functional Data Structures\"
 data Deque a = BD !Int [a] !Int [a]
-  deriving Show
+  deriving (Show, Functor)
 
 -- | /O(1)/. Determine if a 'Deque' is 'empty'.
 --
@@ -92,10 +92,6 @@ instance Eq a => Eq (Deque a) where
 instance Ord a => Ord (Deque a) where
   compare = compare `on` toList
   {-# INLINE compare #-}
-
-instance Functor Deque where
-  fmap h (BD lf f lr r) = BD lf (fmap h f) lr (fmap h r)
-  {-# INLINE fmap #-}
 
 {-
 instance FunctorWithIndex Int Deque where

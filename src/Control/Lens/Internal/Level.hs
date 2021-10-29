@@ -54,7 +54,7 @@ data Level i a
   = Two {-# UNPACK #-} !Word !(Level i a) !(Level i a)
   | One i a
   | Zero
-  deriving (Eq,Ord,Show,Read)
+  deriving (Eq,Ord,Show,Read,Foldable,Functor,Traversable)
 
 -- | Append a pair of 'Level' values to get a new 'Level' with path compression.
 --
@@ -68,27 +68,6 @@ lappend Zero        (Two n l r) = Two (n + 1) l r
 lappend (Two n l r) Zero        = Two (n + 1) l r
 lappend l           r           = Two 0 l r
 {-# INLINE lappend #-}
-
-instance Functor (Level i) where
-  fmap f = go where
-    go (Two n l r) = Two n (go l) (go r)
-    go (One i a)   = One i (f a)
-    go Zero        = Zero
-  {-# INLINE fmap #-}
-
-instance Foldable (Level i) where
-  foldMap f = go where
-    go (Two _ l r) = go l `mappend` go r
-    go (One _ a) = f a
-    go Zero = mempty
-  {-# INLINE foldMap #-}
-
-instance Traversable (Level i) where
-  traverse f = go where
-    go (Two n l r) = Two n <$> go l <*> go r
-    go (One i a) = One i <$> f a
-    go Zero = pure Zero
-  {-# INLINE traverse #-}
 
 ------------------------------------------------------------------------------
 -- Generating Levels
@@ -126,10 +105,7 @@ deepening i a = Deepening $ \n k -> k (if n == 0 then One i a else Zero) False
 --
 -- Attempting to 'Flow' something back into a shape other than the one it was taken from will fail.
 newtype Flows i b a = Flows { runFlows :: [Level i b] -> a }
-
-instance Functor (Flows i b) where
-  fmap f (Flows g) = Flows (f . g)
-  {-# INLINE fmap #-}
+  deriving (Functor)
 
 -- | Walk down one constructor in a 'Level', veering left.
 triml :: Level i b -> Level i b

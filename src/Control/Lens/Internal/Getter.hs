@@ -36,25 +36,14 @@ noEffect = phantom $ pure ()
 {-# INLINE noEffect #-}
 
 newtype AlongsideLeft f b a = AlongsideLeft { getAlongsideLeft :: f (a, b) }
+  deriving (Foldable, Functor, Traversable)
 
 deriving instance Show (f (a, b)) => Show (AlongsideLeft f b a)
 deriving instance Read (f (a, b)) => Read (AlongsideLeft f b a)
 
-instance Functor f => Functor (AlongsideLeft f b) where
-  fmap f = AlongsideLeft . fmap (first f) . getAlongsideLeft
-  {-# INLINE fmap #-}
-
 instance Contravar.Functor f => Contravar.Functor (AlongsideLeft f b) where
   gmap f = AlongsideLeft . gmap (first f) . getAlongsideLeft
   {-# INLINE gmap #-}
-
-instance Foldable f => Foldable (AlongsideLeft f b) where
-  foldMap f = foldMap (f . fst) . getAlongsideLeft
-  {-# INLINE foldMap #-}
-
-instance Traversable f => Traversable (AlongsideLeft f b) where
-  traverse f (AlongsideLeft as) = AlongsideLeft <$> traverse (bitraverse f pure) as
-  {-# INLINE traverse #-}
 
 instance Foldable1 f => Foldable1 (AlongsideLeft f b) where
   foldMap1 f = foldMap1 (f . fst) . getAlongsideLeft
@@ -79,25 +68,14 @@ instance Traversable f => Bitraversable (AlongsideLeft f) where
   {-# INLINE bitraverse #-}
 
 newtype AlongsideRight f a b = AlongsideRight { getAlongsideRight :: f (a, b) }
+  deriving (Foldable, Functor, Traversable)
 
 deriving instance Show (f (a, b)) => Show (AlongsideRight f a b)
 deriving instance Read (f (a, b)) => Read (AlongsideRight f a b)
 
-instance Functor f => Functor (AlongsideRight f a) where
-  fmap f (AlongsideRight x) = AlongsideRight (fmap (second f) x)
-  {-# INLINE fmap #-}
-
 instance Contravar.Functor f => Contravar.Functor (AlongsideRight f a) where
   gmap f (AlongsideRight x) = AlongsideRight (gmap (second f) x)
   {-# INLINE gmap #-}
-
-instance Foldable f => Foldable (AlongsideRight f a) where
-  foldMap f = foldMap (f . snd) . getAlongsideRight
-  {-# INLINE foldMap #-}
-
-instance Traversable f => Traversable (AlongsideRight f a) where
-  traverse f (AlongsideRight as) = AlongsideRight <$> traverse (bitraverse pure f) as
-  {-# INLINE traverse #-}
 
 instance Foldable1 f => Foldable1 (AlongsideRight f a) where
   foldMap1 f = foldMap1 (f . snd) . getAlongsideRight

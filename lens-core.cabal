@@ -326,7 +326,7 @@ library
     LambdaCase
     EmptyCase
     QuantifiedConstraints
-    DeriveFunctor
+    DeriveTraversable
 
 -- Verify the properties of lenses with QuickCheck
 test-suite properties

@@ -9,6 +9,7 @@
 #if __GLASGOW_HASKELL__ >= 707
 {-# LANGUAGE RoleAnnotations #-}
 #endif
+{-# LANGUAGE StandaloneDeriving #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Lens.Internal.Magma
@@ -64,28 +65,14 @@ data Magma i t b a where
   MagmaFmap :: (x -> y) -> Magma i x b a -> Magma i y b a
   Magma :: i -> a -> Magma i b b a
 
+deriving instance Foldable (Magma i t b)
+deriving instance Functor (Magma i t b)
+deriving instance Traversable (Magma i t b)
+
 #if __GLASGOW_HASKELL__ >= 707
 -- note the 3rd argument infers as phantom, but that would be unsound
 type role Magma representational nominal nominal nominal
 #endif
-
-instance Functor (Magma i t b) where
-  fmap f (MagmaAp x y)    = MagmaAp (fmap f x) (fmap f y)
-  fmap _ (MagmaPure x)    = MagmaPure x
-  fmap f (MagmaFmap xy x) = MagmaFmap xy (fmap f x)
-  fmap f (Magma i a)  = Magma i (f a)
-
-instance Foldable (Magma i t b) where
-  foldMap f (MagmaAp x y)   = foldMap f x `mappend` foldMap f y
-  foldMap _ MagmaPure{}     = mempty
-  foldMap f (MagmaFmap _ x) = foldMap f x
-  foldMap f (Magma _ a) = f a
-
-instance Traversable (Magma i t b) where
-  traverse f (MagmaAp x y)    = MagmaAp <$> traverse f x <*> traverse f y
-  traverse _ (MagmaPure x)    = pure (MagmaPure x)
-  traverse f (MagmaFmap xy x) = MagmaFmap xy <$> traverse f x
-  traverse f (Magma i a)  = Magma i <$> f a
 
 instance (Show i, Show a) => Show (Magma i t b a) where
   showsPrec d (MagmaAp x y) = showParen (d > 4) $

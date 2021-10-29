@@ -629,12 +629,7 @@ holeInOne1 x = Holes $ \xt ->
 -- inspired by Roman Cheplyaka's answer to that same question.
 
 newtype Holes t m x = Holes { runHoles :: (x -> t) -> (m, x) }
-
-instance Functor (Holes t m) where
-  fmap f xs = Holes $ \xt ->
-    let
-      (qf, qv) = runHoles xs (xt . f)
-    in (qf, f qv)
+  deriving (Functor)
 
 {-
 instance Semigroup m => Apply (Holes t m) where

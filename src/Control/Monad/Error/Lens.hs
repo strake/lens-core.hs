@@ -2,6 +2,7 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE StandaloneDeriving #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Control.Monad.Error.Lens
@@ -173,11 +174,7 @@ catches m hs = catchError m go where
 -- | You need this when using 'catches'.
 data Handler e m r = forall a. Handler (e -> Maybe a) (a -> m r)
 
-instance Monad m => Functor (Handler e m) where
-  fmap f (Handler ema amr) = Handler ema $ \a -> do
-     r <- amr a
-     return (f r)
-  {-# INLINE fmap #-}
+deriving instance Functor m => Functor (Handler e m)
 
 {-
 instance Monad m => Alt (Handler e m) where

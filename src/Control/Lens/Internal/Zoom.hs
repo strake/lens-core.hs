@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE Trustworthy #-}
 
@@ -49,12 +50,7 @@ import Prelude hiding ((.),id)
 
 -- | Used by 'Control.Lens.Zoom.Zoom' to 'Control.Lens.Zoom.zoom' into 'Control.Monad.State.StateT'.
 newtype Focusing m s a = Focusing { unfocusing :: m (s, a) }
-
-instance Monad m => Functor (Focusing m s) where
-  fmap f (Focusing m) = Focusing $ do
-     (s, a) <- m
-     return (s, f a)
-  {-# INLINE fmap #-}
+  deriving (Functor)
 
 {-
 instance (Monad m, Semigroup s) => Apply (Focusing m s) where
@@ -80,12 +76,7 @@ instance (Monad m, Monoid s) => Applicative (Focusing m s) where
 
 -- | Used by 'Control.Lens.Zoom.Zoom' to 'Control.Lens.Zoom.zoom' into 'Control.Monad.RWS.RWST'.
 newtype FocusingWith w m s a = FocusingWith { unfocusingWith :: m (s, a, w) }
-
-instance Monad m => Functor (FocusingWith w m s) where
-  fmap f (FocusingWith m) = FocusingWith $ do
-     (s, a, w) <- m
-     return (s, f a, w)
-  {-# INLINE fmap #-}
+  deriving (Functor)
 
 {-
 instance (Monad m, Semigroup s, Semigroup w) => Apply (FocusingWith w m s) where
@@ -112,9 +103,7 @@ instance (Monad m, Monoid s, Monoid w) => Applicative (FocusingWith w m s) where
 -- | Used by 'Control.Lens.Zoom.Zoom' to 'Control.Lens.Zoom.zoom' into 'Control.Monad.Writer.WriterT'.
 newtype FocusingPlus w k s a = FocusingPlus { unfocusingPlus :: k (s, w) a }
 
-instance Functor (k (s, w)) => Functor (FocusingPlus w k s) where
-  fmap f (FocusingPlus as) = FocusingPlus (fmap f as)
-  {-# INLINE fmap #-}
+deriving instance Functor (k (s, w)) => Functor (FocusingPlus w k s)
 
 {-
 instance Apply (k (s, w)) => Apply (FocusingPlus w k s) where
@@ -134,10 +123,7 @@ instance Applicative (k (s, w)) => Applicative (FocusingPlus w k s) where
 
 -- | Used by 'Control.Lens.Zoom.Zoom' to 'Control.Lens.Zoom.zoom' into 'Control.Monad.Trans.Maybe.MaybeT' or 'Control.Monad.Trans.List.ListT'.
 newtype FocusingOn f k s a = FocusingOn { unfocusingOn :: k (f s) a }
-
-instance Functor (k (f s)) => Functor (FocusingOn f k s) where
-  fmap f (FocusingOn as) = FocusingOn (fmap f as)
-  {-# INLINE fmap #-}
+  deriving (Functor)
 
 {-
 instance Apply (k (f s)) => Apply (FocusingOn f k s) where
@@ -179,9 +165,7 @@ instance Monoid a => Monoid (May a) where
 -- | Used by 'Control.Lens.Zoom.Zoom' to 'Control.Lens.Zoom.zoom' into 'Control.Monad.Error.ErrorT'.
 newtype FocusingMay k s a = FocusingMay { unfocusingMay :: k (May s) a }
 
-instance Functor (k (May s)) => Functor (FocusingMay k s) where
-  fmap f (FocusingMay as) = FocusingMay (fmap f as)
-  {-# INLINE fmap #-}
+deriving instance Functor (k (May s)) => Functor (FocusingMay k s)
 
 {-
 instance Apply (k (May s)) => Apply (FocusingMay k s) where
@@ -223,9 +207,7 @@ instance Monoid a => Monoid (Err e a) where
 -- | Used by 'Control.Lens.Zoom.Zoom' to 'Control.Lens.Zoom.zoom' into 'Control.Monad.Error.ErrorT'.
 newtype FocusingErr e k s a = FocusingErr { unfocusingErr :: k (Err e s) a }
 
-instance Functor (k (Err e s)) => Functor (FocusingErr e k s) where
-  fmap f (FocusingErr as) = FocusingErr (fmap f as)
-  {-# INLINE fmap #-}
+deriving instance Functor (k (Err e s)) => Functor (FocusingErr e k s)
 
 {-
 instance Apply (k (Err e s)) => Apply (FocusingErr e k s) where
@@ -269,10 +251,7 @@ instance (Applicative f, Monoid a, Monad m) => Monoid (Freed f m a) where
 -- | Used by 'Control.Lens.Zoom.Zoom' to 'Control.Lens.Zoom.zoom' into
 -- 'Control.Monad.Trans.FreeT'
 newtype FocusingFree f m k s a = FocusingFree { unfocusingFree :: k (Freed f m s) a }
-
-instance Functor (k (Freed f m s)) => Functor (FocusingFree f m k s) where
-  fmap f (FocusingFree as) = FocusingFree (fmap f as)
-  {-# INLINE fmap #-}
+  deriving (Functor)
 
 {-
 instance Apply (k (Freed f m s)) => Apply (FocusingFree f m k s) where
@@ -293,11 +272,8 @@ instance Applicative (k (Freed f m s)) => Applicative (FocusingFree f m k s) whe
 
 -- | Wrap a monadic effect with a phantom type argument.
 newtype Effect m r a = Effect { getEffect :: m r }
+  deriving (Functor)
 -- type role Effect representational nominal phantom
-
-instance Functor (Effect m r) where
-  fmap _ (Effect m) = Effect m
-  {-# INLINE fmap #-}
 
 instance Contravar.Functor (Effect m r) where
   gmap _ (Effect m) = Effect m
@@ -331,10 +307,7 @@ instance (Monad m, Monoid r) => Applicative (Effect m r) where
 
 -- | Wrap a monadic effect with a phantom type argument. Used when magnifying 'Control.Monad.RWS.RWST'.
 newtype EffectRWS w st m s a = EffectRWS { getEffectRWS :: st -> m (s,st,w) }
-
-instance Functor (EffectRWS w st m s) where
-  fmap _ (EffectRWS m) = EffectRWS m
-  {-# INLINE fmap #-}
+  deriving (Functor)
 
 {-
 instance (Semigroup s, Semigroup w, Bind m) => Apply (EffectRWS w st m s) where

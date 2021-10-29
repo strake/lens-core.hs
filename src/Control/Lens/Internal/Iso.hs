@@ -37,10 +37,7 @@ import Data.Sequence         as Seq
 -- | This is used internally by the 'Control.Lens.Iso.Iso' code to provide
 -- efficient access to the two functions that make up an isomorphism.
 data Exchange a b s t = Exchange (s -> a) (b -> t)
-
-instance Functor (Exchange a b s) where
-  fmap f (Exchange sa bt) = Exchange sa (f . bt)
-  {-# INLINE fmap #-}
+  deriving (Functor)
 
 instance Profunctor (Exchange a b) where
   dimap f g (Exchange sa bt) = Exchange (sa . f) (g . bt)

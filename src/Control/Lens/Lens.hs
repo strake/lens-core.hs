@@ -1500,10 +1500,7 @@ united f v = f () <₪> \ () -> v
 
 {-
 data First1 f a = First1 (f a) a
-
-instance (Functor f) => Functor (First1 f) where
-  fmap f (First1 fa a) = First1 (f <$> fa) (f a)
-  {-# INLINE fmap #-}
+  deriving (Functor)
 
 instance (Functor f) => Apply (First1 f) where
   First1 ff f <.> First1 _ x = First1 (($ x) <$> ff) (f x)
