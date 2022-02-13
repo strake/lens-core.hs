@@ -417,6 +417,9 @@ module Language.Haskell.TH.Lens
   , _AnyclassStrategy
   , _NewtypeStrategy
 #endif
+  -- * Names
+  , nameOccNameL
+  , nameFlavourL
   ) where
 
 import Control.Applicative
@@ -2921,3 +2924,9 @@ instance Plated Con
 instance Plated Type
 instance Plated Stmt
 instance Plated Pat
+
+nameOccNameL :: Lens' Name OccName
+nameOccNameL f (Name occName flavour) = flip Name flavour <$> f occName
+
+nameFlavourL :: Lens' Name NameFlavour
+nameFlavourL f (Name occName flavour) = Name occName <$> f flavour
