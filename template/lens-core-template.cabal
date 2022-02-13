@@ -215,6 +215,7 @@ library
     UnicodeSyntax
     LambdaCase
     EmptyCase
+    FlexibleContexts
     QuantifiedConstraints
     DeriveFunctor
 
