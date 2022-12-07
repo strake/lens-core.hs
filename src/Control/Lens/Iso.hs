@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -11,7 +12,7 @@
 #endif
 
 #if __GLASGOW_HASKELL__ >= 800
-{-# LANGUAGE TypeInType #-}
+{-# LANGUAGE DataKinds #-}
 #endif
 
 #ifndef MIN_VERSION_bytestring

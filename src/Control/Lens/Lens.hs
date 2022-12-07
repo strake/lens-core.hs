@@ -3,11 +3,12 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE Trustworthy #-}
 #if __GLASGOW_HASKELL__ >= 800
-{-# LANGUAGE TypeInType #-}
+{-# LANGUAGE DataKinds #-}
 #endif
 
 #ifndef MIN_VERSION_mtl

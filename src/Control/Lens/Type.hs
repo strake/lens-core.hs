@@ -5,12 +5,9 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE KindSignatures #-}
-#if __GLASGOW_HASKELL__ >= 706
 {-# LANGUAGE PolyKinds #-}
-#endif
 #if __GLASGOW_HASKELL__ >= 800
-{-# LANGUAGE TypeInType #-}
+{-# LANGUAGE DataKinds #-}
 #endif
 {-# LANGUAGE Trustworthy #-}
 #if __GLASGOW_HASKELL__ >= 800

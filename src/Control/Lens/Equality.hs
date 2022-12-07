@@ -3,12 +3,8 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
-#if __GLASGOW_HASKELL__ >= 706
 {-# LANGUAGE PolyKinds #-}
-#endif
-#if __GLASGOW_HASKELL__ >= 800
-{-# LANGUAGE TypeInType #-}
-#endif
+{-# LANGUAGE DataKinds #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -47,11 +43,11 @@ module Control.Lens.Equality
   ) where
 
 import Control.Lens.Type
+import Data.Kind (Type)
 import Data.Proxy (Proxy)
 import Data.Type.Equality ((:~:)(..))
 #if __GLASGOW_HASKELL__ >= 800
 import GHC.Exts (TYPE)
-import Data.Kind (Type)
 #endif
 
 #ifdef HLINT
