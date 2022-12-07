@@ -110,7 +110,7 @@ source-repository head
 
 custom-setup
   setup-depends:
-    Cabal >= 1.10 && <3.6,
+    Cabal >= 1.10 && <3.10,
     base  >= 4.5 && <5,
     cabal-doctest >= 1 && <1.1,
     filepath
@@ -173,7 +173,7 @@ library
     dual                      >= 0.1.1    && < 0.2,
     foldable1                 >= 0.1      && < 0.2,
     ghc-prim,
-    hs-functors               >= 0.1.6    && < 0.2,
+    hs-functors               >= 0.1.6    && < 0.3,
     lens-core                 >= 0.1      && < 0.2,
     mtl                       >= 2.0.1    && < 2.3,
     tagged                    >= 0.4.4    && < 1,
@@ -181,7 +181,7 @@ library
     th-abstraction            >= 0.3      && < 0.4.2,
     transformers              >= 0.2      && < 0.6,
     util                      >= 0.1.17   && < 0.2,
-    vector                    >= 0.9      && < 0.13
+    vector                    >= 0.9      && < 0.14
 
   exposed-modules:
     Control.Lens.Internal.FieldTH
